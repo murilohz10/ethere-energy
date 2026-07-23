@@ -483,7 +483,7 @@ function FinalCTA() {
       <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-12 md:p-16">
         <div className="absolute inset-0 -z-10 grid-lines opacity-30 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
         <div className="mx-auto max-w-2xl text-center">
-          <LineIcon className="mx-auto h-8 w-8" strokeWidth={1.25} />
+          <Sparkles className="mx-auto h-8 w-8" strokeWidth={1.25} />
           <h2 className="mt-6 text-3xl tracking-tight md:text-4xl">
             Comece hoje a acompanhar o mercado com clareza.
           </h2>
