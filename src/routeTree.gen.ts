@@ -19,6 +19,7 @@ import { Route as AppRelatoriosRouteImport } from './routes/app.relatorios'
 import { Route as AppNoticiasRouteImport } from './routes/app.noticias'
 import { Route as AppMonitoramentoRouteImport } from './routes/app.monitoramento'
 import { Route as AppContratosRouteImport } from './routes/app.contratos'
+import { Route as AppConfiguracoesRouteImport } from './routes/app.configuracoes'
 import { Route as AppAlertasRouteImport } from './routes/app.alertas'
 
 const SignupRoute = SignupRouteImport.update({
@@ -71,6 +72,11 @@ const AppContratosRoute = AppContratosRouteImport.update({
   path: '/contratos',
   getParentRoute: () => AppRoute,
 } as any)
+const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppAlertasRoute = AppAlertasRouteImport.update({
   id: '/alertas',
   path: '/alertas',
@@ -83,6 +89,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/app/alertas': typeof AppAlertasRoute
+  '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
   '/app/noticias': typeof AppNoticiasRoute
@@ -95,6 +102,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/app/alertas': typeof AppAlertasRoute
+  '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
   '/app/noticias': typeof AppNoticiasRoute
@@ -109,6 +117,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/signup': typeof SignupRoute
   '/app/alertas': typeof AppAlertasRoute
+  '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
   '/app/noticias': typeof AppNoticiasRoute
@@ -124,6 +133,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/app/alertas'
+    | '/app/configuracoes'
     | '/app/contratos'
     | '/app/monitoramento'
     | '/app/noticias'
@@ -136,6 +146,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/app/alertas'
+    | '/app/configuracoes'
     | '/app/contratos'
     | '/app/monitoramento'
     | '/app/noticias'
@@ -149,6 +160,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/signup'
     | '/app/alertas'
+    | '/app/configuracoes'
     | '/app/contratos'
     | '/app/monitoramento'
     | '/app/noticias'
@@ -236,6 +248,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppContratosRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/configuracoes': {
+      id: '/app/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/app/configuracoes'
+      preLoaderRoute: typeof AppConfiguracoesRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/alertas': {
       id: '/app/alertas'
       path: '/alertas'
@@ -248,6 +267,7 @@ declare module '@tanstack/react-router' {
 
 interface AppRouteChildren {
   AppAlertasRoute: typeof AppAlertasRoute
+  AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppContratosRoute: typeof AppContratosRoute
   AppMonitoramentoRoute: typeof AppMonitoramentoRoute
   AppNoticiasRoute: typeof AppNoticiasRoute
@@ -258,6 +278,7 @@ interface AppRouteChildren {
 
 const AppRouteChildren: AppRouteChildren = {
   AppAlertasRoute: AppAlertasRoute,
+  AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppContratosRoute: AppContratosRoute,
   AppMonitoramentoRoute: AppMonitoramentoRoute,
   AppNoticiasRoute: AppNoticiasRoute,
