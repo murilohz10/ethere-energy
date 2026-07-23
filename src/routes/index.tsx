@@ -290,7 +290,6 @@ function Features() {
     { icon: Bell, t: "Alertas Inteligentes", d: "Regras personalizadas e prioridades automáticas." },
     { icon: Sparkles, t: "Análises por IA", d: "Resumos diários e recomendações contextuais." },
     { icon: History, t: "Histórico", d: "Consultas rápidas e comparações por período." },
-    { icon: Newspaper, t: "Notícias", d: "Mercado, regulação, clima e energia curados." },
   ];
   return (
     <section id="funcionalidades" className="mx-auto max-w-7xl px-6 py-24">
