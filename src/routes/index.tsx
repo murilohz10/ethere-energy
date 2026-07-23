@@ -357,7 +357,7 @@ function Audience() {
           title="Fazendas de Energia"
           items={[
             "Acompanhamento de geração e receita",
-            "Simulação de cenários de venda",
+            "Projeções de receita por submercado",
             "Monitoramento por submercado",
             "Análises de sazonalidade por IA",
           ]}
