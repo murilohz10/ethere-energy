@@ -419,7 +419,6 @@ function Pricing() {
               "Contratos ilimitados",
               "Alertas avançados por regra",
               "Análises por IA e recomendações",
-              "Simulação de cenários",
               "Relatórios trimestrais e API",
             ]}
           />
