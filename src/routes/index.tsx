@@ -6,11 +6,9 @@ import {
   Bell,
   Sparkles,
   History,
-  Newspaper,
   Check,
   Building2,
   Wind,
-  LineChart as LineIcon,
   ShieldCheck,
   Zap,
 } from "lucide-react";
