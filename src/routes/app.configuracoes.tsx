@@ -34,7 +34,7 @@ function Settings() {
               onClick={() => setTab(t.k)}
               className={cn(
                 "flex w-full items-center gap-2.5 rounded-lg px-3 py-2 text-sm transition",
-                tab === t.k ? "bg-surface text-foreground" : "text-muted-foreground hover:text-foreground",
+                tab === t.k ? "bg-brand-softer font-medium text-brand-dark" : "text-muted-foreground hover:bg-muted hover:text-foreground",
               )}
             >
               <t.i className="h-4 w-4" strokeWidth={1.75} />
@@ -96,7 +96,7 @@ function Settings() {
                   </li>
                 ))}
               </ul>
-              <Button size="sm" className="mt-4 bg-[#2563EB] text-white hover:bg-[#1d4ed8]">Convidar usuário</Button>
+              <Button size="sm" className="mt-4 text-white shadow-blue hover:opacity-95" style={{ background: "var(--gradient-brand)" }}>Convidar usuário</Button>
             </Section>
           )}
           {tab === "seguranca" && (

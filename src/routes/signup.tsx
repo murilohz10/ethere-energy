@@ -82,11 +82,11 @@ function SignupPage() {
 
           {step === 3 && (
             <StepShell title="Tudo pronto" subtitle="Sua conta está configurada. Bem-vindo à Ethere.">
-              <div className="mt-6 flex items-center gap-3 rounded-xl bg-surface p-4 text-sm">
-                <div className="grid h-8 w-8 place-items-center rounded-full bg-[#2563EB] text-white">
+              <div className="mt-6 flex items-center gap-3 rounded-xl border border-brand-soft bg-brand-softer p-4 text-sm">
+                <div className="grid h-9 w-9 place-items-center rounded-full text-white shadow-blue" style={{ background: "var(--gradient-brand)" }}>
                   <Check className="h-4 w-4" />
                 </div>
-                <span>Trial de 14 dias ativado. Sem cartão de crédito.</span>
+                <span className="font-medium text-brand-dark">Trial de 14 dias ativado. Sem cartão de crédito.</span>
               </div>
             </StepShell>
           )}
@@ -103,14 +103,16 @@ function SignupPage() {
               <Button
                 onClick={() => setStep((s) => s + 1)}
                 disabled={step === 0 && !profile}
-                className="bg-[#2563EB] text-white hover:bg-[#1d4ed8]"
+                className="text-white shadow-blue hover:opacity-95"
+                style={{ background: "var(--gradient-brand)" }}
               >
                 Continuar <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
             ) : (
               <Button
                 onClick={() => navigate({ to: "/app" })}
-                className="bg-[#2563EB] text-white hover:bg-[#1d4ed8]"
+                className="text-white shadow-blue hover:opacity-95"
+                style={{ background: "var(--gradient-brand)" }}
               >
                 Entrar na plataforma <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
@@ -130,15 +132,16 @@ function Progress({ step }: { step: number }) {
           <div className="flex items-center gap-2">
             <div
               className={cn(
-                "grid h-6 w-6 place-items-center rounded-full border text-[11px] font-medium",
-                i <= step ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground",
+                "grid h-7 w-7 place-items-center rounded-full border text-[11px] font-semibold transition",
+                i <= step ? "border-transparent text-white shadow-blue" : "border-border text-muted-foreground",
               )}
+              style={i <= step ? { background: "var(--gradient-brand)" } : undefined}
             >
               {i + 1}
             </div>
-            <span className={cn("text-xs", i <= step ? "text-foreground" : "text-muted-foreground")}>{s}</span>
+            <span className={cn("text-xs font-medium", i <= step ? "text-brand-dark" : "text-muted-foreground")}>{s}</span>
           </div>
-          {i < steps.length - 1 && <div className={cn("h-px flex-1", i < step ? "bg-foreground" : "bg-border")} />}
+          {i < steps.length - 1 && <div className={cn("h-px flex-1", i < step ? "bg-brand" : "bg-border")} />}
         </div>
       ))}
     </div>
@@ -164,11 +167,16 @@ function ProfileCard({ icon: Icon, label, active, onClick }: {
       onClick={onClick}
       className={cn(
         "rounded-2xl border p-6 text-left transition",
-        active ? "border-foreground bg-surface shadow-soft" : "border-border hover:bg-surface/70",
+        active ? "border-brand bg-brand-softer shadow-blue" : "border-border hover:border-brand-soft hover:bg-brand-softer/50",
       )}
     >
-      <Icon className="h-6 w-6" strokeWidth={1.5} />
-      <div className="mt-4 text-sm font-medium">{label}</div>
+      <div className={cn(
+        "grid h-11 w-11 place-items-center rounded-xl",
+        active ? "text-white shadow-blue" : "bg-brand-softer text-brand",
+      )} style={active ? { background: "var(--gradient-brand)" } : undefined}>
+        <Icon className="h-5 w-5" strokeWidth={1.75} />
+      </div>
+      <div className="mt-4 text-sm font-semibold">{label}</div>
     </button>
   );
 }
