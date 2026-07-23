@@ -15,7 +15,8 @@ import {
 import { cn } from "@/lib/utils";
 import type { ReactNode } from "react";
 
-const nav = [
+type NavItem = { to: string; label: string; icon: typeof LayoutGrid; exact?: boolean };
+const nav: NavItem[] = [
   { to: "/app", label: "Visão Geral", icon: LayoutGrid, exact: true },
   { to: "/app/monitoramento", label: "Monitoramento", icon: Activity },
   { to: "/app/simulacao", label: "Simulação de Cenários", icon: FlaskConical },
@@ -24,7 +25,7 @@ const nav = [
   { to: "/app/relatorios", label: "Relatórios", icon: BarChart3 },
   { to: "/app/noticias", label: "Notícias", icon: Newspaper },
   { to: "/app/configuracoes", label: "Configurações", icon: Settings },
-] as const;
+];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
