@@ -70,7 +70,7 @@ function Settings() {
           {tab === "notificacoes" && (
             <Section title="Notificações" desc="Escolha como deseja ser avisado.">
               <div className="space-y-4">
-                {["Email para alertas de alta prioridade", "SMS em movimentos > 5% do PLD", "Resumo diário por IA", "Notícias regulatórias"].map((l) => (
+                {["Email para alertas de alta prioridade", "SMS em movimentos > 5% do PLD", "Resumo diário por IA", "Vencimentos de contrato"].map((l) => (
                   <div key={l} className="flex items-center justify-between border-b border-border pb-4 last:border-0">
                     <span className="text-sm">{l}</span>
                     <Switch defaultChecked />
