@@ -406,7 +406,6 @@ function Pricing() {
               "Monitoramento do PLD",
               "Até 20 contratos",
               "Alertas essenciais",
-              "Notícias curadas",
               "Relatórios mensais",
             ]}
           />
