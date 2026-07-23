@@ -3,12 +3,19 @@ import { cn } from "@/lib/utils";
 export function EthereLogo({ className }: { className?: string }) {
   return (
     <div className={cn("flex items-center gap-2", className)}>
-      <svg width="22" height="22" viewBox="0 0 22 22" fill="none" aria-hidden>
-        <rect x="1" y="1" width="20" height="20" rx="6" fill="currentColor" />
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden>
+        <defs>
+          <linearGradient id="ethere-logo-g" x1="0" y1="0" x2="24" y2="24" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stopColor="#1E3A8A" />
+            <stop offset="60%" stopColor="#2563EB" />
+            <stop offset="100%" stopColor="#60A5FA" />
+          </linearGradient>
+        </defs>
+        <rect x="1" y="1" width="22" height="22" rx="6.5" fill="url(#ethere-logo-g)" />
         <path
-          d="M7 8h8M7 11h6M7 14h8"
-          stroke="var(--background)"
-          strokeWidth="1.5"
+          d="M7.5 9h9M7.5 12h6.5M7.5 15h9"
+          stroke="#ffffff"
+          strokeWidth="1.6"
           strokeLinecap="round"
         />
       </svg>

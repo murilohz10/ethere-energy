@@ -21,17 +21,19 @@ function LoginPage() {
   const navigate = useNavigate();
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
-      <aside className="relative hidden overflow-hidden bg-foreground text-background lg:block">
-        <div className="absolute inset-0 grid-lines opacity-[0.08]" />
+      <aside className="relative hidden overflow-hidden text-white lg:block" style={{ background: "var(--gradient-brand)" }}>
+        <div className="absolute inset-0 grid-lines opacity-[0.12]" />
+        <div className="pointer-events-none absolute -right-24 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
+        <div className="pointer-events-none absolute -bottom-24 -left-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
         <div className="relative flex h-full flex-col justify-between p-12">
-          <Link to="/" className="text-background">
+          <Link to="/" className="text-white">
             <EthereLogo />
           </Link>
           <div>
             <p className="max-w-md text-2xl leading-snug tracking-tight">
               “A Ethere reduziu em 70% o tempo que gastávamos consolidando dados do mercado.”
             </p>
-            <div className="mt-6 text-sm text-background/70">
+            <div className="mt-6 text-sm text-white/75">
               Diretor de trading · Comercializadora nacional
             </div>
           </div>
@@ -42,7 +44,7 @@ function LoginPage() {
           <div className="lg:hidden">
             <EthereLogo />
           </div>
-          <h1 className="mt-6 text-2xl tracking-tight">Entrar</h1>
+          <h1 className="mt-6 text-3xl font-semibold tracking-tight">Entrar</h1>
           <p className="mt-1 text-sm text-muted-foreground">Acesse sua conta Ethere.</p>
           <form
             className="mt-8 space-y-4"
@@ -64,7 +66,7 @@ function LoginPage() {
               </div>
               <Input id="password" type="password" placeholder="••••••••" required />
             </div>
-            <Button type="submit" className="w-full bg-[#2563EB] text-white hover:bg-[#1d4ed8]">
+            <Button type="submit" className="w-full text-white shadow-blue hover:opacity-95" style={{ background: "var(--gradient-brand)" }}>
               Entrar <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </form>

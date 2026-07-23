@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/ethere/app-shell";
-import { Sparkles, TrendingUp, FileText, AlertTriangle, DollarSign } from "lucide-react";
+import { Sparkles, TrendingUp, TrendingDown, FileText, AlertTriangle, DollarSign, Activity, ArrowUpRight } from "lucide-react";
 import {
   AreaChart, Area, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid,
   BarChart, Bar,
 } from "recharts";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/app/")({
   head: () => ({ meta: [{ title: "Visão Geral · Ethere" }] }),
@@ -27,25 +28,37 @@ const exposureData = [
 function Overview() {
   return (
     <>
-      <PageHeader title="Visão Geral" description="Resumo operacional e sinais do mercado." />
+      <PageHeader
+        title="Visão Geral"
+        description="Resumo operacional e sinais do mercado em tempo real."
+        actions={
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-soft bg-brand-softer px-2.5 py-1 text-[11px] font-medium text-brand-dark">
+            <span className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" />
+            Ao vivo
+          </span>
+        }
+      />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Kpi label="PLD Atual (SE/CO)" value="R$ 219,42" delta="+4,8%" icon={TrendingUp} />
+        <Kpi label="PLD Atual (SE/CO)" value="R$ 219,42" delta="+4,8%" icon={Activity} accent />
         <Kpi label="Receita Estimada" value="R$ 12,4M" delta="+2,1%" icon={DollarSign} />
         <Kpi label="Exposição ao Mercado" value="18,2 MWm" delta="-1,4%" icon={TrendingUp} negative />
         <Kpi label="Contratos Ativos" value="128" delta="+3 novos" icon={FileText} />
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <div className="lg:col-span-2 rounded-2xl border border-border bg-card p-6">
+        <div className="lg:col-span-2 rounded-2xl border border-border bg-card p-6 shadow-soft">
           <div className="flex items-center justify-between">
             <div>
-              <div className="text-sm font-medium">PLD × Receita — 30 dias</div>
-              <div className="text-xs text-muted-foreground">Submercado SE/CO</div>
+              <div className="flex items-center gap-2 text-sm font-semibold">
+                PLD × Receita
+                <span className="rounded-md bg-brand-softer px-1.5 py-0.5 text-[10px] font-medium text-brand-dark">30 dias</span>
+              </div>
+              <div className="mt-0.5 text-xs text-muted-foreground">Submercado SE/CO</div>
             </div>
-            <div className="flex gap-2 text-xs text-muted-foreground">
+            <div className="flex gap-3 text-xs text-muted-foreground">
               <Legend color="#2563EB" label="PLD" />
-              <Legend color="var(--foreground)" label="Receita" />
+              <Legend color="#1E3A8A" label="Receita" />
             </div>
           </div>
           <div className="mt-4 h-72">
@@ -53,8 +66,12 @@ function Overview() {
               <AreaChart data={series} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="pldG" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0%" stopColor="#2563EB" stopOpacity={0.2} />
+                    <stop offset="0%" stopColor="#2563EB" stopOpacity={0.28} />
                     <stop offset="100%" stopColor="#2563EB" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="recG" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#1E3A8A" stopOpacity={0.15} />
+                    <stop offset="100%" stopColor="#1E3A8A" stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
@@ -62,67 +79,79 @@ function Overview() {
                 <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip
                   contentStyle={{
-                    borderRadius: 10, border: "1px solid var(--border)",
-                    background: "var(--card)", fontSize: 12,
+                    borderRadius: 12, border: "1px solid var(--border)",
+                    background: "var(--card)", fontSize: 12, boxShadow: "var(--shadow-elegant)",
                   }}
                 />
-                <Area type="monotone" dataKey="pld" stroke="#2563EB" strokeWidth={2} fill="url(#pldG)" />
-                <Area type="monotone" dataKey="receita" stroke="var(--foreground)" strokeWidth={1.5} fillOpacity={0} />
+                <Area type="monotone" dataKey="pld" stroke="#2563EB" strokeWidth={2.5} fill="url(#pldG)" />
+                <Area type="monotone" dataKey="receita" stroke="#1E3A8A" strokeWidth={2} fill="url(#recG)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-border bg-card p-6">
-          <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-[#2563EB]" />
-            <span className="text-sm font-medium">Análise diária por IA</span>
+        <div className="relative overflow-hidden rounded-2xl border border-brand-soft bg-card p-6 shadow-soft">
+          <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-brand/10 blur-2xl" />
+          <div className="relative flex items-center gap-2">
+            <div className="grid h-8 w-8 place-items-center rounded-lg text-white shadow-blue" style={{ background: "var(--gradient-brand)" }}>
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <span className="text-sm font-semibold">Análise diária por IA</span>
           </div>
-          <p className="mt-4 text-sm leading-relaxed text-foreground/85">
-            O PLD SE/CO apresenta tendência de <b>alta moderada</b> nas próximas 48h por redução dos
-            reservatórios e temperatura acima da média. Recomendamos <b>revisar exposição em contratos
+          <p className="relative mt-4 text-sm leading-relaxed text-foreground/90">
+            O PLD SE/CO apresenta tendência de <b className="text-brand-dark">alta moderada</b> nas próximas 48h por redução dos
+            reservatórios e temperatura acima da média. Recomendamos <b className="text-brand-dark">revisar exposição em contratos
             flexíveis</b> e considerar hedge parcial em 5–8% do portfólio.
           </p>
-          <ul className="mt-5 space-y-3 text-sm">
-            <IaItem label="Fator hidrológico" value="Negativo" />
-            <IaItem label="Fator térmico" value="Positivo" />
-            <IaItem label="Risco 7d" value="Moderado" />
+          <ul className="relative mt-5 space-y-2.5 text-sm">
+            <IaItem label="Fator hidrológico" value="Negativo" tone="negative" />
+            <IaItem label="Fator térmico" value="Positivo" tone="positive" />
+            <IaItem label="Risco 7d" value="Moderado" tone="warning" />
           </ul>
-          <button className="mt-6 inline-flex text-xs font-medium text-[#2563EB] hover:underline">
-            Ver análise completa →
+          <button className="relative mt-6 inline-flex items-center gap-1 text-xs font-semibold text-brand hover:text-brand-dark">
+            Ver análise completa <ArrowUpRight className="h-3.5 w-3.5" />
           </button>
         </div>
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
-        <div className="rounded-2xl border border-border bg-card p-6 lg:col-span-2">
-          <div className="text-sm font-medium">Exposição por submercado</div>
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-soft lg:col-span-2">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-semibold">Exposição por submercado</div>
+            <span className="text-xs text-muted-foreground">MWm</span>
+          </div>
           <div className="mt-4 h-56">
             <ResponsiveContainer>
               <BarChart data={exposureData}>
+                <defs>
+                  <linearGradient id="barG" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#60A5FA" />
+                    <stop offset="100%" stopColor="#2563EB" />
+                  </linearGradient>
+                </defs>
                 <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="m" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
-                <Tooltip contentStyle={{ borderRadius: 10, border: "1px solid var(--border)", background: "var(--card)", fontSize: 12 }} />
-                <Bar dataKey="v" fill="#2563EB" radius={[6, 6, 0, 0]} />
+                <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", background: "var(--card)", fontSize: 12, boxShadow: "var(--shadow-elegant)" }} />
+                <Bar dataKey="v" fill="url(#barG)" radius={[8, 8, 0, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
         </div>
-        <div className="rounded-2xl border border-border bg-card p-6">
-          <div className="flex items-center gap-2 text-sm font-medium">
-            <AlertTriangle className="h-4 w-4" /> Alertas recentes
+        <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
+          <div className="flex items-center gap-2 text-sm font-semibold">
+            <AlertTriangle className="h-4 w-4 text-amber-500" /> Alertas recentes
           </div>
           <ul className="mt-4 space-y-3 text-sm">
             {[
-              { t: "PLD +5% em 24h", p: "Alta", c: "text-destructive" },
-              { t: "Reservatório SE < 40%", p: "Média", c: "text-warning" },
-              { t: "Contrato Beta vence em 7d", p: "Baixa", c: "text-muted-foreground" },
-              { t: "Nova regulação ANEEL", p: "Info", c: "text-muted-foreground" },
+              { t: "PLD +5% em 24h", p: "Alta", tone: "bg-red-500/10 text-red-600" },
+              { t: "Reservatório SE < 40%", p: "Média", tone: "bg-amber-500/10 text-amber-700" },
+              { t: "Contrato Beta vence em 7d", p: "Baixa", tone: "bg-brand-softer text-brand-dark" },
+              { t: "Nova regulação ANEEL", p: "Info", tone: "bg-muted text-muted-foreground" },
             ].map((a) => (
-              <li key={a.t} className="flex items-center justify-between border-b border-border pb-3 last:border-0">
-                <span>{a.t}</span>
-                <span className={"text-[11px] uppercase tracking-wide " + a.c}>{a.p}</span>
+              <li key={a.t} className="flex items-center justify-between border-b border-border pb-3 last:border-0 last:pb-0">
+                <span className="text-foreground/85">{a.t}</span>
+                <span className={cn("rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide", a.tone)}>{a.p}</span>
               </li>
             ))}
           </ul>
@@ -132,18 +161,30 @@ function Overview() {
   );
 }
 
-function Kpi({ label, value, delta, icon: Icon, negative }: {
-  label: string; value: string; delta: string; icon: typeof TrendingUp; negative?: boolean;
+function Kpi({ label, value, delta, icon: Icon, negative, accent }: {
+  label: string; value: string; delta: string; icon: typeof TrendingUp; negative?: boolean; accent?: boolean;
 }) {
   return (
-    <div className="rounded-2xl border border-border bg-card p-5">
-      <div className="flex items-center justify-between text-muted-foreground">
-        <span className="text-xs">{label}</span>
-        <Icon className="h-4 w-4" strokeWidth={1.5} />
+    <div className={cn(
+      "group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-soft transition hover:shadow-elegant",
+      accent ? "border-brand-soft" : "border-border",
+    )}>
+      {accent && <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5" style={{ background: "var(--gradient-brand)" }} />}
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-medium text-muted-foreground">{label}</span>
+        <div className={cn("grid h-8 w-8 place-items-center rounded-lg", accent ? "bg-brand-softer text-brand" : "bg-muted text-muted-foreground")}>
+          <Icon className="h-4 w-4" strokeWidth={1.75} />
+        </div>
       </div>
       <div className="mt-3 flex items-baseline gap-2">
         <span className="text-2xl font-semibold tracking-tight">{value}</span>
-        <span className={"text-xs font-medium " + (negative ? "text-destructive" : "text-[#2563EB]")}>{delta}</span>
+        <span className={cn(
+          "inline-flex items-center gap-0.5 rounded-full px-1.5 py-0.5 text-[11px] font-semibold",
+          negative ? "bg-red-500/10 text-red-600" : "bg-brand/10 text-brand-dark",
+        )}>
+          {negative ? <TrendingDown className="h-3 w-3" /> : <TrendingUp className="h-3 w-3" />}
+          {delta}
+        </span>
       </div>
     </div>
   );
@@ -158,11 +199,14 @@ function Legend({ color, label }: { color: string; label: string }) {
   );
 }
 
-function IaItem({ label, value }: { label: string; value: string }) {
+function IaItem({ label, value, tone }: { label: string; value: string; tone: "positive" | "negative" | "warning" }) {
+  const toneClass = tone === "positive" ? "bg-emerald-500/10 text-emerald-700"
+    : tone === "negative" ? "bg-red-500/10 text-red-600"
+    : "bg-amber-500/10 text-amber-700";
   return (
-    <li className="flex items-center justify-between border-b border-border pb-2 last:border-0">
+    <li className="flex items-center justify-between border-b border-border/70 pb-2 last:border-0 last:pb-0">
       <span className="text-muted-foreground">{label}</span>
-      <span className="font-medium">{value}</span>
+      <span className={cn("rounded-full px-2 py-0.5 text-[11px] font-semibold", toneClass)}>{value}</span>
     </li>
   );
 }

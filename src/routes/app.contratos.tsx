@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { PageHeader } from "@/components/ethere/app-shell";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 
 export const Route = createFileRoute("/app/contratos")({
   head: () => ({ meta: [{ title: "Contratos · Ethere" }] }),
@@ -18,9 +18,16 @@ const rows = [
 ];
 
 const badge: Record<string, string> = {
-  Alta: "bg-destructive/10 text-destructive",
-  Média: "bg-warning/15 text-warning",
-  Baixa: "bg-[#2563EB]/10 text-[#2563EB]",
+  Alta: "bg-red-500/10 text-red-600 ring-1 ring-red-500/20",
+  Média: "bg-amber-500/10 text-amber-700 ring-1 ring-amber-500/20",
+  Baixa: "bg-brand-softer text-brand-dark ring-1 ring-brand/20",
+};
+
+const subTone: Record<string, string> = {
+  "SE/CO": "bg-brand/10 text-brand-dark",
+  "S": "bg-sky-500/10 text-sky-700",
+  "NE": "bg-indigo-500/10 text-indigo-700",
+  "N": "bg-slate-500/10 text-slate-700",
 };
 
 function Contracts() {
@@ -30,32 +37,47 @@ function Contracts() {
         title="Contratos"
         description="Portfólio consolidado com exposição por contrato."
         actions={
-          <Button size="sm" className="bg-[#2563EB] text-white hover:bg-[#1d4ed8]">
+          <Button size="sm" className="text-white shadow-blue hover:opacity-95" style={{ background: "var(--gradient-brand)" }}>
             <Plus className="mr-1 h-4 w-4" /> Novo contrato
           </Button>
         }
       />
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-card">
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <div className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-muted-foreground">
+          <Search className="h-4 w-4" />
+          <input className="w-56 bg-transparent placeholder:text-muted-foreground focus:outline-none" placeholder="Buscar por cliente ou ID…" />
+        </div>
+        {["Todos", "SE/CO", "S", "NE", "N"].map((f, i) => (
+          <button key={f} className={
+            "rounded-full border px-3 py-1 text-xs transition " +
+            (i === 0 ? "border-brand bg-brand text-white" : "border-border text-muted-foreground hover:border-brand-soft hover:text-brand-dark")
+          }>{f}</button>
+        ))}
+      </div>
+
+      <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-soft">
         <table className="w-full text-sm">
-          <thead className="bg-surface/60 text-xs uppercase tracking-wider text-muted-foreground">
+          <thead className="bg-brand-softer/70 text-[11px] uppercase tracking-wider text-brand-dark/80">
             <tr>
               {["Contrato", "Cliente", "Submercado", "Volume", "Preço", "Vencimento", "Exposição"].map((h) => (
-                <th key={h} className="px-6 py-3 text-left font-medium">{h}</th>
+                <th key={h} className="px-6 py-3.5 text-left font-semibold">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
-              <tr key={r.id} className="border-t border-border transition hover:bg-surface/60">
-                <td className="px-6 py-4 font-medium">{r.id}</td>
-                <td className="px-6 py-4">{r.cliente}</td>
-                <td className="px-6 py-4 text-muted-foreground">{r.sub}</td>
-                <td className="px-6 py-4">{r.vol}</td>
-                <td className="px-6 py-4">{r.preco}</td>
-                <td className="px-6 py-4 text-muted-foreground">{r.venc}</td>
+              <tr key={r.id} className="border-t border-border transition hover:bg-brand-softer/40">
+                <td className="px-6 py-4 font-semibold text-brand-dark">{r.id}</td>
+                <td className="px-6 py-4 font-medium">{r.cliente}</td>
                 <td className="px-6 py-4">
-                  <span className={"rounded-full px-2.5 py-1 text-[11px] font-medium " + badge[r.exp]}>
+                  <span className={"rounded-md px-2 py-0.5 text-[11px] font-semibold " + subTone[r.sub]}>{r.sub}</span>
+                </td>
+                <td className="px-6 py-4 tabular-nums">{r.vol}</td>
+                <td className="px-6 py-4 tabular-nums">{r.preco}</td>
+                <td className="px-6 py-4 text-muted-foreground tabular-nums">{r.venc}</td>
+                <td className="px-6 py-4">
+                  <span className={"rounded-full px-2.5 py-1 text-[11px] font-semibold " + badge[r.exp]}>
                     {r.exp}
                   </span>
                 </td>
