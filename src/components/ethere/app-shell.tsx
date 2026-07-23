@@ -3,11 +3,9 @@ import { EthereLogo } from "./logo";
 import {
   LayoutGrid,
   Activity,
-  FlaskConical,
   FileText,
   Bell,
   BarChart3,
-  Newspaper,
   Settings,
   Search,
   ChevronDown,
@@ -19,11 +17,9 @@ type NavItem = { to: string; label: string; icon: typeof LayoutGrid; exact?: boo
 const nav: NavItem[] = [
   { to: "/app", label: "Visão Geral", icon: LayoutGrid, exact: true },
   { to: "/app/monitoramento", label: "Monitoramento", icon: Activity },
-  { to: "/app/simulacao", label: "Simulação de Cenários", icon: FlaskConical },
   { to: "/app/contratos", label: "Contratos", icon: FileText },
   { to: "/app/alertas", label: "Alertas", icon: Bell },
   { to: "/app/relatorios", label: "Relatórios", icon: BarChart3 },
-  { to: "/app/noticias", label: "Notícias", icon: Newspaper },
   { to: "/app/configuracoes", label: "Configurações", icon: Settings },
 ];
 
