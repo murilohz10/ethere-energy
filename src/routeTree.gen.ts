@@ -14,9 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
-import { Route as AppSimulacaoRouteImport } from './routes/app.simulacao'
 import { Route as AppRelatoriosRouteImport } from './routes/app.relatorios'
-import { Route as AppNoticiasRouteImport } from './routes/app.noticias'
 import { Route as AppMonitoramentoRouteImport } from './routes/app.monitoramento'
 import { Route as AppContratosRouteImport } from './routes/app.contratos'
 import { Route as AppConfiguracoesRouteImport } from './routes/app.configuracoes'
@@ -47,19 +45,9 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppSimulacaoRoute = AppSimulacaoRouteImport.update({
-  id: '/simulacao',
-  path: '/simulacao',
-  getParentRoute: () => AppRoute,
-} as any)
 const AppRelatoriosRoute = AppRelatoriosRouteImport.update({
   id: '/relatorios',
   path: '/relatorios',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppNoticiasRoute = AppNoticiasRouteImport.update({
-  id: '/noticias',
-  path: '/noticias',
   getParentRoute: () => AppRoute,
 } as any)
 const AppMonitoramentoRoute = AppMonitoramentoRouteImport.update({
@@ -92,9 +80,7 @@ export interface FileRoutesByFullPath {
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
-  '/app/noticias': typeof AppNoticiasRoute
   '/app/relatorios': typeof AppRelatoriosRoute
-  '/app/simulacao': typeof AppSimulacaoRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRoutesByTo {
@@ -105,9 +91,7 @@ export interface FileRoutesByTo {
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
-  '/app/noticias': typeof AppNoticiasRoute
   '/app/relatorios': typeof AppRelatoriosRoute
-  '/app/simulacao': typeof AppSimulacaoRoute
   '/app': typeof AppIndexRoute
 }
 export interface FileRoutesById {
@@ -120,9 +104,7 @@ export interface FileRoutesById {
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
-  '/app/noticias': typeof AppNoticiasRoute
   '/app/relatorios': typeof AppRelatoriosRoute
-  '/app/simulacao': typeof AppSimulacaoRoute
   '/app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
@@ -136,9 +118,7 @@ export interface FileRouteTypes {
     | '/app/configuracoes'
     | '/app/contratos'
     | '/app/monitoramento'
-    | '/app/noticias'
     | '/app/relatorios'
-    | '/app/simulacao'
     | '/app/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -149,9 +129,7 @@ export interface FileRouteTypes {
     | '/app/configuracoes'
     | '/app/contratos'
     | '/app/monitoramento'
-    | '/app/noticias'
     | '/app/relatorios'
-    | '/app/simulacao'
     | '/app'
   id:
     | '__root__'
@@ -163,9 +141,7 @@ export interface FileRouteTypes {
     | '/app/configuracoes'
     | '/app/contratos'
     | '/app/monitoramento'
-    | '/app/noticias'
     | '/app/relatorios'
-    | '/app/simulacao'
     | '/app/'
   fileRoutesById: FileRoutesById
 }
@@ -213,25 +189,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/simulacao': {
-      id: '/app/simulacao'
-      path: '/simulacao'
-      fullPath: '/app/simulacao'
-      preLoaderRoute: typeof AppSimulacaoRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/app/relatorios': {
       id: '/app/relatorios'
       path: '/relatorios'
       fullPath: '/app/relatorios'
       preLoaderRoute: typeof AppRelatoriosRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/noticias': {
-      id: '/app/noticias'
-      path: '/noticias'
-      fullPath: '/app/noticias'
-      preLoaderRoute: typeof AppNoticiasRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/monitoramento': {
@@ -270,9 +232,7 @@ interface AppRouteChildren {
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppContratosRoute: typeof AppContratosRoute
   AppMonitoramentoRoute: typeof AppMonitoramentoRoute
-  AppNoticiasRoute: typeof AppNoticiasRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
-  AppSimulacaoRoute: typeof AppSimulacaoRoute
   AppIndexRoute: typeof AppIndexRoute
 }
 
@@ -281,9 +241,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppContratosRoute: AppContratosRoute,
   AppMonitoramentoRoute: AppMonitoramentoRoute,
-  AppNoticiasRoute: AppNoticiasRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,
-  AppSimulacaoRoute: AppSimulacaoRoute,
   AppIndexRoute: AppIndexRoute,
 }
 

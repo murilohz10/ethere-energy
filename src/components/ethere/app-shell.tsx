@@ -3,11 +3,9 @@ import { EthereLogo } from "./logo";
 import {
   LayoutGrid,
   Activity,
-  FlaskConical,
   FileText,
   Bell,
   BarChart3,
-  Newspaper,
   Settings,
   Search,
   ChevronDown,
@@ -19,11 +17,9 @@ type NavItem = { to: string; label: string; icon: typeof LayoutGrid; exact?: boo
 const nav: NavItem[] = [
   { to: "/app", label: "Visão Geral", icon: LayoutGrid, exact: true },
   { to: "/app/monitoramento", label: "Monitoramento", icon: Activity },
-  { to: "/app/simulacao", label: "Simulação de Cenários", icon: FlaskConical },
   { to: "/app/contratos", label: "Contratos", icon: FileText },
   { to: "/app/alertas", label: "Alertas", icon: Bell },
   { to: "/app/relatorios", label: "Relatórios", icon: BarChart3 },
-  { to: "/app/noticias", label: "Notícias", icon: Newspaper },
   { to: "/app/configuracoes", label: "Configurações", icon: Settings },
 ];
 
@@ -69,11 +65,11 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <div className="flex flex-1 flex-col lg:pl-60">
+      <div className="flex min-w-0 flex-1 flex-col lg:pl-60">
         <TopBar />
         <Ticker />
-        <main className="flex-1 px-6 py-8 lg:px-10">
-          <div className="mx-auto max-w-7xl">{children}</div>
+        <main className="flex-1 px-6 py-8 lg:px-8">
+          <div className="w-full">{children}</div>
         </main>
       </div>
     </div>
@@ -82,7 +78,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 function TopBar() {
   return (
-    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-background/80 px-6 backdrop-blur-xl lg:px-10">
+    <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-background/80 px-6 backdrop-blur-xl lg:px-8">
       <div className="flex items-center gap-3 text-sm text-muted-foreground">
         <Search className="h-4 w-4" />
         <input

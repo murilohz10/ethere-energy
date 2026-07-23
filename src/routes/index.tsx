@@ -6,11 +6,9 @@ import {
   Bell,
   Sparkles,
   History,
-  Newspaper,
   Check,
   Building2,
   Wind,
-  LineChart as LineIcon,
   ShieldCheck,
   Zap,
 } from "lucide-react";
@@ -292,7 +290,6 @@ function Features() {
     { icon: Bell, t: "Alertas Inteligentes", d: "Regras personalizadas e prioridades automáticas." },
     { icon: Sparkles, t: "Análises por IA", d: "Resumos diários e recomendações contextuais." },
     { icon: History, t: "Histórico", d: "Consultas rápidas e comparações por período." },
-    { icon: Newspaper, t: "Notícias", d: "Mercado, regulação, clima e energia curados." },
   ];
   return (
     <section id="funcionalidades" className="mx-auto max-w-7xl px-6 py-24">
@@ -360,7 +357,7 @@ function Audience() {
           title="Fazendas de Energia"
           items={[
             "Acompanhamento de geração e receita",
-            "Simulação de cenários de venda",
+            "Projeções de receita por submercado",
             "Monitoramento por submercado",
             "Análises de sazonalidade por IA",
           ]}
@@ -409,7 +406,6 @@ function Pricing() {
               "Monitoramento do PLD",
               "Até 20 contratos",
               "Alertas essenciais",
-              "Notícias curadas",
               "Relatórios mensais",
             ]}
           />
@@ -423,7 +419,6 @@ function Pricing() {
               "Contratos ilimitados",
               "Alertas avançados por regra",
               "Análises por IA e recomendações",
-              "Simulação de cenários",
               "Relatórios trimestrais e API",
             ]}
           />
@@ -488,7 +483,7 @@ function FinalCTA() {
       <div className="relative overflow-hidden rounded-3xl border border-border bg-card p-12 md:p-16">
         <div className="absolute inset-0 -z-10 grid-lines opacity-30 [mask-image:radial-gradient(ellipse_at_center,black,transparent_70%)]" />
         <div className="mx-auto max-w-2xl text-center">
-          <LineIcon className="mx-auto h-8 w-8" strokeWidth={1.25} />
+          <Sparkles className="mx-auto h-8 w-8" strokeWidth={1.25} />
           <h2 className="mt-6 text-3xl tracking-tight md:text-4xl">
             Comece hoje a acompanhar o mercado com clareza.
           </h2>
