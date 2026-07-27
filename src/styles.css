@@ -55,59 +55,61 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --shadow-elegant: 0 1px 2px oklch(0.3 0.1 258 / 0.06), 0 8px 30px -12px oklch(0.4 0.15 258 / 0.14);
-  --shadow-soft: 0 1px 2px oklch(0.3 0.1 258 / 0.05);
-  --shadow-blue: 0 8px 28px -10px oklch(0.55 0.2 258 / 0.35);
+  --shadow-soft: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 1px 2px rgba(3, 8, 20, 0.6);
+  --shadow-elegant: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 24px 48px -24px rgba(2, 6, 18, 0.7);
+  --shadow-blue: 0 10px 32px -12px rgba(59, 130, 246, 0.55), 0 0 0 1px rgba(59, 130, 246, 0.15) inset;
 }
 
 :root {
   --radius: 0.875rem;
-  --background: #ffffff;
-  --foreground: #0B1120;
-  --surface: #F8FAFF;
-  --surface-muted: #EFF6FF;
-  --card: #ffffff;
-  --card-foreground: #0B1120;
-  --popover: #ffffff;
-  --popover-foreground: #0B1120;
-  --primary: #1E3A8A;
-  --primary-foreground: #ffffff;
-  --secondary: #EFF6FF;
-  --secondary-foreground: #1E3A8A;
-  --muted: #F1F5F9;
-  --muted-foreground: #64748B;
-  --accent: #EFF6FF;
-  --accent-foreground: #1E3A8A;
-  --destructive: oklch(0.6 0.2 25);
-  --destructive-foreground: #ffffff;
-  --success: oklch(0.62 0.14 155);
-  --warning: oklch(0.75 0.14 75);
-  --border: #E2E8F0;
-  --input: #E2E8F0;
-  --ring: #2563EB;
-  --brand: #2563EB;
-  --brand-foreground: #ffffff;
-  --brand-dark: #1E3A8A;
+  /* Deep navy / petroleum blue base — Bloomberg + Linear inspired */
+  --background: #070E1C;
+  --foreground: #E6EDF9;
+  --surface: #0B152A;
+  --surface-muted: #0F1B34;
+  --card: #0F1B34;
+  --card-foreground: #E6EDF9;
+  --popover: #0F1B34;
+  --popover-foreground: #E6EDF9;
+  --primary: #3B82F6;
+  --primary-foreground: #FFFFFF;
+  --secondary: #142545;
+  --secondary-foreground: #DBEAFE;
+  --muted: #131F3B;
+  --muted-foreground: #8394B4;
+  --accent: #142545;
+  --accent-foreground: #DBEAFE;
+  --destructive: oklch(0.66 0.2 25);
+  --destructive-foreground: #FFFFFF;
+  --success: oklch(0.72 0.16 155);
+  --warning: oklch(0.8 0.16 80);
+  --border: #1B2A4B;
+  --input: #1B2A4B;
+  --ring: #3B82F6;
+  /* Brand blues — flipped for readability on dark surfaces */
+  --brand: #3B82F6;
+  --brand-foreground: #FFFFFF;
+  --brand-dark: #93C5FD;         /* accent text on tinted surfaces (was deep navy on light) */
   --brand-light: #60A5FA;
-  --brand-soft: #DBEAFE;
-  --brand-softer: #EFF6FF;
-  --chart-1: #2563EB;
-  --chart-2: #60A5FA;
-  --chart-3: #1E3A8A;
-  --chart-4: #93C5FD;
-  --chart-5: #0EA5E9;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #334155;
-  --sidebar-primary: #2563EB;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #EFF6FF;
-  --sidebar-accent-foreground: #1E3A8A;
-  --sidebar-border: #E2E8F0;
-  --sidebar-ring: #2563EB;
-  --gradient-brand: linear-gradient(135deg, #1E3A8A 0%, #2563EB 55%, #60A5FA 100%);
-  --gradient-brand-soft: linear-gradient(180deg, #EFF6FF 0%, #ffffff 100%);
-  --gradient-card: linear-gradient(180deg, #ffffff 0%, #F8FAFF 100%);
-  --gradient-blue-radial: radial-gradient(1200px 500px at 50% -10%, #DBEAFE 0%, transparent 60%);
+  --brand-soft: #24406F;         /* subtle blue borders/dividers */
+  --brand-softer: #10203F;       /* tinted elevated surface (petroleum) */
+  --chart-1: #60A5FA;
+  --chart-2: #3B82F6;
+  --chart-3: #93C5FD;
+  --chart-4: #1E3A8A;
+  --chart-5: #22D3EE;
+  --sidebar: #060B1A;
+  --sidebar-foreground: #B8C4DC;
+  --sidebar-primary: #3B82F6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #10203F;
+  --sidebar-accent-foreground: #DBEAFE;
+  --sidebar-border: #14213E;
+  --sidebar-ring: #3B82F6;
+  --gradient-brand: linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #60A5FA 100%);
+  --gradient-brand-soft: linear-gradient(180deg, #10203F 0%, #070E1C 100%);
+  --gradient-card: linear-gradient(180deg, #11203F 0%, #0B1730 100%);
+  --gradient-blue-radial: radial-gradient(1200px 500px at 50% -10%, rgba(59, 130, 246, 0.28) 0%, transparent 60%);
 }
 
 @layer base {
@@ -118,20 +120,25 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
   }
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-weight: 450;
+    background-image:
+      radial-gradient(900px 500px at 100% -10%, rgba(59, 130, 246, 0.08), transparent 60%),
+      radial-gradient(700px 400px at -10% 20%, rgba(30, 58, 138, 0.12), transparent 60%);
+    background-attachment: fixed;
   }
   h1, h2, h3, h4, h5 {
     letter-spacing: -0.025em;
     font-weight: 600;
+    color: #F2F6FC;
   }
   ::selection {
-    background: var(--brand-soft);
-    color: var(--brand-dark);
+    background: rgba(59, 130, 246, 0.35);
+    color: #FFFFFF;
   }
 }
 
@@ -146,20 +153,20 @@
 
 @utility grid-lines {
   background-image:
-    linear-gradient(to right, #DBEAFE 1px, transparent 1px),
-    linear-gradient(to bottom, #DBEAFE 1px, transparent 1px);
+    linear-gradient(to right, rgba(147, 197, 253, 0.08) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(147, 197, 253, 0.08) 1px, transparent 1px);
   background-size: 56px 56px;
 }
 
 @utility grid-lines-blue {
   background-image:
-    linear-gradient(to right, oklch(0.55 0.2 258 / 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, oklch(0.55 0.2 258 / 0.08) 1px, transparent 1px);
+    linear-gradient(to right, rgba(96, 165, 250, 0.09) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(96, 165, 250, 0.09) 1px, transparent 1px);
   background-size: 48px 48px;
 }
 
 @utility dot-grid {
-  background-image: radial-gradient(#BFDBFE 1px, transparent 1px);
+  background-image: radial-gradient(rgba(147, 197, 253, 0.18) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
@@ -176,12 +183,16 @@
 }
 
 @utility text-gradient-brand {
-  background: linear-gradient(135deg, #1E3A8A 0%, #2563EB 60%, #60A5FA 100%);
+  background: linear-gradient(135deg, #93C5FD 0%, #60A5FA 50%, #3B82F6 100%);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 @utility ring-brand {
-  box-shadow: 0 0 0 4px oklch(0.55 0.2 258 / 0.12);
+  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
+}
+
+@utility glow-brand {
+  box-shadow: 0 0 40px -8px rgba(59, 130, 246, 0.45);
 }
