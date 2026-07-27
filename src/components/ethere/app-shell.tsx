@@ -51,17 +51,25 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={n.to}
                 to={n.to}
                 className={cn(
-                  "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all",
+                  "group relative flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-all duration-200",
                   active
                     ? "bg-brand-softer text-brand-dark font-medium"
-                    : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground",
+                    : "text-muted-foreground hover:bg-sidebar-accent hover:text-foreground hover:translate-x-0.5",
                 )}
               >
-                {active && (
-                  <span className="absolute inset-y-1.5 left-0 w-0.5 rounded-r-full bg-brand" />
-                )}
+                <span
+                  className={cn(
+                    "absolute inset-y-1.5 left-0 w-0.5 rounded-r-full bg-brand transition-all duration-300",
+                    active ? "opacity-100 scale-y-100" : "opacity-0 scale-y-50",
+                  )}
+                />
                 <n.icon
-                  className={cn("h-[18px] w-[18px] transition", active ? "text-brand" : "text-muted-foreground group-hover:text-foreground")}
+                  className={cn(
+                    "h-[18px] w-[18px] transition-all duration-200",
+                    active
+                      ? "text-brand"
+                      : "text-muted-foreground group-hover:text-foreground group-hover:scale-110",
+                  )}
                   strokeWidth={1.75}
                 />
                 {n.label}
