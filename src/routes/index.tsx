@@ -138,7 +138,7 @@ function HeroPreview() {
           <span className="rounded-full bg-brand-softer px-2 py-0.5 text-[10px] font-medium text-brand-dark">Live</span>
         </div>
         <div className="mt-4 grid gap-3">
-          <div className="rounded-xl border border-border bg-card p-5 shadow-soft">
+          <div className="rounded-xl border border-border bg-surface p-5 shadow-soft">
             <div className="flex items-center justify-between">
               <div>
                 <div className="text-xs text-muted-foreground">PLD SE/CO · hoje</div>
@@ -168,7 +168,7 @@ function HeroPreview() {
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-xl border border-border bg-card p-4 shadow-soft">
+            <div className="rounded-xl border border-border bg-surface p-4 shadow-soft">
               <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
                 <FileText className="h-3.5 w-3.5" /> Contratos ativos
               </div>
