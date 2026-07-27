@@ -79,7 +79,7 @@ function Hero() {
       <div className="relative mx-auto max-w-7xl px-6 pt-20 pb-24 md:pt-28 md:pb-32">
         <div className="grid items-center gap-12 lg:grid-cols-[1.05fr_0.95fr]">
           <div>
-            <div className="inline-flex items-center gap-2 rounded-full border border-brand-soft bg-white/70 px-3 py-1 text-xs text-brand-dark shadow-soft backdrop-blur">
+            <div className="inline-flex items-center gap-2 rounded-full border border-brand-soft bg-brand-softer/70 px-3 py-1 text-xs text-brand-dark shadow-soft backdrop-blur">
               <span className="relative flex h-2 w-2">
                 <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand opacity-60" />
                 <span className="relative inline-flex h-2 w-2 rounded-full bg-brand" />
