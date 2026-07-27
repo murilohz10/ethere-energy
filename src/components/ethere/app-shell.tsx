@@ -78,15 +78,15 @@ export function AppShell({ children }: { children: ReactNode }) {
           })}
         </nav>
         <div className="border-t border-border p-3">
-          <button className="flex w-full items-center gap-3 rounded-lg p-2 text-left transition hover:bg-sidebar-accent">
-            <div className="grid h-9 w-9 place-items-center rounded-full text-xs font-semibold text-white shadow-blue" style={{ background: "var(--gradient-brand)" }}>
+          <button className="group flex w-full items-center gap-3 rounded-lg p-2 text-left transition-all duration-200 hover:bg-sidebar-accent">
+            <div className="grid h-9 w-9 place-items-center rounded-full text-xs font-semibold text-white shadow-blue transition-transform duration-300 group-hover:scale-105" style={{ background: "var(--gradient-brand)" }}>
               LG
             </div>
             <div className="flex-1">
               <div className="text-xs font-medium">Lucas Gomes</div>
               <div className="text-[11px] text-muted-foreground">Ethere Ltda.</div>
             </div>
-            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+            <ChevronDown className="h-3.5 w-3.5 text-muted-foreground transition-transform duration-200 group-hover:translate-y-0.5" />
           </button>
         </div>
       </aside>
