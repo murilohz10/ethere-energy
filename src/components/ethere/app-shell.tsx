@@ -106,8 +106,8 @@ function TopBar() {
   return (
     <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-border bg-background/85 px-6 backdrop-blur-xl lg:px-8">
       <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-muted-foreground transition focus-within:border-brand focus-within:ring-brand">
-          <Search className="h-4 w-4" />
+        <div className="group flex items-center gap-2.5 rounded-lg border border-border bg-surface px-3 py-1.5 text-sm text-muted-foreground transition-all duration-200 focus-within:border-brand focus-within:bg-surface-muted focus-within:shadow-blue hover:border-brand-soft">
+          <Search className="h-4 w-4 transition-colors duration-200 group-focus-within:text-brand" />
           <input
             className="w-64 bg-transparent placeholder:text-muted-foreground focus:outline-none"
             placeholder="Buscar contratos, alertas…"
@@ -117,10 +117,10 @@ function TopBar() {
       </div>
       <div className="flex items-center gap-3 text-xs">
         <span className="hidden items-center gap-1.5 rounded-full border border-brand-soft bg-brand-softer px-2.5 py-1 font-medium text-brand-dark md:inline-flex">
-          <span className="h-1.5 w-1.5 rounded-full bg-brand" />
+          <span className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" />
           Trial · 12 dias restantes
         </span>
-        <button className="rounded-md px-3 py-1.5 text-xs font-medium text-white transition hover:opacity-95" style={{ background: "var(--gradient-brand)" }}>
+        <button className="rounded-md px-3 py-1.5 text-xs font-medium text-white shadow-blue transition-all duration-200 hover:-translate-y-0.5 hover:shadow-elegant active:translate-y-0" style={{ background: "var(--gradient-brand)" }}>
           Upgrade
         </button>
       </div>
