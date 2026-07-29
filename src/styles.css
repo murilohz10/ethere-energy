@@ -122,6 +122,11 @@
     -moz-osx-font-smoothing: grayscale;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11", "ss01";
   }
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 6rem;
+  }
+
   body {
     background-color: var(--color-background);
     color: var(--color-foreground);

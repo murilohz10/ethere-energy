@@ -19,6 +19,7 @@ import { Route as AppMonitoramentoRouteImport } from './routes/app.monitoramento
 import { Route as AppContratosRouteImport } from './routes/app.contratos'
 import { Route as AppConfiguracoesRouteImport } from './routes/app.configuracoes'
 import { Route as AppAlertasRouteImport } from './routes/app.alertas'
+import { Route as AppMetricasMetricRouteImport } from './routes/app.metricas.$metric'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
@@ -70,6 +71,11 @@ const AppAlertasRoute = AppAlertasRouteImport.update({
   path: '/alertas',
   getParentRoute: () => AppRoute,
 } as any)
+const AppMetricasMetricRoute = AppMetricasMetricRouteImport.update({
+  id: '/metricas/$metric',
+  path: '/metricas/$metric',
+  getParentRoute: () => AppRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/app/monitoramento': typeof AppMonitoramentoRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/': typeof AppIndexRoute
+  '/app/metricas/$metric': typeof AppMetricasMetricRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/app/monitoramento': typeof AppMonitoramentoRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app': typeof AppIndexRoute
+  '/app/metricas/$metric': typeof AppMetricasMetricRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -106,6 +114,7 @@ export interface FileRoutesById {
   '/app/monitoramento': typeof AppMonitoramentoRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/': typeof AppIndexRoute
+  '/app/metricas/$metric': typeof AppMetricasMetricRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -120,6 +129,7 @@ export interface FileRouteTypes {
     | '/app/monitoramento'
     | '/app/relatorios'
     | '/app/'
+    | '/app/metricas/$metric'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -131,6 +141,7 @@ export interface FileRouteTypes {
     | '/app/monitoramento'
     | '/app/relatorios'
     | '/app'
+    | '/app/metricas/$metric'
   id:
     | '__root__'
     | '/'
@@ -143,6 +154,7 @@ export interface FileRouteTypes {
     | '/app/monitoramento'
     | '/app/relatorios'
     | '/app/'
+    | '/app/metricas/$metric'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -224,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAlertasRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/metricas/$metric': {
+      id: '/app/metricas/$metric'
+      path: '/metricas/$metric'
+      fullPath: '/app/metricas/$metric'
+      preLoaderRoute: typeof AppMetricasMetricRouteImport
+      parentRoute: typeof AppRoute
+    }
   }
 }
 
@@ -234,6 +253,7 @@ interface AppRouteChildren {
   AppMonitoramentoRoute: typeof AppMonitoramentoRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
   AppIndexRoute: typeof AppIndexRoute
+  AppMetricasMetricRoute: typeof AppMetricasMetricRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -243,6 +263,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppMonitoramentoRoute: AppMonitoramentoRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,
   AppIndexRoute: AppIndexRoute,
+  AppMetricasMetricRoute: AppMetricasMetricRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
