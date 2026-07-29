@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/ethere/app-shell";
 import { Sparkles, TrendingUp, TrendingDown, FileText, AlertTriangle, DollarSign, Activity, ArrowUpRight } from "lucide-react";
 import {
@@ -40,10 +40,10 @@ function Overview() {
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <Kpi label="PLD Atual (SE/CO)" value="R$ 219,42" delta="+4,8%" icon={Activity} accent />
-        <Kpi label="Receita Estimada" value="R$ 12,4M" delta="+2,1%" icon={DollarSign} />
-        <Kpi label="Exposição ao Mercado" value="18,2 MWm" delta="-1,4%" icon={TrendingUp} negative />
-        <Kpi label="Contratos Ativos" value="128" delta="+3 novos" icon={FileText} />
+        <Kpi to="pld" label="PLD Atual (SE/CO)" value="R$ 219,42" delta="+4,8%" icon={Activity} accent />
+        <Kpi to="receita" label="Receita Estimada" value="R$ 12,4M" delta="+2,1%" icon={DollarSign} />
+        <Kpi to="exposicao" label="Exposição ao Mercado" value="18,2 MWm" delta="-1,4%" icon={TrendingUp} negative />
+        <Kpi to="contratos" label="Contratos Ativos" value="128" delta="+3 novos" icon={FileText} />
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
@@ -108,9 +108,9 @@ function Overview() {
             <IaItem label="Fator térmico" value="Positivo" tone="positive" />
             <IaItem label="Risco 7d" value="Moderado" tone="warning" />
           </ul>
-          <button className="relative mt-6 inline-flex items-center gap-1 text-xs font-semibold text-brand hover:text-brand-dark">
+          <Link to="/app/monitoramento" className="relative mt-6 inline-flex items-center gap-1 text-xs font-semibold text-brand hover:text-brand-dark">
             Ver análise completa <ArrowUpRight className="h-3.5 w-3.5" />
-          </button>
+          </Link>
         </div>
       </div>
 
@@ -161,14 +161,18 @@ function Overview() {
   );
 }
 
-function Kpi({ label, value, delta, icon: Icon, negative, accent }: {
-  label: string; value: string; delta: string; icon: typeof TrendingUp; negative?: boolean; accent?: boolean;
+function Kpi({ to, label, value, delta, icon: Icon, negative, accent }: {
+  to: string; label: string; value: string; delta: string; icon: typeof TrendingUp; negative?: boolean; accent?: boolean;
 }) {
   return (
-    <div className={cn(
-      "group relative overflow-hidden rounded-2xl border bg-card p-5 shadow-soft transition hover:shadow-elegant",
-      accent ? "border-brand-soft" : "border-border",
-    )}>
+    <Link
+      to="/app/metricas/$metric"
+      params={{ metric: to }}
+      className={cn(
+        "group relative block overflow-hidden rounded-2xl border bg-card p-5 shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant",
+        accent ? "border-brand-soft" : "border-border",
+      )}
+    >
       {accent && <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5" style={{ background: "var(--gradient-brand)" }} />}
       <div className="flex items-center justify-between">
         <span className="text-xs font-medium text-muted-foreground">{label}</span>
@@ -186,7 +190,10 @@ function Kpi({ label, value, delta, icon: Icon, negative, accent }: {
           {delta}
         </span>
       </div>
-    </div>
+      <span className="mt-2 inline-flex items-center gap-1 text-[11px] font-medium text-muted-foreground transition group-hover:text-brand">
+        Ver detalhes <ArrowUpRight className="h-3 w-3" />
+      </span>
+    </Link>
   );
 }
 
