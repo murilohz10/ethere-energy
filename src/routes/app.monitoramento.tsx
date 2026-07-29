@@ -59,7 +59,7 @@ function Monitor() {
     return !hidden.includes(s.key);
   });
 
-  const window = useMemo(() => {
+  const viewData = useMemo(() => {
     const size = Math.max(5, Math.round(data.length / zoom));
     return data.slice(data.length - size);
   }, [data, zoom]);
@@ -73,7 +73,7 @@ function Monitor() {
   };
 
   const exportData = () => {
-    downloadFile(`pld-${period}-dias.csv`, toCsv(window as unknown as Record<string, string | number>[]), "text/csv;charset=utf-8");
+    downloadFile(`pld-${period}-dias.csv`, toCsv(viewData as unknown as Record<string, string | number>[]), "text/csv;charset=utf-8");
     toast.success("Série exportada em CSV");
   };
 
@@ -188,7 +188,7 @@ function Monitor() {
             <div className="h-full animate-pulse rounded-xl bg-muted/40" />
           ) : (
             <ResponsiveContainer>
-              <LineChart data={window}>
+              <LineChart data={viewData}>
                 <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
