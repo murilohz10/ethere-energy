@@ -374,24 +374,25 @@ function Features() {
 
 function HowItWorks() {
   const steps = [
-    { n: "01", t: "Cadastro", d: "Crie sua conta em minutos e escolha o perfil da operação." },
-    { n: "02", t: "Configuração", d: "Importe contratos, defina alertas e submercados relevantes." },
-    { n: "03", t: "Plataforma pronta", d: "Comece a acompanhar o mercado com dados organizados." },
+    { n: "01", t: "Crie sua conta", d: "Cadastro em minutos, com trial de 14 dias e sem cartão de crédito." },
+    { n: "02", t: "Cadastre seus contratos", d: "Volumes, preços, submercados e vencimentos organizados em um só lugar." },
+    { n: "03", t: "Configure alertas", d: "Regras por PLD, reservatórios, vencimentos e mudanças regulatórias." },
+    { n: "04", t: "Decida com base nos dados", d: "Dashboards executivos e análises por IA para agir no momento certo." },
   ];
   return (
-    <section className="border-y border-brand-soft bg-brand-softer/60">
+    <section id="como-funciona" className="border-y border-brand-soft bg-brand-softer/60">
       <div className="mx-auto max-w-7xl px-6 py-24">
-        <SectionHeader eyebrow="Como funciona" title="Três passos até a operação pronta." />
-        <div className="mt-14 grid gap-8 md:grid-cols-3">
+        <SectionHeader eyebrow="Como funciona" title="Quatro passos até a operação pronta." />
+        <div className="mt-14 grid gap-8 md:grid-cols-2 lg:grid-cols-4">
           {steps.map((s, i) => (
-            <div key={s.n} className="relative rounded-2xl border border-brand-soft bg-card p-6 shadow-soft">
+            <div key={s.n} className="relative rounded-2xl border border-brand-soft bg-card p-6 shadow-soft transition hover:-translate-y-0.5 hover:shadow-elegant">
               <div className="grid h-9 w-9 place-items-center rounded-lg text-xs font-semibold text-white shadow-blue" style={{ background: "var(--gradient-brand)" }}>
                 {s.n}
               </div>
               <div className="mt-4 text-lg font-semibold tracking-tight">{s.t}</div>
               <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.d}</p>
-              {i < 2 && (
-                <div className="absolute right-[-14px] top-1/2 hidden -translate-y-1/2 md:block">
+              {i < steps.length - 1 && (
+                <div className="absolute right-[-14px] top-1/2 hidden -translate-y-1/2 lg:block">
                   <ArrowRight className="h-5 w-5 text-brand/50" />
                 </div>
               )}
@@ -402,6 +403,81 @@ function HowItWorks() {
     </section>
   );
 }
+
+function Benefits() {
+  const items = [
+    { icon: Activity, t: "Monitoramento do PLD", d: "Acompanhe preços por submercado em tempo real, com séries históricas e comparações." },
+    { icon: FileText, t: "Gestão simplificada de contratos", d: "Portfólio completo com volumes, preços, exposição e alertas de vencimento." },
+    { icon: Bell, t: "Alertas inteligentes", d: "Regras personalizadas por prioridade e canal, disparadas no momento exato." },
+    { icon: Sparkles, t: "Análises por IA", d: "Resumos diários, tendências e recomendações contextuais para sua operação." },
+    { icon: BarChart3, t: "Dashboards executivos", d: "Indicadores consolidados prontos para comitês, diretoria e investidores." },
+    { icon: ShieldCheck, t: "Confiabilidade", d: "Dados organizados, histórico auditável e relatórios exportáveis em PDF e Excel." },
+  ];
+  return (
+    <section id="beneficios" className="bg-background">
+      <div className="mx-auto max-w-7xl px-6 py-24">
+        <SectionHeader
+          eyebrow="Benefícios"
+          title="Menos planilhas. Mais decisões com base em dados."
+        />
+        <div className="mt-12 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {items.map((b) => (
+            <div key={b.t} className="group rounded-2xl border border-border bg-card p-6 transition hover:-translate-y-0.5 hover:border-brand-soft hover:shadow-elegant">
+              <div className="grid h-11 w-11 place-items-center rounded-xl bg-brand-softer text-brand transition group-hover:bg-brand group-hover:text-white">
+                <b.icon className="h-5 w-5" strokeWidth={1.75} />
+              </div>
+              <div className="mt-5 text-base font-semibold">{b.t}</div>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{b.d}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function Faq() {
+  const faqs = [
+    {
+      q: "O que é o Mercado Livre de Energia?",
+      a: "É o ambiente em que consumidores, comercializadoras e geradores negociam energia livremente, definindo preço, prazo e volume por contrato — diferente do mercado regulado, onde a tarifa é definida pela distribuidora.",
+    },
+    {
+      q: "Preciso instalar algum software?",
+      a: "Não. A Ethere é 100% web. Basta acessar pelo navegador com seu login — não há instalação, servidores ou manutenção do seu lado.",
+    },
+    {
+      q: "Existe período de teste?",
+      a: "Sim. Todos os planos incluem 14 dias de trial, sem necessidade de cartão de crédito, com acesso completo às funcionalidades.",
+    },
+    {
+      q: "Como funciona o plano Professional?",
+      a: "O Professional inclui contratos ilimitados, alertas avançados por regra, análises por IA com recomendações, relatórios trimestrais e acesso à API para integrações.",
+    },
+    {
+      q: "Meus dados ficam seguros?",
+      a: "Sim. Os dados são isolados por empresa, com controle de acesso por usuário, autenticação em duas etapas opcional e histórico de atividades.",
+    },
+  ];
+  return (
+    <section id="faq" className="border-t border-border bg-background">
+      <div className="mx-auto max-w-7xl px-6 py-24">
+        <SectionHeader eyebrow="FAQ" title="Perguntas frequentes." />
+        <div className="mt-10 max-w-3xl">
+          <Accordion type="single" collapsible className="w-full">
+            {faqs.map((f, i) => (
+              <AccordionItem key={f.q} value={`i${i}`} className="border-border">
+                <AccordionTrigger className="text-left text-base font-medium hover:no-underline">{f.q}</AccordionTrigger>
+                <AccordionContent className="text-sm leading-relaxed text-muted-foreground">{f.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 
 function Audience() {
   return (
