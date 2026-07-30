@@ -225,20 +225,61 @@ export function useSettings() {
 
 /* -------------------------------- session --------------------------------- */
 
-export type Session = { email: string; name: string; company: string; remember: boolean } | null;
+export type UserProfileKind = "Comercializadora" | "Fazenda de Energia";
 
-const sessionStore = createPersistentStore<{ user: Session }>("ethere.session.v1", {
-  user: { email: "lucas@ethere.com", name: "Lucas Gomes", company: "Ethere Ltda.", remember: true },
-});
+export type SessionUser = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  company: string;
+  cnpj: string;
+  phone: string;
+  profile: UserProfileKind;
+  plan: "Essential" | "Professional";
+  avatar: string;
+  remember: boolean;
+  onboarded: boolean;
+};
+
+export type Session = SessionUser | null;
+
+export const emptyUser: SessionUser = {
+  email: "",
+  firstName: "",
+  lastName: "",
+  role: "",
+  company: "",
+  cnpj: "",
+  phone: "",
+  profile: "Comercializadora",
+  plan: "Professional",
+  avatar: "",
+  remember: false,
+  onboarded: false,
+};
+
+const sessionStore = createPersistentStore<{ user: Session }>("ethere.session.v2", { user: null });
 
 export function useSession() {
   const [state, set] = useStore(sessionStore);
   return {
     user: state.user,
-    signIn: (user: NonNullable<Session>) => set({ user }),
+    isAuthenticated: !!state.user,
+    signIn: (user: Partial<SessionUser> & { email: string }) =>
+      set({ user: { ...emptyUser, ...user } }),
+    updateUser: (patch: Partial<SessionUser>) =>
+      set((s) => (s.user ? { user: { ...s.user, ...patch } } : s)),
     signOut: () => set({ user: null }),
   };
 }
+
+export const initials = (u: Session) =>
+  u ? `${u.firstName?.[0] ?? ""}${u.lastName?.[0] ?? ""}`.toUpperCase() || u.email[0]?.toUpperCase() || "U" : "U";
+
+export const fullName = (u: Session) =>
+  u ? [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email : "";
+
 
 /* ----------------------------- notifications ------------------------------ */
 
