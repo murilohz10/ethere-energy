@@ -65,9 +65,12 @@ function Landing() {
       <Solution />
       <Features />
       <HowItWorks />
+      <Benefits />
       <Audience />
       <Pricing />
+      <Faq />
       <FinalCTA />
+
       <MarketingFooter />
     </div>
   );
