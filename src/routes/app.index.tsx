@@ -6,6 +6,10 @@ import {
   BarChart, Bar,
 } from "recharts";
 import { cn } from "@/lib/utils";
+import { buildInsights, useAlerts, useContracts, useSession } from "@/lib/store";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
+
 
 export const Route = createFileRoute("/app/")({
   head: () => ({ meta: [{ title: "Visão Geral · Ethere" }] }),
@@ -26,6 +30,18 @@ const exposureData = [
 ];
 
 function Overview() {
+  const { contracts } = useContracts();
+  const { alerts } = useAlerts();
+  const { user } = useSession();
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const t = setTimeout(() => setLoading(false), 450);
+    return () => clearTimeout(t);
+  }, []);
+
+  const insights = buildInsights(contracts, alerts, user?.firstName);
+
   return (
     <>
       <PageHeader
@@ -39,7 +55,52 @@ function Overview() {
         }
       />
 
+      <section className="mb-6 rounded-2xl border border-brand-soft bg-card p-6 shadow-soft">
+        <div className="flex items-center gap-2">
+          <div className="grid h-8 w-8 place-items-center rounded-lg text-white shadow-blue" style={{ background: "var(--gradient-brand)" }}>
+            <Sparkles className="h-4 w-4" />
+          </div>
+          <div>
+            <div className="text-sm font-semibold">Insights inteligentes</div>
+            <div className="text-xs text-muted-foreground">Gerados a partir do seu portfólio e das condições do mercado.</div>
+          </div>
+        </div>
+        <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+          {loading
+            ? Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="rounded-xl border border-border bg-surface p-4">
+                  <Skeleton className="h-4 w-2/3" />
+                  <Skeleton className="mt-3 h-3 w-full" />
+                  <Skeleton className="mt-2 h-3 w-4/5" />
+                </div>
+              ))
+            : insights.map((i) => (
+                <div
+                  key={i.id}
+                  className={cn(
+                    "rounded-xl border bg-surface p-4 transition hover:-translate-y-0.5 hover:shadow-soft",
+                    i.tone === "warning" ? "border-amber-500/30" : i.tone === "positive" ? "border-brand-soft" : "border-border",
+                  )}
+                >
+                  <div className="flex items-start gap-2">
+                    <span
+                      className={cn(
+                        "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
+                        i.tone === "warning" ? "bg-amber-500" : i.tone === "positive" ? "bg-brand" : "bg-muted-foreground",
+                      )}
+                    />
+                    <div>
+                      <div className="text-sm font-semibold leading-snug">{i.title}</div>
+                      <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{i.body}</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+        </div>
+      </section>
+
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+
         <Kpi to="pld" label="PLD Atual (SE/CO)" value="R$ 219,42" delta="+4,8%" icon={Activity} accent />
         <Kpi to="receita" label="Receita Estimada" value="R$ 12,4M" delta="+2,1%" icon={DollarSign} />
         <Kpi to="exposicao" label="Exposição ao Mercado" value="18,2 MWm" delta="-1,4%" icon={TrendingUp} negative />

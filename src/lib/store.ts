@@ -225,20 +225,61 @@ export function useSettings() {
 
 /* -------------------------------- session --------------------------------- */
 
-export type Session = { email: string; name: string; company: string; remember: boolean } | null;
+export type UserProfileKind = "Comercializadora" | "Fazenda de Energia";
 
-const sessionStore = createPersistentStore<{ user: Session }>("ethere.session.v1", {
-  user: { email: "lucas@ethere.com", name: "Lucas Gomes", company: "Ethere Ltda.", remember: true },
-});
+export type SessionUser = {
+  email: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+  company: string;
+  cnpj: string;
+  phone: string;
+  profile: UserProfileKind;
+  plan: "Essential" | "Professional";
+  avatar: string;
+  remember: boolean;
+  onboarded: boolean;
+};
+
+export type Session = SessionUser | null;
+
+export const emptyUser: SessionUser = {
+  email: "",
+  firstName: "",
+  lastName: "",
+  role: "",
+  company: "",
+  cnpj: "",
+  phone: "",
+  profile: "Comercializadora",
+  plan: "Professional",
+  avatar: "",
+  remember: false,
+  onboarded: false,
+};
+
+const sessionStore = createPersistentStore<{ user: Session }>("ethere.session.v2", { user: null });
 
 export function useSession() {
   const [state, set] = useStore(sessionStore);
   return {
     user: state.user,
-    signIn: (user: NonNullable<Session>) => set({ user }),
+    isAuthenticated: !!state.user,
+    signIn: (user: Partial<SessionUser> & { email: string }) =>
+      set({ user: { ...emptyUser, ...user } }),
+    updateUser: (patch: Partial<SessionUser>) =>
+      set((s) => (s.user ? { user: { ...s.user, ...patch } } : s)),
     signOut: () => set({ user: null }),
   };
 }
+
+export const initials = (u: Session) =>
+  u ? `${u.firstName?.[0] ?? ""}${u.lastName?.[0] ?? ""}`.toUpperCase() || u.email[0]?.toUpperCase() || "U" : "U";
+
+export const fullName = (u: Session) =>
+  u ? [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email : "";
+
 
 /* ----------------------------- notifications ------------------------------ */
 
@@ -290,4 +331,103 @@ export function toCsv(rows: Record<string, string | number>[]) {
   const headers = Object.keys(rows[0]);
   const escape = (v: string | number) => `"${String(v).replace(/"/g, '""')}"`;
   return [headers.join(";"), ...rows.map((r) => headers.map((h) => escape(r[h])).join(";"))].join("\n");
+}
+
+/* ------------------------------- onboarding ------------------------------- */
+
+const onboardingStore = createPersistentStore<{ done: boolean; step: number }>("ethere.onboarding.v1", {
+  done: false,
+  step: 0,
+});
+
+export function useOnboarding() {
+  const [state, set] = useStore(onboardingStore);
+  return {
+    ...state,
+    setStep: (step: number) => set((s) => ({ ...s, step })),
+    complete: () => set({ done: true, step: 5 }),
+    restart: () => set({ done: false, step: 0 }),
+  };
+}
+
+/* -------------------------------- validation ------------------------------ */
+
+export const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(v.trim());
+export const isStrongPassword = (v: string) => v.length >= 8;
+export const isPhone = (v: string) => v.replace(/\D/g, "").length >= 10;
+export const isCnpj = (v: string) => v.replace(/\D/g, "").length === 14;
+
+export const maskCnpj = (v: string) =>
+  v.replace(/\D/g, "").slice(0, 14)
+    .replace(/^(\d{2})(\d)/, "$1.$2")
+    .replace(/^(\d{2})\.(\d{3})(\d)/, "$1.$2.$3")
+    .replace(/\.(\d{3})(\d)/, ".$1/$2")
+    .replace(/(\d{4})(\d)/, "$1-$2");
+
+export const maskPhone = (v: string) =>
+  v.replace(/\D/g, "").slice(0, 11)
+    .replace(/^(\d{2})(\d)/, "($1) $2")
+    .replace(/(\d{5})(\d)/, "$1-$2");
+
+/* -------------------------------- insights -------------------------------- */
+
+export type Insight = { id: string; tone: "positive" | "warning" | "neutral"; title: string; body: string };
+
+export function buildInsights(contracts: Contract[], alerts: AlertRule[], firstName?: string): Insight[] {
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Bom dia" : hour < 18 ? "Boa tarde" : "Boa noite";
+  const activeAlerts = alerts.filter((a) => a.enabled).length;
+  const now = Date.now();
+  const expiring = contracts
+    .filter((c) => c.status !== "Encerrado")
+    .map((c) => ({ c, days: Math.ceil((new Date(`${c.endDate}T00:00:00`).getTime() - now) / 86400000) }))
+    .filter((x) => x.days > 0 && x.days <= 60)
+    .sort((a, b) => a.days - b.days);
+  const volume = contracts.filter((c) => c.status === "Ativo").reduce((s, c) => s + c.volume, 0);
+  const revenue = contracts
+    .filter((c) => c.status === "Ativo" && c.type === "Venda")
+    .reduce((s, c) => s + c.volume * c.price * 730, 0);
+
+  const list: Insight[] = [
+    {
+      id: "greet",
+      tone: "neutral",
+      title: `${greeting}${firstName ? `, ${firstName}` : ""}!`,
+      body: "O PLD SE/CO apresenta tendência de alta moderada nas próximas 48 horas.",
+    },
+  ];
+
+  if (expiring[0]) {
+    list.push({
+      id: "expiring",
+      tone: "warning",
+      title: `Contrato ${expiring[0].c.code} vence em ${expiring[0].days} dias`,
+      body: `${expiring[0].c.name} · ${expiring[0].c.company}. Avalie a renovação antecipada.`,
+    });
+  }
+
+  list.push({
+    id: "alerts",
+    tone: activeAlerts ? "positive" : "warning",
+    title: activeAlerts ? `Você possui ${activeAlerts} alertas ativos` : "Nenhum alerta ativo",
+    body: activeAlerts
+      ? "As regras estão monitorando PLD, reservatórios e vencimentos em tempo real."
+      : "Crie um alerta para ser avisado sobre movimentos relevantes do mercado.",
+  });
+
+  list.push({
+    id: "volatility",
+    tone: "warning",
+    title: "Maior volatilidade prevista entre 18h e 21h",
+    body: "Concentração de carga no horário de ponta deve pressionar o preço no submercado SE/CO.",
+  });
+
+  list.push({
+    id: "revenue",
+    tone: "positive",
+    title: "Receita estimada aumentou 7% em relação ao mês anterior",
+    body: `Portfólio ativo de ${volume.toFixed(1)} MWm, com receita projetada de ${brl(revenue)}.`,
+  });
+
+  return list;
 }
