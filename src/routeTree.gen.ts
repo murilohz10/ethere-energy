@@ -18,6 +18,7 @@ import { Route as AppRouteImport } from './routes/app'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppRelatoriosRouteImport } from './routes/app.relatorios'
+import { Route as AppPerfilRouteImport } from './routes/app.perfil'
 import { Route as AppMonitoramentoRouteImport } from './routes/app.monitoramento'
 import { Route as AppContratosRouteImport } from './routes/app.contratos'
 import { Route as AppConfiguracoesRouteImport } from './routes/app.configuracoes'
@@ -69,6 +70,11 @@ const AppRelatoriosRoute = AppRelatoriosRouteImport.update({
   path: '/relatorios',
   getParentRoute: () => AppRoute,
 } as any)
+const AppPerfilRoute = AppPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMonitoramentoRoute = AppMonitoramentoRouteImport.update({
   id: '/monitoramento',
   path: '/monitoramento',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
+  '/app/perfil': typeof AppPerfilRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/': typeof AppIndexRoute
   '/app/metricas/$metric': typeof AppMetricasMetricRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
+  '/app/perfil': typeof AppPerfilRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app': typeof AppIndexRoute
   '/app/metricas/$metric': typeof AppMetricasMetricRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
+  '/app/perfil': typeof AppPerfilRoute
   '/app/relatorios': typeof AppRelatoriosRoute
   '/app/': typeof AppIndexRoute
   '/app/metricas/$metric': typeof AppMetricasMetricRoute
@@ -157,6 +166,7 @@ export interface FileRouteTypes {
     | '/app/configuracoes'
     | '/app/contratos'
     | '/app/monitoramento'
+    | '/app/perfil'
     | '/app/relatorios'
     | '/app/'
     | '/app/metricas/$metric'
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/app/configuracoes'
     | '/app/contratos'
     | '/app/monitoramento'
+    | '/app/perfil'
     | '/app/relatorios'
     | '/app'
     | '/app/metricas/$metric'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/app/configuracoes'
     | '/app/contratos'
     | '/app/monitoramento'
+    | '/app/perfil'
     | '/app/relatorios'
     | '/app/'
     | '/app/metricas/$metric'
@@ -268,6 +280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRelatoriosRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/perfil': {
+      id: '/app/perfil'
+      path: '/perfil'
+      fullPath: '/app/perfil'
+      preLoaderRoute: typeof AppPerfilRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/monitoramento': {
       id: '/app/monitoramento'
       path: '/monitoramento'
@@ -311,6 +330,7 @@ interface AppRouteChildren {
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppContratosRoute: typeof AppContratosRoute
   AppMonitoramentoRoute: typeof AppMonitoramentoRoute
+  AppPerfilRoute: typeof AppPerfilRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
   AppIndexRoute: typeof AppIndexRoute
   AppMetricasMetricRoute: typeof AppMetricasMetricRoute
@@ -321,6 +341,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppContratosRoute: AppContratosRoute,
   AppMonitoramentoRoute: AppMonitoramentoRoute,
+  AppPerfilRoute: AppPerfilRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,
   AppIndexRoute: AppIndexRoute,
   AppMetricasMetricRoute: AppMetricasMetricRoute,
