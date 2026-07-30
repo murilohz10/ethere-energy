@@ -6,6 +6,10 @@ import {
   BarChart, Bar,
 } from "recharts";
 import { cn } from "@/lib/utils";
+import { buildInsights, useAlerts, useContracts, useSession } from "@/lib/store";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useState } from "react";
+
 
 export const Route = createFileRoute("/app/")({
   head: () => ({ meta: [{ title: "Visão Geral · Ethere" }] }),
