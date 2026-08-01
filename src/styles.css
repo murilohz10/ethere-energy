@@ -39,7 +39,9 @@
   --color-brand-softer: var(--brand-softer);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  --color-cyan: var(--cyan);
   --color-danger: var(--destructive);
+
   --color-surface: var(--surface);
   --color-surface-muted: var(--surface-muted);
   --color-chart-1: var(--chart-1);
