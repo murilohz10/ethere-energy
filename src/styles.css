@@ -63,54 +63,56 @@
 :root {
   --radius: 0.875rem;
   /* Deep navy / petroleum blue base — Bloomberg + Linear inspired */
-  --background: #070E1C;
-  --foreground: #E6EDF9;
-  --surface: #0B152A;
-  --surface-muted: #0F1B34;
-  --card: #0F1B34;
-  --card-foreground: #E6EDF9;
-  --popover: #0F1B34;
-  --popover-foreground: #E6EDF9;
-  --primary: #3B82F6;
-  --primary-foreground: #FFFFFF;
-  --secondary: #142545;
-  --secondary-foreground: #DBEAFE;
-  --muted: #131F3B;
-  --muted-foreground: #8394B4;
-  --accent: #142545;
-  --accent-foreground: #DBEAFE;
+  --background: #081526;
+  --foreground: #E8F2FB;
+  --surface: #0B1B30;
+  --surface-muted: #0E2138;
+  --card: #0D1F36;
+  --card-foreground: #E8F2FB;
+  --popover: #0D1F36;
+  --popover-foreground: #E8F2FB;
+  --primary: #3FA9F5;
+  --primary-foreground: #04121F;
+  --secondary: #122A45;
+  --secondary-foreground: #D5EBFC;
+  --muted: #112542;
+  --muted-foreground: #8AA2BF;
+  --accent: #122A45;
+  --accent-foreground: #D5EBFC;
   --destructive: oklch(0.66 0.2 25);
   --destructive-foreground: #FFFFFF;
-  --success: oklch(0.72 0.16 155);
+  --success: oklch(0.75 0.15 165);
   --warning: oklch(0.8 0.16 80);
-  --border: #1B2A4B;
-  --input: #1B2A4B;
-  --ring: #3B82F6;
-  /* Brand blues — flipped for readability on dark surfaces */
-  --brand: #3B82F6;
-  --brand-foreground: #FFFFFF;
-  --brand-dark: #93C5FD;         /* accent text on tinted surfaces (was deep navy on light) */
-  --brand-light: #60A5FA;
-  --brand-soft: #24406F;         /* subtle blue borders/dividers */
-  --brand-softer: #10203F;       /* tinted elevated surface (petroleum) */
-  --chart-1: #60A5FA;
-  --chart-2: #3B82F6;
-  --chart-3: #93C5FD;
-  --chart-4: #1E3A8A;
-  --chart-5: #22D3EE;
-  --sidebar: #060B1A;
-  --sidebar-foreground: #B8C4DC;
-  --sidebar-primary: #3B82F6;
-  --sidebar-primary-foreground: #FFFFFF;
-  --sidebar-accent: #10203F;
-  --sidebar-accent-foreground: #DBEAFE;
-  --sidebar-border: #14213E;
-  --sidebar-ring: #3B82F6;
-  --gradient-brand: linear-gradient(135deg, #1E3A8A 0%, #2563EB 50%, #60A5FA 100%);
-  --gradient-brand-soft: linear-gradient(180deg, #10203F 0%, #070E1C 100%);
-  --gradient-card: linear-gradient(180deg, #11203F 0%, #0B1730 100%);
-  --gradient-blue-radial: radial-gradient(1200px 500px at 50% -10%, rgba(59, 130, 246, 0.28) 0%, transparent 60%);
+  --border: #1A3252;
+  --input: #1A3252;
+  --ring: #3FA9F5;
+  /* Brand blues */
+  --brand: #3FA9F5;
+  --brand-foreground: #04121F;
+  --brand-dark: #7FCBFF;
+  --brand-light: #6FC3FF;
+  --brand-soft: #24476F;
+  --brand-softer: #0E2440;
+  --cyan: #22D3EE;
+  --chart-1: #3FA9F5;
+  --chart-2: #22D3EE;
+  --chart-3: #7FCBFF;
+  --chart-4: #1D4E89;
+  --chart-5: #A5F3FC;
+  --sidebar: #061220;
+  --sidebar-foreground: #B8CADF;
+  --sidebar-primary: #3FA9F5;
+  --sidebar-primary-foreground: #04121F;
+  --sidebar-accent: #0E2440;
+  --sidebar-accent-foreground: #D5EBFC;
+  --sidebar-border: #14263E;
+  --sidebar-ring: #3FA9F5;
+  --gradient-brand: linear-gradient(135deg, #1D4E89 0%, #2A8FE0 45%, #3FA9F5 75%, #22D3EE 100%);
+  --gradient-brand-soft: linear-gradient(180deg, #0E2440 0%, #081526 100%);
+  --gradient-card: linear-gradient(180deg, rgba(24, 52, 86, 0.75) 0%, rgba(11, 27, 48, 0.85) 100%);
+  --gradient-blue-radial: radial-gradient(1200px 500px at 50% -10%, rgba(63, 169, 245, 0.3) 0%, transparent 60%);
 }
+
 
 @layer base {
   * {
