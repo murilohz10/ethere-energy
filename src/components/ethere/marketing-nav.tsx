@@ -1,5 +1,6 @@
 import { Link } from "@tanstack/react-router";
 import { EthereLogo } from "./logo";
+import { ThemeToggle } from "./theme-toggle";
 import { Button } from "@/components/ui/button";
 import { Linkedin, Instagram, Mail, ArrowRight } from "lucide-react";
 
@@ -17,6 +18,7 @@ export function MarketingNav() {
           <a href="#plano" className="link-underline transition hover:text-brand-dark">Plano</a>
         </nav>
         <div className="flex items-center gap-2">
+          <ThemeToggle />
           <Link to="/login">
             <Button variant="ghost" size="sm" className="text-sm font-medium">Entrar</Button>
           </Link>

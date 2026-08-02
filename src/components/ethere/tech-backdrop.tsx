@@ -43,6 +43,10 @@ export function TechBackdrop({ density = 34 }: { density?: number }) {
     window.addEventListener("resize", resize);
 
     const draw = () => {
+      const isDark = document.documentElement.classList.contains("dark");
+      const line = isDark ? "63, 169, 245" : "23, 69, 111";
+      const dot = isDark ? "rgba(127, 203, 255, 0.35)" : "rgba(30, 123, 214, 0.3)";
+      const lineAlpha = isDark ? 0.16 : 0.12;
       ctx.clearRect(0, 0, w, h);
       for (const p of points) {
         p.x += p.vx;
@@ -58,7 +62,7 @@ export function TechBackdrop({ density = 34 }: { density?: number }) {
           const dy = (a.y - b.y) * h;
           const d = Math.hypot(dx, dy);
           if (d < 150) {
-            ctx.strokeStyle = `rgba(63, 169, 245, ${((1 - d / 150) * 0.16).toFixed(3)})`;
+            ctx.strokeStyle = `rgba(${line}, ${((1 - d / 150) * lineAlpha).toFixed(3)})`;
             ctx.lineWidth = 0.6;
             ctx.beginPath();
             ctx.moveTo(a.x * w, a.y * h);
@@ -68,7 +72,7 @@ export function TechBackdrop({ density = 34 }: { density?: number }) {
         }
       }
       for (const p of points) {
-        ctx.fillStyle = "rgba(127, 203, 255, 0.35)";
+        ctx.fillStyle = dot;
         ctx.beginPath();
         ctx.arc(p.x * w, p.y * h, p.r, 0, Math.PI * 2);
         ctx.fill();
