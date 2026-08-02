@@ -64,6 +64,7 @@
 
 /* ---------- Light theme (default) ---------- */
 :root {
+  color-scheme: light;
   --radius: 0.875rem;
   --background: #FFFFFF;
   --foreground: #0A1A2F;
@@ -138,6 +139,7 @@
 
 /* ---------- Dark theme (deep navy / petroleum) ---------- */
 .dark {
+  color-scheme: dark;
   /* Deep navy / petroleum blue base — Bloomberg + Linear inspired */
   --background: #081526;
   --foreground: #E8F2FB;

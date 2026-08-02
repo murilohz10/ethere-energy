@@ -15,7 +15,6 @@ function apply(theme: Theme) {
   if (typeof document === "undefined") return;
   const root = document.documentElement;
   root.classList.toggle("dark", theme === "dark");
-  root.style.colorScheme = theme;
 }
 
 /** Reads stored/system preference and applies it. Safe to call repeatedly. */
