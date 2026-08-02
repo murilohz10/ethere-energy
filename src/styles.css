@@ -57,9 +57,9 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
-  --shadow-soft: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 1px 2px rgba(3, 8, 20, 0.6);
-  --shadow-elegant: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 24px 48px -24px rgba(2, 6, 18, 0.7);
-  --shadow-blue: 0 10px 32px -12px rgba(59, 130, 246, 0.55), 0 0 0 1px rgba(59, 130, 246, 0.15) inset;
+  --shadow-soft: var(--shadow-soft-c);
+  --shadow-elegant: var(--shadow-elegant-c);
+  --shadow-blue: var(--shadow-blue-c);
 }
 
 /* ---------- Light theme (default) ---------- */
@@ -126,6 +126,14 @@
   --selection-fg: #0A1A2F;
   --heading-color: #08182C;
   --focus-ring: rgba(30, 123, 214, 0.45);
+  --text-grad: linear-gradient(135deg, #17456F 0%, #1E7BD6 55%, #0E9BB8 100%);
+  --text-grad-cyan: linear-gradient(100deg, #0A1A2F 0%, #1E7BD6 55%, #0E9BB8 100%);
+  --aurora-1: rgba(30, 123, 214, 0.1);
+  --aurora-2: rgba(14, 155, 184, 0.08);
+  --aurora-3: rgba(23, 69, 111, 0.08);
+  --dot-color: rgba(23, 69, 111, 0.16);
+  --ring-brand-c: 0 0 0 4px rgba(30, 123, 214, 0.14);
+  --glow-brand-c: 0 0 40px -10px rgba(30, 123, 214, 0.35);
 }
 
 /* ---------- Dark theme (deep navy / petroleum) ---------- */
@@ -193,6 +201,14 @@
   --selection-fg: #FFFFFF;
   --heading-color: #F2F6FC;
   --focus-ring: rgba(59, 130, 246, 0.55);
+  --text-grad: linear-gradient(135deg, #93C5FD 0%, #60A5FA 50%, #3B82F6 100%);
+  --text-grad-cyan: linear-gradient(100deg, #FFFFFF 0%, #7FCBFF 45%, #22D3EE 100%);
+  --aurora-1: rgba(63, 169, 245, 0.22);
+  --aurora-2: rgba(34, 211, 238, 0.16);
+  --aurora-3: rgba(29, 78, 137, 0.28);
+  --dot-color: rgba(147, 197, 253, 0.18);
+  --ring-brand-c: 0 0 0 4px rgba(59, 130, 246, 0.18);
+  --glow-brand-c: 0 0 40px -8px rgba(59, 130, 246, 0.45);
 }
 
 
@@ -215,19 +231,18 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-weight: 450;
-    background-image:
-      radial-gradient(900px 500px at 100% -10%, rgba(59, 130, 246, 0.08), transparent 60%),
-      radial-gradient(700px 400px at -10% 20%, rgba(30, 58, 138, 0.12), transparent 60%);
+    background-image: var(--bg-radial-1), var(--bg-radial-2);
     background-attachment: fixed;
+    transition: background-color 300ms ease, color 300ms ease;
   }
   h1, h2, h3, h4, h5 {
     letter-spacing: -0.025em;
     font-weight: 600;
-    color: #F2F6FC;
+    color: var(--heading-color);
   }
   ::selection {
-    background: rgba(59, 130, 246, 0.35);
-    color: #FFFFFF;
+    background: var(--selection-bg);
+    color: var(--selection-fg);
   }
 
   /* Global micro-interactions — elegant, discreet feedback */
@@ -255,7 +270,7 @@
     outline: none;
     box-shadow:
       0 0 0 2px var(--color-background),
-      0 0 0 4px rgba(59, 130, 246, 0.55);
+      0 0 0 4px var(--focus-ring);
     border-radius: calc(var(--radius) - 6px);
   }
 
@@ -343,20 +358,20 @@
 
 @utility grid-lines {
   background-image:
-    linear-gradient(to right, rgba(147, 197, 253, 0.08) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(147, 197, 253, 0.08) 1px, transparent 1px);
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
   background-size: 56px 56px;
 }
 
 @utility grid-lines-blue {
   background-image:
-    linear-gradient(to right, rgba(96, 165, 250, 0.09) 1px, transparent 1px),
-    linear-gradient(to bottom, rgba(96, 165, 250, 0.09) 1px, transparent 1px);
+    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
   background-size: 48px 48px;
 }
 
 @utility dot-grid {
-  background-image: radial-gradient(rgba(147, 197, 253, 0.18) 1px, transparent 1px);
+  background-image: radial-gradient(var(--dot-color) 1px, transparent 1px);
   background-size: 20px 20px;
 }
 
@@ -373,34 +388,32 @@
 }
 
 @utility text-gradient-brand {
-  background: linear-gradient(135deg, #93C5FD 0%, #60A5FA 50%, #3B82F6 100%);
+  background: var(--text-grad);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 @utility ring-brand {
-  box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.18);
+  box-shadow: var(--ring-brand-c);
 }
 
 @utility glow-brand {
-  box-shadow: 0 0 40px -8px rgba(59, 130, 246, 0.45);
+  box-shadow: var(--glow-brand-c);
 }
 
 /* ---------- Landing: glass, glow, motion ---------- */
 
 @utility glass-panel {
-  background: linear-gradient(160deg, rgba(30, 62, 100, 0.55) 0%, rgba(11, 27, 48, 0.7) 100%);
-  border: 1px solid rgba(127, 203, 255, 0.12);
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(14px) saturate(120%);
-  box-shadow:
-    0 1px 0 rgba(255, 255, 255, 0.05) inset,
-    0 30px 60px -30px rgba(2, 10, 22, 0.9);
+  box-shadow: var(--shadow-elegant-c);
 }
 
 @utility glass-soft {
-  background: rgba(13, 31, 54, 0.55);
-  border: 1px solid rgba(127, 203, 255, 0.1);
+  background: var(--glass-soft-bg);
+  border: 1px solid var(--glass-border);
   backdrop-filter: blur(10px);
 }
 
@@ -412,18 +425,18 @@
     inset-inline: 12%;
     top: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(63, 169, 245, 0.55), transparent);
+    background: linear-gradient(90deg, transparent, var(--hairline), transparent);
   }
 }
 
 @utility glow-ring {
   box-shadow:
-    0 0 0 1px rgba(63, 169, 245, 0.25),
-    0 0 32px -6px rgba(63, 169, 245, 0.35);
+    0 0 0 1px var(--glass-border),
+    var(--glow-brand-c);
 }
 
 @utility text-gradient-cyan {
-  background: linear-gradient(100deg, #FFFFFF 0%, #7FCBFF 45%, #22D3EE 100%);
+  background: var(--text-grad-cyan);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -431,9 +444,9 @@
 
 @utility aurora {
   background-image:
-    radial-gradient(700px 340px at 12% 0%, rgba(63, 169, 245, 0.22), transparent 65%),
-    radial-gradient(620px 320px at 88% 12%, rgba(34, 211, 238, 0.16), transparent 65%),
-    radial-gradient(900px 500px at 50% 100%, rgba(29, 78, 137, 0.28), transparent 70%);
+    radial-gradient(700px 340px at 12% 0%, var(--aurora-1), transparent 65%),
+    radial-gradient(620px 320px at 88% 12%, var(--aurora-2), transparent 65%),
+    radial-gradient(900px 500px at 50% 100%, var(--aurora-3), transparent 70%);
   background-size: 160% 160%, 160% 160%, 160% 160%;
   animation: aurora-drift 26s ease-in-out infinite alternate;
 }
