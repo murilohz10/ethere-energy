@@ -33,6 +33,11 @@ function emit() {
 
 export function setTheme(theme: Theme) {
   current = theme;
+  if (typeof document !== "undefined") {
+    const root = document.documentElement;
+    root.classList.add("theme-transition");
+    window.setTimeout(() => root.classList.remove("theme-transition"), 340);
+  }
   apply(theme);
   try {
     window.localStorage.setItem(KEY, theme);
