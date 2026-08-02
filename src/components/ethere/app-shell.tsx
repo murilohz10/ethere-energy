@@ -1,5 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { EthereLogo } from "./logo";
+import { ThemeToggle } from "./theme-toggle";
 import {
   LayoutGrid,
   Activity,
@@ -216,6 +217,7 @@ function TopBar({ mobileNav }: { mobileNav?: ReactNode }) {
         </button>
       </div>
       <div className="flex items-center gap-3 text-xs">
+        <ThemeToggle />
         <span className="hidden items-center gap-1.5 rounded-full border border-brand-soft bg-brand-softer px-2.5 py-1 font-medium text-brand-dark lg:inline-flex">
           <span className="h-1.5 w-1.5 rounded-full bg-brand animate-pulse" />
           Trial · 12 dias restantes
