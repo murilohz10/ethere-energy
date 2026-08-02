@@ -22,8 +22,6 @@ export function MarketingNav() {
           <Link to="/login">
             <Button variant="ghost" size="sm" className="text-sm font-medium">Entrar</Button>
           </Link>
-            <Button variant="ghost" size="sm" className="text-sm font-medium">Entrar</Button>
-          </Link>
           <Link to="/signup">
             <Button
               size="sm"
