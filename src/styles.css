@@ -62,8 +62,74 @@
   --shadow-blue: 0 10px 32px -12px rgba(59, 130, 246, 0.55), 0 0 0 1px rgba(59, 130, 246, 0.15) inset;
 }
 
+/* ---------- Light theme (default) ---------- */
 :root {
   --radius: 0.875rem;
+  --background: #FFFFFF;
+  --foreground: #0A1A2F;
+  --surface: #F6F8FC;
+  --surface-muted: #EEF3F9;
+  --card: #FFFFFF;
+  --card-foreground: #0A1A2F;
+  --popover: #FFFFFF;
+  --popover-foreground: #0A1A2F;
+  --primary: #1E7BD6;
+  --primary-foreground: #FFFFFF;
+  --secondary: #EDF3FA;
+  --secondary-foreground: #14304F;
+  --muted: #F1F5FA;
+  --muted-foreground: #5A6D86;
+  --accent: #EDF3FA;
+  --accent-foreground: #14304F;
+  --destructive: oklch(0.58 0.19 25);
+  --destructive-foreground: #FFFFFF;
+  --success: oklch(0.62 0.13 165);
+  --warning: oklch(0.68 0.14 70);
+  --border: #E2E9F2;
+  --input: #DDE5EF;
+  --ring: #1E7BD6;
+  --brand: #1E7BD6;
+  --brand-foreground: #FFFFFF;
+  --brand-dark: #175FA8;
+  --brand-light: #4E9EE6;
+  --brand-soft: #C9DEF5;
+  --brand-softer: #F0F6FD;
+  --cyan: #0E9BB8;
+  --chart-1: #1E7BD6;
+  --chart-2: #0E9BB8;
+  --chart-3: #4E9EE6;
+  --chart-4: #17456F;
+  --chart-5: #8CCBE0;
+  --sidebar: #FBFCFE;
+  --sidebar-foreground: #3E5772;
+  --sidebar-primary: #1E7BD6;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #EDF3FA;
+  --sidebar-accent-foreground: #14304F;
+  --sidebar-border: #E4EAF3;
+  --sidebar-ring: #1E7BD6;
+  --gradient-brand: linear-gradient(135deg, #17456F 0%, #1E7BD6 55%, #35A3D8 100%);
+  --gradient-brand-soft: linear-gradient(180deg, #F4F8FD 0%, #FFFFFF 100%);
+  --gradient-card: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(246, 248, 252, 0.9) 100%);
+  --gradient-blue-radial: radial-gradient(1200px 500px at 50% -10%, rgba(30, 123, 214, 0.14) 0%, transparent 60%);
+  --bg-radial-1: radial-gradient(900px 500px at 100% -10%, rgba(30, 123, 214, 0.07), transparent 60%);
+  --bg-radial-2: radial-gradient(700px 400px at -10% 20%, rgba(23, 69, 111, 0.06), transparent 60%);
+  --glass-bg: linear-gradient(160deg, rgba(255, 255, 255, 0.92) 0%, rgba(246, 249, 253, 0.92) 100%);
+  --glass-border: rgba(30, 123, 214, 0.14);
+  --glass-soft-bg: rgba(255, 255, 255, 0.75);
+  --hairline: rgba(30, 123, 214, 0.35);
+  --grid-line: rgba(23, 69, 111, 0.07);
+  --shadow-soft-c: 0 1px 2px rgba(16, 40, 72, 0.06), 0 1px 1px rgba(16, 40, 72, 0.04);
+  --shadow-elegant-c: 0 1px 2px rgba(16, 40, 72, 0.05), 0 18px 40px -20px rgba(16, 40, 72, 0.22);
+  --shadow-blue-c: 0 10px 28px -12px rgba(30, 123, 214, 0.42), 0 0 0 1px rgba(30, 123, 214, 0.1) inset;
+  --selection-bg: rgba(30, 123, 214, 0.18);
+  --selection-fg: #0A1A2F;
+  --heading-color: #08182C;
+  --focus-ring: rgba(30, 123, 214, 0.45);
+}
+
+/* ---------- Dark theme (deep navy / petroleum) ---------- */
+.dark {
   /* Deep navy / petroleum blue base — Bloomberg + Linear inspired */
   --background: #081526;
   --foreground: #E8F2FB;
@@ -113,6 +179,20 @@
   --gradient-brand-soft: linear-gradient(180deg, #0E2440 0%, #081526 100%);
   --gradient-card: linear-gradient(180deg, rgba(24, 52, 86, 0.75) 0%, rgba(11, 27, 48, 0.85) 100%);
   --gradient-blue-radial: radial-gradient(1200px 500px at 50% -10%, rgba(63, 169, 245, 0.3) 0%, transparent 60%);
+  --bg-radial-1: radial-gradient(900px 500px at 100% -10%, rgba(59, 130, 246, 0.08), transparent 60%);
+  --bg-radial-2: radial-gradient(700px 400px at -10% 20%, rgba(30, 58, 138, 0.12), transparent 60%);
+  --glass-bg: linear-gradient(160deg, rgba(30, 62, 100, 0.55) 0%, rgba(11, 27, 48, 0.7) 100%);
+  --glass-border: rgba(127, 203, 255, 0.12);
+  --glass-soft-bg: rgba(13, 31, 54, 0.55);
+  --hairline: rgba(63, 169, 245, 0.55);
+  --grid-line: rgba(147, 197, 253, 0.08);
+  --shadow-soft-c: 0 1px 0 rgba(255, 255, 255, 0.03) inset, 0 1px 2px rgba(3, 8, 20, 0.6);
+  --shadow-elegant-c: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 24px 48px -24px rgba(2, 6, 18, 0.7);
+  --shadow-blue-c: 0 10px 32px -12px rgba(59, 130, 246, 0.55), 0 0 0 1px rgba(59, 130, 246, 0.15) inset;
+  --selection-bg: rgba(59, 130, 246, 0.35);
+  --selection-fg: #FFFFFF;
+  --heading-color: #F2F6FC;
+  --focus-ring: rgba(59, 130, 246, 0.55);
 }
 
 
