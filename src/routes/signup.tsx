@@ -66,7 +66,7 @@ function SignupPage() {
       if (form.confirm !== form.password) e.confirm = "As senhas não coincidem.";
     }
     if (current === 2 && !form.profile) e.profile = "Selecione um perfil.";
-    if (current === 3 && !form.plan) e.plan = "Selecione um plano.";
+
     setErrors(e);
     return Object.keys(e).length === 0;
   }
