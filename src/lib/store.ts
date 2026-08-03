@@ -288,6 +288,15 @@ export const initials = (u: Session) =>
 export const fullName = (u: Session) =>
   u ? [u.firstName, u.lastName].filter(Boolean).join(" ") || u.email : "";
 
+/* ---------------------------------- rbac ---------------------------------- */
+
+export function useAccessRole(): AppRole {
+  const { user } = useSession();
+  return normalizeRole(user?.accessRole);
+}
+
+
+
 
 /* ----------------------------- notifications ------------------------------ */
 
