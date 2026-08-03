@@ -37,9 +37,25 @@ export type Subscription = {
 export const defaultSubscription: Subscription = {
   planId: ETHERE_PLAN.id,
   status: "trialing",
+  renewsAt: null,
   stripeCustomerId: null,
   stripeSubscriptionId: null,
 };
+
+export function formatPlanPrice(plan: { priceLabel: string; interval: string }) {
+  return `${plan.priceLabel} / ${plan.interval}`;
+}
+
+export function subscriptionStatusLabel(status: SubscriptionStatus) {
+  return status === "trialing"
+    ? "Em trial"
+    : status === "active"
+      ? "Ativa"
+      : status === "past_due"
+        ? "Pagamento pendente"
+        : "Cancelada";
+}
+
 
 /** Placeholder da futura chamada de checkout (Stripe). */
 export async function startCheckout(): Promise<{ ok: false; reason: string }> {
