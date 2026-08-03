@@ -278,7 +278,7 @@ function TopBar({ mobileNav }: { mobileNav?: ReactNode }) {
         <CommandList>
           <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
           <CommandGroup heading="Navegação">
-            {[...nav, { to: "/app/perfil", label: "Meu perfil", icon: User }].map((n) => (
+            {[...visibleNav, { to: "/app/perfil", label: "Meu perfil", icon: User }].map((n) => (
               <CommandItem key={n.to} value={n.label} onSelect={() => { setOpen(false); navigate({ to: n.to }); }}>
                 <n.icon className="mr-2 h-4 w-4" /> {n.label}
               </CommandItem>
