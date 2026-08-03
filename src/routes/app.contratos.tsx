@@ -71,6 +71,8 @@ const daysTo = (iso: string) => Math.ceil((new Date(`${iso}T00:00:00`).getTime()
 
 function Contracts() {
   const { contracts, add, update, remove } = useContracts();
+  const role = useAccessRole();
+  const canDelete = can(role, "contracts:delete");
 
   const [query, setQuery] = useState("");
   const [fStatus, setFStatus] = useState("todos");
