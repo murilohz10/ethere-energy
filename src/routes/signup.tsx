@@ -179,7 +179,7 @@ function SignupPage() {
 
           {step === 3 && (
             <StepShell title="Plano Ethere" subtitle="Um plano único, com tudo incluído. 14 dias de trial sem cartão de crédito.">
-              <div className="mt-6 overflow-hidden rounded-2xl border border-brand bg-brand-softer/60 p-6 shadow-blue">
+              <div className="relative mt-6 overflow-hidden rounded-2xl border border-brand bg-brand-softer/60 p-6 shadow-blue">
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5" style={{ background: "var(--gradient-brand)" }} />
                 <div className="flex items-baseline justify-between gap-4">
                   <div>
