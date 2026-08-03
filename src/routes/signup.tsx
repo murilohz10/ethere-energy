@@ -80,29 +80,34 @@ function SignupPage() {
     if (!validate(3)) return;
     setLoading(true);
     setTimeout(() => {
+      const name = [form.firstName.trim(), form.lastName.trim()].filter(Boolean).join(" ");
       signIn({
         email: form.email.trim(),
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
         role: form.role.trim(),
+        accessRole: "Administrador",
         company: form.company.trim(),
         cnpj: form.cnpj,
         phone: form.phone,
         profile: form.profile!,
-        plan: form.plan!,
+        plan: ETHERE_PLAN.name,
         remember: true,
         onboarded: false,
       });
       setSettings({
         ...settings,
-        plan: form.plan!,
+        plan: ETHERE_PLAN.name,
+        subscription: { ...defaultSubscription, status: "trialing" },
         company: { ...settings.company, name: form.company.trim(), cnpj: form.cnpj, email: form.email.trim(), phone: form.phone },
+        users: [{ id: uid(), name: name || form.email.trim(), email: form.email.trim(), role: "Administrador" }],
       });
       setLoading(false);
-      toast.success("Conta criada com sucesso. Vamos configurar seu ambiente.");
+      toast.success("Empresa e usuário administrador criados. Vamos configurar seu ambiente.");
       navigate({ to: "/onboarding" });
     }, 1000);
   }
+
 
   return (
     <div className="min-h-screen bg-background">
