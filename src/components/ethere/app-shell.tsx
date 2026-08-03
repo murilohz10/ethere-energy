@@ -264,13 +264,15 @@ function TopBar({ mobileNav }: { mobileNav?: ReactNode }) {
           </PopoverContent>
         </Popover>
 
-        <button
-          onClick={() => navigate({ to: "/app/configuracoes" })}
-          className="rounded-md px-3 py-1.5 text-xs font-medium text-white shadow-blue transition-all duration-200 hover:-translate-y-0.5 hover:shadow-elegant active:translate-y-0"
-          style={{ background: "var(--gradient-brand)" }}
-        >
-          Upgrade
-        </button>
+        {can(role, "billing:manage") && (
+          <button
+            onClick={() => navigate({ to: "/app/configuracoes" })}
+            className="rounded-md px-3 py-1.5 text-xs font-medium text-white shadow-blue transition-all duration-200 hover:-translate-y-0.5 hover:shadow-elegant active:translate-y-0"
+            style={{ background: "var(--gradient-brand)" }}
+          >
+            Upgrade
+          </button>
+        )}
       </div>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
