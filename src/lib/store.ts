@@ -189,20 +189,22 @@ export function useReports() {
 
 /* -------------------------------- settings -------------------------------- */
 
-export type TeamUser = { id: string; name: string; email: string; role: string };
+export type TeamUser = { id: string; name: string; email: string; role: AppRole };
 
 export type SettingsState = {
   company: { name: string; cnpj: string; email: string; phone: string };
   plan: string;
+  subscription: Subscription;
   notifications: Record<string, boolean>;
   preferences: { defaultSubmarket: Submarket; period: string; density: "Confortável" | "Compacta" };
   users: TeamUser[];
   twoFactor: boolean;
 };
 
-const settingsStore = createPersistentStore<SettingsState>("ethere.settings.v1", {
+const settingsStore = createPersistentStore<SettingsState>("ethere.settings.v2", {
   company: { name: "Ethere Ltda.", cnpj: "12.345.678/0001-90", email: "contato@ethere.com", phone: "+55 11 3000-0000" },
-  plan: "Professional",
+  plan: ETHERE_PLAN.name,
+  subscription: defaultSubscription,
   notifications: {
     "Email para alertas de alta prioridade": true,
     "SMS em movimentos > 5% do PLD": true,
@@ -211,9 +213,9 @@ const settingsStore = createPersistentStore<SettingsState>("ethere.settings.v1",
   },
   preferences: { defaultSubmarket: "SE/CO", period: "30 dias", density: "Confortável" },
   users: [
-    { id: "u1", name: "Lucas Gomes", email: "lucas@ethere.com", role: "Admin" },
-    { id: "u2", name: "Marina Alves", email: "marina@ethere.com", role: "Analista" },
-    { id: "u3", name: "Rafael Silva", email: "rafael@ethere.com", role: "Trader" },
+    { id: "u1", name: "Lucas Gomes", email: "lucas@ethere.com", role: "Administrador" },
+    { id: "u2", name: "Marina Alves", email: "marina@ethere.com", role: "Gestor" },
+    { id: "u3", name: "Rafael Silva", email: "rafael@ethere.com", role: "Analista" },
   ],
   twoFactor: false,
 });
@@ -231,12 +233,15 @@ export type SessionUser = {
   email: string;
   firstName: string;
   lastName: string;
+  /** Cargo declarado pelo usuário (texto livre). */
   role: string;
+  /** Nível de acesso (RBAC). */
+  accessRole: AppRole;
   company: string;
   cnpj: string;
   phone: string;
   profile: UserProfileKind;
-  plan: "Essential" | "Professional";
+  plan: string;
   avatar: string;
   remember: boolean;
   onboarded: boolean;
@@ -249,11 +254,12 @@ export const emptyUser: SessionUser = {
   firstName: "",
   lastName: "",
   role: "",
+  accessRole: "Administrador",
   company: "",
   cnpj: "",
   phone: "",
   profile: "Comercializadora",
-  plan: "Professional",
+  plan: ETHERE_PLAN.name,
   avatar: "",
   remember: false,
   onboarded: false,
