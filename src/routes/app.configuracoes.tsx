@@ -52,11 +52,11 @@ function SettingsPage() {
   };
   const cancel = () => { setDraft(settings); toast("Alterações descartadas"); };
 
-  const [invite, setInvite] = useState({ open: false, name: "", email: "", role: "Analista" });
+  const [userForm, setUserForm] = useState<{ open: boolean; id: string | null; name: string; email: string; role: AppRole }>({
+    open: false, id: null, name: "", email: "", role: "Analista",
+  });
   const [removeUser, setRemoveUser] = useState<string | null>(null);
   const [pwd, setPwd] = useState({ current: "", next: "", show: false });
-  const [planOpen, setPlanOpen] = useState(false);
-  const [planChoice, setPlanChoice] = useState(settings.plan);
   const [cancelPlan, setCancelPlan] = useState(false);
 
   return (
