@@ -273,9 +273,11 @@ function Contracts() {
           <Button variant="outline" size="sm" onClick={() => { selected.forEach((id) => update(id, { status: "Encerrado" })); toast.success("Status atualizado para Encerrado"); setSelected([]); }}>
             Encerrar
           </Button>
-          <Button variant="destructive" size="sm" onClick={() => setToDelete(selected)}>
-            <Trash2 className="mr-1 h-3.5 w-3.5" /> Excluir
-          </Button>
+          {canDelete && (
+            <Button variant="destructive" size="sm" onClick={() => setToDelete(selected)}>
+              <Trash2 className="mr-1 h-3.5 w-3.5" /> Excluir
+            </Button>
+          )}
           <button className="ml-auto text-xs text-muted-foreground hover:text-foreground" onClick={() => setSelected([])}>
             Limpar seleção
           </button>
