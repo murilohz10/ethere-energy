@@ -172,33 +172,38 @@ function SignupPage() {
           )}
 
           {step === 3 && (
-            <StepShell title="Escolha seu plano" subtitle="14 dias de trial em qualquer plano. Sem cartão de crédito.">
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <PlanOption
-                  name="Essential"
-                  price="R$ 1.490"
-                  items={["Monitoramento do PLD", "Até 20 contratos", "Alertas essenciais", "Relatórios mensais"]}
-                  active={form.plan === "Essential"}
-                  onClick={() => set({ plan: "Essential" })}
-                />
-                <PlanOption
-                  name="Professional"
-                  price="R$ 3.990"
-                  featured
-                  items={["Contratos ilimitados", "Alertas avançados", "Análises por IA", "Relatórios e API"]}
-                  active={form.plan === "Professional"}
-                  onClick={() => set({ plan: "Professional" })}
-                />
+            <StepShell title="Plano Ethere" subtitle="Um plano único, com tudo incluído. 14 dias de trial sem cartão de crédito.">
+              <div className="mt-6 overflow-hidden rounded-2xl border border-brand bg-brand-softer/60 p-6 shadow-blue">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5" style={{ background: "var(--gradient-brand)" }} />
+                <div className="flex items-baseline justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-semibold text-brand-dark">{ETHERE_PLAN.name}</div>
+                    <p className="mt-1 max-w-sm text-xs text-muted-foreground">{ETHERE_PLAN.description}</p>
+                  </div>
+                  <div className="whitespace-nowrap text-2xl font-semibold tracking-tight">
+                    {ETHERE_PLAN.priceLabel}
+                    <span className="text-sm font-normal text-muted-foreground">/{ETHERE_PLAN.interval}</span>
+                  </div>
+                </div>
+                <ul className="mt-5 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                  {ETHERE_PLAN.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2">
+                      <Check className="mt-0.5 h-3.5 w-3.5 text-brand" strokeWidth={3} /> {f}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              {errors.plan && <p className="mt-3 text-xs text-destructive">{errors.plan}</p>}
               <div className="mt-6 flex items-center gap-3 rounded-xl border border-brand-soft bg-brand-softer p-4 text-sm">
                 <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-white shadow-blue" style={{ background: "var(--gradient-brand)" }}>
                   <Check className="h-4 w-4" />
                 </div>
-                <span className="font-medium text-brand-dark">Trial de 14 dias ativado ao concluir. Cancele quando quiser.</span>
+                <span className="font-medium text-brand-dark">
+                  Ao concluir, criamos sua empresa e seu usuário como Administrador. Cobrança habilitada apenas após o trial.
+                </span>
               </div>
             </StepShell>
           )}
+
 
           <div className="mt-8 flex items-center justify-between">
             <Button variant="ghost" disabled={step === 0 || loading} onClick={() => setStep((s) => Math.max(0, s - 1))}>
