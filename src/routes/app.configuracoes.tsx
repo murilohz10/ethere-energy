@@ -17,6 +17,8 @@ import {
 import { Building2, CreditCard, Bell, Users, Lock, SlidersHorizontal, Trash2, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSettings, useSession, uid, type SettingsState, type Submarket } from "@/lib/store";
+import { appRoles, roleDescriptions, type AppRole } from "@/lib/rbac";
+import { ETHERE_PLAN, formatPlanPrice, subscriptionStatusLabel } from "@/lib/billing";
 
 export const Route = createFileRoute("/app/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações · Ethere" }] }),
