@@ -29,6 +29,8 @@ import {
   useContracts, brl, fmtDate, downloadFile, toCsv,
   type Contract, type ContractStatus, type ContractType, type Submarket,
 } from "@/lib/store";
+import { useAccessRole } from "@/lib/store";
+import { can } from "@/lib/rbac";
 
 export const Route = createFileRoute("/app/contratos")({
   head: () => ({ meta: [{ title: "Contratos · Ethere" }] }),
