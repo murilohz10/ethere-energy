@@ -104,16 +104,13 @@ function ProfilePage() {
             <div className="flex items-center gap-2 text-xs font-semibold text-brand-dark">
               <Sparkles className="h-3.5 w-3.5" /> Plano contratado
             </div>
-            <div className="mt-2 text-lg font-semibold tracking-tight">{user?.plan || settings.plan}</div>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              {(user?.plan || settings.plan) === "Professional"
-                ? "Contratos ilimitados, alertas avançados, análises por IA e relatórios trimestrais."
-                : "Monitoramento do PLD, até 20 contratos, alertas essenciais e relatórios mensais."}
-            </p>
+            <div className="mt-2 text-lg font-semibold tracking-tight">{ETHERE_PLAN.name}</div>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{ETHERE_PLAN.description}</p>
             <div className="mt-3 flex items-center gap-1.5 text-[11px] font-medium text-brand-dark">
-              <Check className="h-3.5 w-3.5" /> Trial ativo · 12 dias restantes
+              <Check className="h-3.5 w-3.5" /> {ETHERE_PLAN.priceLabel}/{ETHERE_PLAN.interval} · Nível de acesso: {role}
             </div>
           </div>
+
         </div>
 
         <div className="rounded-2xl border border-border bg-card p-6 shadow-soft lg:col-span-2">
