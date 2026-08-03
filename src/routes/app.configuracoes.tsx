@@ -249,48 +249,63 @@ function SettingsPage() {
         </div>
       </div>
 
-      {/* invite user */}
-      <Dialog open={invite.open} onOpenChange={(o) => setInvite({ ...invite, open: o })}>
+      {/* create / edit user */}
+      <Dialog open={userForm.open} onOpenChange={(o) => setUserForm({ ...userForm, open: o })}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Convidar usuário</DialogTitle>
-            <DialogDescription>Envie um convite para um novo membro da equipe.</DialogDescription>
+            <DialogTitle>{userForm.id ? "Editar usuário" : "Cadastrar usuário"}</DialogTitle>
+            <DialogDescription>Defina os dados de acesso e o nível de permissão.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label>Nome</Label>
-              <Input value={invite.name} onChange={(e) => setInvite({ ...invite, name: e.target.value })} placeholder="Nome completo" />
+              <Input value={userForm.name} onChange={(e) => setUserForm({ ...userForm, name: e.target.value })} placeholder="Nome completo" />
             </div>
             <div className="space-y-2">
               <Label>Email</Label>
-              <Input value={invite.email} onChange={(e) => setInvite({ ...invite, email: e.target.value })} placeholder="pessoa@empresa.com" />
+              <Input value={userForm.email} onChange={(e) => setUserForm({ ...userForm, email: e.target.value })} placeholder="pessoa@empresa.com" />
             </div>
             <div className="space-y-2">
-              <Label>Permissão</Label>
-              <Select value={invite.role} onValueChange={(role) => setInvite({ ...invite, role })}>
+              <Label>Função</Label>
+              <Select value={userForm.role} onValueChange={(role) => setUserForm({ ...userForm, role: role as AppRole })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{["Admin", "Analista", "Trader", "Leitura"].map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
+                <SelectContent>{appRoles.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">{roleDescriptions[userForm.role]}</p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setInvite({ ...invite, open: false })}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setUserForm({ ...userForm, open: false })}>Cancelar</Button>
             <Button
               className="text-white shadow-blue hover:opacity-95"
               style={{ background: "var(--gradient-brand)" }}
               onClick={() => {
-                if (!invite.name.trim()) return toast.error("Informe o nome.");
-                if (!/^\S+@\S+\.\S+$/.test(invite.email)) return toast.error("Informe um email válido.");
-                setSettings({ ...settings, users: [...settings.users, { id: uid(), name: invite.name, email: invite.email, role: invite.role }] });
-                setInvite({ open: false, name: "", email: "", role: "Analista" });
-                toast.success("Convite enviado");
+                if (!userForm.name.trim()) return toast.error("Informe o nome.");
+                if (!/^\S+@\S+\.\S+$/.test(userForm.email)) return toast.error("Informe um email válido.");
+                if (userForm.id) {
+                  setSettings({
+                    ...settings,
+                    users: settings.users.map((u) =>
+                      u.id === userForm.id ? { ...u, name: userForm.name.trim(), email: userForm.email.trim(), role: userForm.role } : u,
+                    ),
+                  });
+                  toast.success("Usuário atualizado");
+                } else {
+                  setSettings({
+                    ...settings,
+                    users: [...settings.users, { id: uid(), name: userForm.name.trim(), email: userForm.email.trim(), role: userForm.role }],
+                  });
+                  toast.success("Usuário cadastrado");
+                }
+                setUserForm({ open: false, id: null, name: "", email: "", role: "Analista" });
               }}
             >
-              Enviar convite
+              {userForm.id ? "Salvar" : "Cadastrar"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
 
 
 
