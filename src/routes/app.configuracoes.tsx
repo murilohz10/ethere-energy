@@ -292,42 +292,8 @@ function SettingsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* change plan */}
-      <Dialog open={planOpen} onOpenChange={setPlanOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Alterar plano</DialogTitle>
-            <DialogDescription>Escolha o plano ideal para sua operação.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2 py-2">
-            {plans.map((p) => (
-              <button
-                key={p}
-                onClick={() => setPlanChoice(p)}
-                className={cn(
-                  "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition",
-                  planChoice === p ? "border-brand bg-brand-softer text-brand-dark" : "border-border hover:border-brand-soft",
-                )}
-              >
-                <span className="font-medium">{p}</span>
-                <span className="text-xs text-muted-foreground">
-                  {p === "Starter" ? "R$ 1.490/mês" : p === "Professional" ? "R$ 3.990/mês" : "Sob consulta"}
-                </span>
-              </button>
-            ))}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPlanOpen(false)}>Cancelar</Button>
-            <Button
-              className="text-white shadow-blue hover:opacity-95"
-              style={{ background: "var(--gradient-brand)" }}
-              onClick={() => { setSettings({ ...settings, plan: planChoice }); setPlanOpen(false); toast.success(`Plano alterado para ${planChoice}`); }}
-            >
-              Confirmar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+
 
       <AlertDialog open={!!removeUser} onOpenChange={(o) => !o && setRemoveUser(null)}>
         <AlertDialogContent>
