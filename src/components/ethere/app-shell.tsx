@@ -21,8 +21,9 @@ import {
 import { cn } from "@/lib/utils";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  fullName, initials, useAlerts, useContracts, useNotifications, useSession,
+  fullName, initials, useAlerts, useContracts, useNotifications, useSession, useAccessRole,
 } from "@/lib/store";
+import { can, canAccessPath } from "@/lib/rbac";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
