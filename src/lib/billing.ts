@@ -29,6 +29,8 @@ export type SubscriptionStatus = "trialing" | "active" | "past_due" | "canceled"
 export type Subscription = {
   planId: string;
   status: SubscriptionStatus;
+  /** Data da próxima renovação (dd/mm), quando aplicável. */
+  renewsAt: string | null;
   /** IDs do Stripe, quando a integração for ativada. */
   stripeCustomerId: string | null;
   stripeSubscriptionId: string | null;
