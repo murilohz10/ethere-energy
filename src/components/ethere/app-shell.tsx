@@ -188,6 +188,8 @@ function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
 function TopBar({ mobileNav }: { mobileNav?: ReactNode }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const role = useAccessRole();
+  const visibleNav = nav.filter((n) => canAccessPath(role, n.to));
   const { contracts } = useContracts();
   const { alerts } = useAlerts();
   const { notifications, unread, markAllRead, markRead } = useNotifications();
