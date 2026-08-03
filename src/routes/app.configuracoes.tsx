@@ -34,7 +34,7 @@ const tabs = [
   { k: "seguranca", l: "Segurança", i: Lock },
 ] as const;
 
-const plans = ["Starter", "Professional", "Enterprise"];
+
 
 function SettingsPage() {
   const { settings, setSettings } = useSettings();
