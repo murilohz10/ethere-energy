@@ -344,13 +344,15 @@ function Contracts() {
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
-                      <button
-                        onClick={() => setToDelete([r.id])}
-                        aria-label={`Excluir ${r.code}`}
-                        className="rounded-md p-1.5 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-500"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      {canDelete && (
+                        <button
+                          onClick={() => setToDelete([r.id])}
+                          aria-label={`Excluir ${r.code}`}
+                          className="rounded-md p-1.5 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-500"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button aria-label="Mais ações" className="rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground">
