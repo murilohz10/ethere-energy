@@ -8,8 +8,9 @@ import { Building2, Wind, Check, ArrowRight, ArrowLeft, Eye, EyeOff, Loader2 } f
 import { cn } from "@/lib/utils";
 import {
   isCnpj, isEmail, isPhone, isStrongPassword, maskCnpj, maskPhone,
-  useSession, useSettings, type UserProfileKind,
+  useSession, useSettings, uid, type UserProfileKind,
 } from "@/lib/store";
+import { ETHERE_PLAN, defaultSubscription } from "@/lib/billing";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/signup")({
