@@ -1,4 +1,6 @@
 import { useCallback, useSyncExternalStore } from "react";
+import { ETHERE_PLAN, defaultSubscription, type Subscription } from "./billing";
+import { normalizeRole, type AppRole } from "./rbac";
 
 /* ---------------------------------- core --------------------------------- */
 
