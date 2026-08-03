@@ -82,6 +82,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const role = useAccessRole();
+  const visibleNav = nav.filter((n) => canAccessPath(role, n.to));
   return (
     <>
       <div className="flex h-16 items-center px-5">
@@ -97,7 +99,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         </p>
       </div>
       <nav className="flex-1 space-y-1 px-3 py-2">
-        {nav.map((n) => {
+        {visibleNav.map((n) => {
           const active = n.exact ? pathname === n.to : pathname.startsWith(n.to);
           return (
             <Link
