@@ -94,15 +94,31 @@ function SettingsPage() {
             <Section title="Assinatura" desc="Plano atual e faturamento.">
               <div className="rounded-xl border border-border p-5">
                 <div className="text-xs text-muted-foreground">Plano</div>
-                <div className="mt-1 text-lg font-medium">{settings.plan}</div>
-                <div className="mt-1 text-sm text-muted-foreground">R$ 3.990 / mês · Renova em 12/04</div>
-                <div className="mt-4 flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => { setPlanChoice(settings.plan); setPlanOpen(true); }}>Alterar plano</Button>
-                  <Button size="sm" variant="ghost" onClick={() => setCancelPlan(true)}>Cancelar</Button>
+                <div className="mt-1 text-lg font-medium">{ETHERE_PLAN.name}</div>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  {formatPlanPrice(ETHERE_PLAN)} · {subscriptionStatusLabel(settings.subscription.status)}
+                  {settings.subscription.renewsAt ? ` · Renova em ${settings.subscription.renewsAt}` : ""}
+                </div>
+                <ul className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                  {ETHERE_PLAN.features.map((f) => (
+                    <li key={f}>• {f}</li>
+                  ))}
+                </ul>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    className="text-white shadow-blue hover:opacity-95"
+                    style={{ background: "var(--gradient-brand)" }}
+                    onClick={() => toast.info("Pagamentos via Stripe serão habilitados em breve.")}
+                  >
+                    Gerenciar pagamento
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setCancelPlan(true)}>Cancelar assinatura</Button>
                 </div>
               </div>
             </Section>
           )}
+
 
           {tab === "notificacoes" && (
             <Section title="Notificações" desc="Escolha como deseja ser avisado.">
