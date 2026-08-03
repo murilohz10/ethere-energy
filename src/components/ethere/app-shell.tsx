@@ -167,9 +167,11 @@ function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
         <DropdownMenuItem onSelect={() => { onNavigate?.(); navigate({ to: "/app/perfil" }); }}>
           <User className="mr-2 h-4 w-4" /> Meu perfil
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => { onNavigate?.(); navigate({ to: "/app/configuracoes" }); }}>
-          <Settings className="mr-2 h-4 w-4" /> Configurações
-        </DropdownMenuItem>
+        {can(role, "settings:view") && (
+          <DropdownMenuItem onSelect={() => { onNavigate?.(); navigate({ to: "/app/configuracoes" }); }}>
+            <Settings className="mr-2 h-4 w-4" /> Configurações
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={() => {
