@@ -138,6 +138,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   const { user, signOut } = useSession();
+  const role = useAccessRole();
   const navigate = useNavigate();
 
   return (
