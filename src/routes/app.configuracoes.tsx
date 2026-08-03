@@ -151,11 +151,11 @@ function SettingsPage() {
           )}
 
           {tab === "usuarios" && (
-            <Section title="Usuários" desc="Convide e gerencie sua equipe.">
+            <Section title="Usuários" desc="Cadastre, edite e remova membros e defina o nível de acesso.">
               <ul className="divide-y divide-border">
                 {settings.users.map((u) => (
-                  <li key={u.id} className="flex items-center justify-between py-3">
-                    <div>
+                  <li key={u.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                    <div className="min-w-0">
                       <div className="text-sm font-medium">{u.name}</div>
                       <div className="text-xs text-muted-foreground">{u.email}</div>
                     </div>
@@ -163,13 +163,21 @@ function SettingsPage() {
                       <Select
                         value={u.role}
                         onValueChange={(role) => {
-                          setSettings({ ...settings, users: settings.users.map((x) => (x.id === u.id ? { ...x, role } : x)) });
-                          toast.success(`Permissão de ${u.name} atualizada`);
+                          setSettings({
+                            ...settings,
+                            users: settings.users.map((x) => (x.id === u.id ? { ...x, role: role as AppRole } : x)),
+                          });
+                          toast.success(`Permissão de ${u.name} atualizada para ${role}`);
                         }}
                       >
-                        <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent>{["Admin", "Analista", "Trader", "Leitura"].map((r) => <SelectItem key={r} value={r} className="text-xs">{r}</SelectItem>)}</SelectContent>
+                        <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {appRoles.map((r) => <SelectItem key={r} value={r} className="text-xs">{r}</SelectItem>)}
+                        </SelectContent>
                       </Select>
+                      <Button size="sm" variant="outline" onClick={() => setUserForm({ open: true, id: u.id, name: u.name, email: u.email, role: u.role })}>
+                        Editar
+                      </Button>
                       <button onClick={() => setRemoveUser(u.id)} aria-label={`Remover ${u.name}`} className="rounded-md p-1.5 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-500">
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -177,11 +185,19 @@ function SettingsPage() {
                   </li>
                 ))}
               </ul>
-              <Button size="sm" onClick={() => setInvite({ open: true, name: "", email: "", role: "Analista" })} className="mt-4 text-white shadow-blue hover:opacity-95" style={{ background: "var(--gradient-brand)" }}>
-                Convidar usuário
+              <div className="mt-6 grid gap-2 rounded-xl border border-border bg-surface-muted/40 p-4 text-xs text-muted-foreground">
+                {appRoles.map((r) => (
+                  <div key={r}>
+                    <span className="font-medium text-foreground">{r}:</span> {roleDescriptions[r]}
+                  </div>
+                ))}
+              </div>
+              <Button size="sm" onClick={() => setUserForm({ open: true, id: null, name: "", email: "", role: "Analista" })} className="mt-4 text-white shadow-blue hover:opacity-95" style={{ background: "var(--gradient-brand)" }}>
+                Cadastrar usuário
               </Button>
             </Section>
           )}
+
 
           {tab === "seguranca" && (
             <Section title="Segurança" desc="Proteja o acesso à sua conta.">
