@@ -30,12 +30,12 @@ const steps = ["Dados pessoais", "Acesso", "Perfil", "Plano"];
 type Form = {
   firstName: string; lastName: string; role: string; company: string; cnpj: string; phone: string;
   email: string; password: string; confirm: string;
-  profile: UserProfileKind | null; plan: "Essential" | "Professional" | null;
+  profile: UserProfileKind | null;
 };
 
 const initial: Form = {
   firstName: "", lastName: "", role: "", company: "", cnpj: "", phone: "",
-  email: "", password: "", confirm: "", profile: null, plan: null,
+  email: "", password: "", confirm: "", profile: null,
 };
 
 function SignupPage() {
@@ -284,35 +284,6 @@ function ProfileCard({ icon: Icon, label, active, onClick }: {
         <Icon className="h-5 w-5" strokeWidth={1.75} />
       </div>
       <div className="mt-4 text-sm font-semibold">{label}</div>
-    </button>
-  );
-}
-
-function PlanOption({ name, price, items, active, featured, onClick }: {
-  name: string; price: string; items: string[]; active: boolean; featured?: boolean; onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "relative overflow-hidden rounded-2xl border p-6 text-left transition",
-        active ? "border-brand bg-brand-softer shadow-blue" : "border-border hover:border-brand-soft",
-      )}
-    >
-      {featured && <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5" style={{ background: "var(--gradient-brand)" }} />}
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold">{name}</span>
-        {featured && <span className="rounded-full bg-brand-softer px-2 py-0.5 text-[10px] font-semibold text-brand-dark">Recomendado</span>}
-      </div>
-      <div className="mt-3 text-2xl font-semibold tracking-tight">{price}<span className="text-sm font-normal text-muted-foreground">/mês</span></div>
-      <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-        {items.map((i) => (
-          <li key={i} className="flex items-start gap-2">
-            <Check className="mt-0.5 h-3.5 w-3.5 text-brand" strokeWidth={3} /> {i}
-          </li>
-        ))}
-      </ul>
     </button>
   );
 }
