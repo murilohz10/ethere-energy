@@ -8,8 +8,9 @@ import { Building2, Wind, Check, ArrowRight, ArrowLeft, Eye, EyeOff, Loader2 } f
 import { cn } from "@/lib/utils";
 import {
   isCnpj, isEmail, isPhone, isStrongPassword, maskCnpj, maskPhone,
-  useSession, useSettings, type UserProfileKind,
+  useSession, useSettings, uid, type UserProfileKind,
 } from "@/lib/store";
+import { ETHERE_PLAN, defaultSubscription } from "@/lib/billing";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/signup")({
@@ -29,12 +30,12 @@ const steps = ["Dados pessoais", "Acesso", "Perfil", "Plano"];
 type Form = {
   firstName: string; lastName: string; role: string; company: string; cnpj: string; phone: string;
   email: string; password: string; confirm: string;
-  profile: UserProfileKind | null; plan: "Essential" | "Professional" | null;
+  profile: UserProfileKind | null;
 };
 
 const initial: Form = {
   firstName: "", lastName: "", role: "", company: "", cnpj: "", phone: "",
-  email: "", password: "", confirm: "", profile: null, plan: null,
+  email: "", password: "", confirm: "", profile: null,
 };
 
 function SignupPage() {
@@ -65,7 +66,7 @@ function SignupPage() {
       if (form.confirm !== form.password) e.confirm = "As senhas não coincidem.";
     }
     if (current === 2 && !form.profile) e.profile = "Selecione um perfil.";
-    if (current === 3 && !form.plan) e.plan = "Selecione um plano.";
+
     setErrors(e);
     return Object.keys(e).length === 0;
   }
@@ -79,29 +80,34 @@ function SignupPage() {
     if (!validate(3)) return;
     setLoading(true);
     setTimeout(() => {
+      const name = [form.firstName.trim(), form.lastName.trim()].filter(Boolean).join(" ");
       signIn({
         email: form.email.trim(),
         firstName: form.firstName.trim(),
         lastName: form.lastName.trim(),
         role: form.role.trim(),
+        accessRole: "Administrador",
         company: form.company.trim(),
         cnpj: form.cnpj,
         phone: form.phone,
         profile: form.profile!,
-        plan: form.plan!,
+        plan: ETHERE_PLAN.name,
         remember: true,
         onboarded: false,
       });
       setSettings({
         ...settings,
-        plan: form.plan!,
+        plan: ETHERE_PLAN.name,
+        subscription: { ...defaultSubscription, status: "trialing" },
         company: { ...settings.company, name: form.company.trim(), cnpj: form.cnpj, email: form.email.trim(), phone: form.phone },
+        users: [{ id: uid(), name: name || form.email.trim(), email: form.email.trim(), role: "Administrador" }],
       });
       setLoading(false);
-      toast.success("Conta criada com sucesso. Vamos configurar seu ambiente.");
+      toast.success("Empresa e usuário administrador criados. Vamos configurar seu ambiente.");
       navigate({ to: "/onboarding" });
     }, 1000);
   }
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -172,33 +178,38 @@ function SignupPage() {
           )}
 
           {step === 3 && (
-            <StepShell title="Escolha seu plano" subtitle="14 dias de trial em qualquer plano. Sem cartão de crédito.">
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <PlanOption
-                  name="Essential"
-                  price="R$ 1.490"
-                  items={["Monitoramento do PLD", "Até 20 contratos", "Alertas essenciais", "Relatórios mensais"]}
-                  active={form.plan === "Essential"}
-                  onClick={() => set({ plan: "Essential" })}
-                />
-                <PlanOption
-                  name="Professional"
-                  price="R$ 3.990"
-                  featured
-                  items={["Contratos ilimitados", "Alertas avançados", "Análises por IA", "Relatórios e API"]}
-                  active={form.plan === "Professional"}
-                  onClick={() => set({ plan: "Professional" })}
-                />
+            <StepShell title="Plano Ethere" subtitle="Um plano único, com tudo incluído. 14 dias de trial sem cartão de crédito.">
+              <div className="relative mt-6 overflow-hidden rounded-2xl border border-brand bg-brand-softer/60 p-6 shadow-blue">
+                <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5" style={{ background: "var(--gradient-brand)" }} />
+                <div className="flex items-baseline justify-between gap-4">
+                  <div>
+                    <div className="text-sm font-semibold text-brand-dark">{ETHERE_PLAN.name}</div>
+                    <p className="mt-1 max-w-sm text-xs text-muted-foreground">{ETHERE_PLAN.description}</p>
+                  </div>
+                  <div className="whitespace-nowrap text-2xl font-semibold tracking-tight">
+                    {ETHERE_PLAN.priceLabel}
+                    <span className="text-sm font-normal text-muted-foreground">/{ETHERE_PLAN.interval}</span>
+                  </div>
+                </div>
+                <ul className="mt-5 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                  {ETHERE_PLAN.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2">
+                      <Check className="mt-0.5 h-3.5 w-3.5 text-brand" strokeWidth={3} /> {f}
+                    </li>
+                  ))}
+                </ul>
               </div>
-              {errors.plan && <p className="mt-3 text-xs text-destructive">{errors.plan}</p>}
               <div className="mt-6 flex items-center gap-3 rounded-xl border border-brand-soft bg-brand-softer p-4 text-sm">
                 <div className="grid h-9 w-9 shrink-0 place-items-center rounded-full text-white shadow-blue" style={{ background: "var(--gradient-brand)" }}>
                   <Check className="h-4 w-4" />
                 </div>
-                <span className="font-medium text-brand-dark">Trial de 14 dias ativado ao concluir. Cancele quando quiser.</span>
+                <span className="font-medium text-brand-dark">
+                  Ao concluir, criamos sua empresa e seu usuário como Administrador. Cobrança habilitada apenas após o trial.
+                </span>
               </div>
             </StepShell>
           )}
+
 
           <div className="mt-8 flex items-center justify-between">
             <Button variant="ghost" disabled={step === 0 || loading} onClick={() => setStep((s) => Math.max(0, s - 1))}>
@@ -273,35 +284,6 @@ function ProfileCard({ icon: Icon, label, active, onClick }: {
         <Icon className="h-5 w-5" strokeWidth={1.75} />
       </div>
       <div className="mt-4 text-sm font-semibold">{label}</div>
-    </button>
-  );
-}
-
-function PlanOption({ name, price, items, active, featured, onClick }: {
-  name: string; price: string; items: string[]; active: boolean; featured?: boolean; onClick: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={cn(
-        "relative overflow-hidden rounded-2xl border p-6 text-left transition",
-        active ? "border-brand bg-brand-softer shadow-blue" : "border-border hover:border-brand-soft",
-      )}
-    >
-      {featured && <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5" style={{ background: "var(--gradient-brand)" }} />}
-      <div className="flex items-center justify-between">
-        <span className="text-sm font-semibold">{name}</span>
-        {featured && <span className="rounded-full bg-brand-softer px-2 py-0.5 text-[10px] font-semibold text-brand-dark">Recomendado</span>}
-      </div>
-      <div className="mt-3 text-2xl font-semibold tracking-tight">{price}<span className="text-sm font-normal text-muted-foreground">/mês</span></div>
-      <ul className="mt-4 space-y-2 text-sm text-muted-foreground">
-        {items.map((i) => (
-          <li key={i} className="flex items-start gap-2">
-            <Check className="mt-0.5 h-3.5 w-3.5 text-brand" strokeWidth={3} /> {i}
-          </li>
-        ))}
-      </ul>
     </button>
   );
 }

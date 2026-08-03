@@ -17,6 +17,8 @@ import {
 import { Building2, CreditCard, Bell, Users, Lock, SlidersHorizontal, Trash2, Eye, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useSettings, useSession, uid, type SettingsState, type Submarket } from "@/lib/store";
+import { appRoles, roleDescriptions, type AppRole } from "@/lib/rbac";
+import { ETHERE_PLAN, formatPlanPrice, subscriptionStatusLabel } from "@/lib/billing";
 
 export const Route = createFileRoute("/app/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações · Ethere" }] }),
@@ -32,7 +34,7 @@ const tabs = [
   { k: "seguranca", l: "Segurança", i: Lock },
 ] as const;
 
-const plans = ["Starter", "Professional", "Enterprise"];
+
 
 function SettingsPage() {
   const { settings, setSettings } = useSettings();
@@ -50,11 +52,11 @@ function SettingsPage() {
   };
   const cancel = () => { setDraft(settings); toast("Alterações descartadas"); };
 
-  const [invite, setInvite] = useState({ open: false, name: "", email: "", role: "Analista" });
+  const [userForm, setUserForm] = useState<{ open: boolean; id: string | null; name: string; email: string; role: AppRole }>({
+    open: false, id: null, name: "", email: "", role: "Analista",
+  });
   const [removeUser, setRemoveUser] = useState<string | null>(null);
   const [pwd, setPwd] = useState({ current: "", next: "", show: false });
-  const [planOpen, setPlanOpen] = useState(false);
-  const [planChoice, setPlanChoice] = useState(settings.plan);
   const [cancelPlan, setCancelPlan] = useState(false);
 
   return (
@@ -94,15 +96,31 @@ function SettingsPage() {
             <Section title="Assinatura" desc="Plano atual e faturamento.">
               <div className="rounded-xl border border-border p-5">
                 <div className="text-xs text-muted-foreground">Plano</div>
-                <div className="mt-1 text-lg font-medium">{settings.plan}</div>
-                <div className="mt-1 text-sm text-muted-foreground">R$ 3.990 / mês · Renova em 12/04</div>
-                <div className="mt-4 flex gap-2">
-                  <Button size="sm" variant="outline" onClick={() => { setPlanChoice(settings.plan); setPlanOpen(true); }}>Alterar plano</Button>
-                  <Button size="sm" variant="ghost" onClick={() => setCancelPlan(true)}>Cancelar</Button>
+                <div className="mt-1 text-lg font-medium">{ETHERE_PLAN.name}</div>
+                <div className="mt-1 text-sm text-muted-foreground">
+                  {formatPlanPrice(ETHERE_PLAN)} · {subscriptionStatusLabel(settings.subscription.status)}
+                  {settings.subscription.renewsAt ? ` · Renova em ${settings.subscription.renewsAt}` : ""}
+                </div>
+                <ul className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
+                  {ETHERE_PLAN.features.map((f) => (
+                    <li key={f}>• {f}</li>
+                  ))}
+                </ul>
+                <div className="mt-5 flex flex-wrap gap-2">
+                  <Button
+                    size="sm"
+                    className="text-white shadow-blue hover:opacity-95"
+                    style={{ background: "var(--gradient-brand)" }}
+                    onClick={() => toast.info("Pagamentos via Stripe serão habilitados em breve.")}
+                  >
+                    Gerenciar pagamento
+                  </Button>
+                  <Button size="sm" variant="ghost" onClick={() => setCancelPlan(true)}>Cancelar assinatura</Button>
                 </div>
               </div>
             </Section>
           )}
+
 
           {tab === "notificacoes" && (
             <Section title="Notificações" desc="Escolha como deseja ser avisado.">
@@ -151,11 +169,11 @@ function SettingsPage() {
           )}
 
           {tab === "usuarios" && (
-            <Section title="Usuários" desc="Convide e gerencie sua equipe.">
+            <Section title="Usuários" desc="Cadastre, edite e remova membros e defina o nível de acesso.">
               <ul className="divide-y divide-border">
                 {settings.users.map((u) => (
-                  <li key={u.id} className="flex items-center justify-between py-3">
-                    <div>
+                  <li key={u.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
+                    <div className="min-w-0">
                       <div className="text-sm font-medium">{u.name}</div>
                       <div className="text-xs text-muted-foreground">{u.email}</div>
                     </div>
@@ -163,13 +181,21 @@ function SettingsPage() {
                       <Select
                         value={u.role}
                         onValueChange={(role) => {
-                          setSettings({ ...settings, users: settings.users.map((x) => (x.id === u.id ? { ...x, role } : x)) });
-                          toast.success(`Permissão de ${u.name} atualizada`);
+                          setSettings({
+                            ...settings,
+                            users: settings.users.map((x) => (x.id === u.id ? { ...x, role: role as AppRole } : x)),
+                          });
+                          toast.success(`Permissão de ${u.name} atualizada para ${role}`);
                         }}
                       >
-                        <SelectTrigger className="h-8 w-32 text-xs"><SelectValue /></SelectTrigger>
-                        <SelectContent>{["Admin", "Analista", "Trader", "Leitura"].map((r) => <SelectItem key={r} value={r} className="text-xs">{r}</SelectItem>)}</SelectContent>
+                        <SelectTrigger className="h-8 w-40 text-xs"><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          {appRoles.map((r) => <SelectItem key={r} value={r} className="text-xs">{r}</SelectItem>)}
+                        </SelectContent>
                       </Select>
+                      <Button size="sm" variant="outline" onClick={() => setUserForm({ open: true, id: u.id, name: u.name, email: u.email, role: u.role })}>
+                        Editar
+                      </Button>
                       <button onClick={() => setRemoveUser(u.id)} aria-label={`Remover ${u.name}`} className="rounded-md p-1.5 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-500">
                         <Trash2 className="h-4 w-4" />
                       </button>
@@ -177,11 +203,19 @@ function SettingsPage() {
                   </li>
                 ))}
               </ul>
-              <Button size="sm" onClick={() => setInvite({ open: true, name: "", email: "", role: "Analista" })} className="mt-4 text-white shadow-blue hover:opacity-95" style={{ background: "var(--gradient-brand)" }}>
-                Convidar usuário
+              <div className="mt-6 grid gap-2 rounded-xl border border-border bg-surface-muted/40 p-4 text-xs text-muted-foreground">
+                {appRoles.map((r) => (
+                  <div key={r}>
+                    <span className="font-medium text-foreground">{r}:</span> {roleDescriptions[r]}
+                  </div>
+                ))}
+              </div>
+              <Button size="sm" onClick={() => setUserForm({ open: true, id: null, name: "", email: "", role: "Analista" })} className="mt-4 text-white shadow-blue hover:opacity-95" style={{ background: "var(--gradient-brand)" }}>
+                Cadastrar usuário
               </Button>
             </Section>
           )}
+
 
           {tab === "seguranca" && (
             <Section title="Segurança" desc="Proteja o acesso à sua conta.">
@@ -233,85 +267,66 @@ function SettingsPage() {
         </div>
       </div>
 
-      {/* invite user */}
-      <Dialog open={invite.open} onOpenChange={(o) => setInvite({ ...invite, open: o })}>
+      {/* create / edit user */}
+      <Dialog open={userForm.open} onOpenChange={(o) => setUserForm({ ...userForm, open: o })}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Convidar usuário</DialogTitle>
-            <DialogDescription>Envie um convite para um novo membro da equipe.</DialogDescription>
+            <DialogTitle>{userForm.id ? "Editar usuário" : "Cadastrar usuário"}</DialogTitle>
+            <DialogDescription>Defina os dados de acesso e o nível de permissão.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label>Nome</Label>
-              <Input value={invite.name} onChange={(e) => setInvite({ ...invite, name: e.target.value })} placeholder="Nome completo" />
+              <Input value={userForm.name} onChange={(e) => setUserForm({ ...userForm, name: e.target.value })} placeholder="Nome completo" />
             </div>
             <div className="space-y-2">
               <Label>Email</Label>
-              <Input value={invite.email} onChange={(e) => setInvite({ ...invite, email: e.target.value })} placeholder="pessoa@empresa.com" />
+              <Input value={userForm.email} onChange={(e) => setUserForm({ ...userForm, email: e.target.value })} placeholder="pessoa@empresa.com" />
             </div>
             <div className="space-y-2">
-              <Label>Permissão</Label>
-              <Select value={invite.role} onValueChange={(role) => setInvite({ ...invite, role })}>
+              <Label>Função</Label>
+              <Select value={userForm.role} onValueChange={(role) => setUserForm({ ...userForm, role: role as AppRole })}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{["Admin", "Analista", "Trader", "Leitura"].map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
+                <SelectContent>{appRoles.map((r) => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
               </Select>
+              <p className="text-xs text-muted-foreground">{roleDescriptions[userForm.role]}</p>
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setInvite({ ...invite, open: false })}>Cancelar</Button>
+            <Button variant="outline" onClick={() => setUserForm({ ...userForm, open: false })}>Cancelar</Button>
             <Button
               className="text-white shadow-blue hover:opacity-95"
               style={{ background: "var(--gradient-brand)" }}
               onClick={() => {
-                if (!invite.name.trim()) return toast.error("Informe o nome.");
-                if (!/^\S+@\S+\.\S+$/.test(invite.email)) return toast.error("Informe um email válido.");
-                setSettings({ ...settings, users: [...settings.users, { id: uid(), name: invite.name, email: invite.email, role: invite.role }] });
-                setInvite({ open: false, name: "", email: "", role: "Analista" });
-                toast.success("Convite enviado");
+                if (!userForm.name.trim()) return toast.error("Informe o nome.");
+                if (!/^\S+@\S+\.\S+$/.test(userForm.email)) return toast.error("Informe um email válido.");
+                if (userForm.id) {
+                  setSettings({
+                    ...settings,
+                    users: settings.users.map((u) =>
+                      u.id === userForm.id ? { ...u, name: userForm.name.trim(), email: userForm.email.trim(), role: userForm.role } : u,
+                    ),
+                  });
+                  toast.success("Usuário atualizado");
+                } else {
+                  setSettings({
+                    ...settings,
+                    users: [...settings.users, { id: uid(), name: userForm.name.trim(), email: userForm.email.trim(), role: userForm.role }],
+                  });
+                  toast.success("Usuário cadastrado");
+                }
+                setUserForm({ open: false, id: null, name: "", email: "", role: "Analista" });
               }}
             >
-              Enviar convite
+              {userForm.id ? "Salvar" : "Cadastrar"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* change plan */}
-      <Dialog open={planOpen} onOpenChange={setPlanOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Alterar plano</DialogTitle>
-            <DialogDescription>Escolha o plano ideal para sua operação.</DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2 py-2">
-            {plans.map((p) => (
-              <button
-                key={p}
-                onClick={() => setPlanChoice(p)}
-                className={cn(
-                  "flex w-full items-center justify-between rounded-xl border px-4 py-3 text-left text-sm transition",
-                  planChoice === p ? "border-brand bg-brand-softer text-brand-dark" : "border-border hover:border-brand-soft",
-                )}
-              >
-                <span className="font-medium">{p}</span>
-                <span className="text-xs text-muted-foreground">
-                  {p === "Starter" ? "R$ 1.490/mês" : p === "Professional" ? "R$ 3.990/mês" : "Sob consulta"}
-                </span>
-              </button>
-            ))}
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPlanOpen(false)}>Cancelar</Button>
-            <Button
-              className="text-white shadow-blue hover:opacity-95"
-              style={{ background: "var(--gradient-brand)" }}
-              onClick={() => { setSettings({ ...settings, plan: planChoice }); setPlanOpen(false); toast.success(`Plano alterado para ${planChoice}`); }}
-            >
-              Confirmar
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+
+
+
 
       <AlertDialog open={!!removeUser} onOpenChange={(o) => !o && setRemoveUser(null)}>
         <AlertDialogContent>

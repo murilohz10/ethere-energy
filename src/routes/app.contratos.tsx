@@ -29,6 +29,8 @@ import {
   useContracts, brl, fmtDate, downloadFile, toCsv,
   type Contract, type ContractStatus, type ContractType, type Submarket,
 } from "@/lib/store";
+import { useAccessRole } from "@/lib/store";
+import { can } from "@/lib/rbac";
 
 export const Route = createFileRoute("/app/contratos")({
   head: () => ({ meta: [{ title: "Contratos · Ethere" }] }),
@@ -71,6 +73,8 @@ const daysTo = (iso: string) => Math.ceil((new Date(`${iso}T00:00:00`).getTime()
 
 function Contracts() {
   const { contracts, add, update, remove } = useContracts();
+  const role = useAccessRole();
+  const canDelete = can(role, "contracts:delete");
 
   const [query, setQuery] = useState("");
   const [fStatus, setFStatus] = useState("todos");
@@ -273,9 +277,11 @@ function Contracts() {
           <Button variant="outline" size="sm" onClick={() => { selected.forEach((id) => update(id, { status: "Encerrado" })); toast.success("Status atualizado para Encerrado"); setSelected([]); }}>
             Encerrar
           </Button>
-          <Button variant="destructive" size="sm" onClick={() => setToDelete(selected)}>
-            <Trash2 className="mr-1 h-3.5 w-3.5" /> Excluir
-          </Button>
+          {canDelete && (
+            <Button variant="destructive" size="sm" onClick={() => setToDelete(selected)}>
+              <Trash2 className="mr-1 h-3.5 w-3.5" /> Excluir
+            </Button>
+          )}
           <button className="ml-auto text-xs text-muted-foreground hover:text-foreground" onClick={() => setSelected([])}>
             Limpar seleção
           </button>
@@ -344,13 +350,15 @@ function Contracts() {
                       >
                         <Pencil className="h-4 w-4" />
                       </button>
-                      <button
-                        onClick={() => setToDelete([r.id])}
-                        aria-label={`Excluir ${r.code}`}
-                        className="rounded-md p-1.5 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-500"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </button>
+                      {canDelete && (
+                        <button
+                          onClick={() => setToDelete([r.id])}
+                          aria-label={`Excluir ${r.code}`}
+                          className="rounded-md p-1.5 text-muted-foreground transition hover:bg-red-500/10 hover:text-red-500"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      )}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <button aria-label="Mais ações" className="rounded-md p-1.5 text-muted-foreground transition hover:bg-muted hover:text-foreground">

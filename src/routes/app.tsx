@@ -1,7 +1,8 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/ethere/app-shell";
-import { useSession } from "@/lib/store";
+import { useSession, useAccessRole } from "@/lib/store";
+import { canAccessPath } from "@/lib/rbac";
 import { Loader2 } from "lucide-react";
 
 export const Route = createFileRoute("/app")({
@@ -11,7 +12,9 @@ export const Route = createFileRoute("/app")({
 
 function AppLayout() {
   const { isAuthenticated } = useSession();
+  const role = useAccessRole();
   const navigate = useNavigate();
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
   const [checked, setChecked] = useState(false);
 
   useEffect(() => {
@@ -21,6 +24,13 @@ function AppLayout() {
       setChecked(true);
     }
   }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    if (!canAccessPath(role, pathname)) {
+      navigate({ to: "/app/acesso-negado", replace: true });
+    }
+  }, [isAuthenticated, role, pathname, navigate]);
 
   if (!isAuthenticated || !checked) {
     return (
@@ -36,3 +46,4 @@ function AppLayout() {
     </AppShell>
   );
 }
+

@@ -23,6 +23,7 @@ import { Route as AppMonitoramentoRouteImport } from './routes/app.monitoramento
 import { Route as AppContratosRouteImport } from './routes/app.contratos'
 import { Route as AppConfiguracoesRouteImport } from './routes/app.configuracoes'
 import { Route as AppAlertasRouteImport } from './routes/app.alertas'
+import { Route as AppAcessoNegadoRouteImport } from './routes/app.acesso-negado'
 import { Route as AppMetricasMetricRouteImport } from './routes/app.metricas.$metric'
 
 const SignupRoute = SignupRouteImport.update({
@@ -95,6 +96,11 @@ const AppAlertasRoute = AppAlertasRouteImport.update({
   path: '/alertas',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAcessoNegadoRoute = AppAcessoNegadoRouteImport.update({
+  id: '/acesso-negado',
+  path: '/acesso-negado',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppMetricasMetricRoute = AppMetricasMetricRouteImport.update({
   id: '/metricas/$metric',
   path: '/metricas/$metric',
@@ -109,6 +115,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/signup': typeof SignupRoute
+  '/app/acesso-negado': typeof AppAcessoNegadoRoute
   '/app/alertas': typeof AppAlertasRoute
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/signup': typeof SignupRoute
+  '/app/acesso-negado': typeof AppAcessoNegadoRoute
   '/app/alertas': typeof AppAlertasRoute
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
@@ -143,6 +151,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/signup': typeof SignupRoute
+  '/app/acesso-negado': typeof AppAcessoNegadoRoute
   '/app/alertas': typeof AppAlertasRoute
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
@@ -162,6 +171,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/redefinir-senha'
     | '/signup'
+    | '/app/acesso-negado'
     | '/app/alertas'
     | '/app/configuracoes'
     | '/app/contratos'
@@ -178,6 +188,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/redefinir-senha'
     | '/signup'
+    | '/app/acesso-negado'
     | '/app/alertas'
     | '/app/configuracoes'
     | '/app/contratos'
@@ -195,6 +206,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/redefinir-senha'
     | '/signup'
+    | '/app/acesso-negado'
     | '/app/alertas'
     | '/app/configuracoes'
     | '/app/contratos'
@@ -315,6 +327,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAlertasRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/acesso-negado': {
+      id: '/app/acesso-negado'
+      path: '/acesso-negado'
+      fullPath: '/app/acesso-negado'
+      preLoaderRoute: typeof AppAcessoNegadoRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/metricas/$metric': {
       id: '/app/metricas/$metric'
       path: '/metricas/$metric'
@@ -326,6 +345,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AppRouteChildren {
+  AppAcessoNegadoRoute: typeof AppAcessoNegadoRoute
   AppAlertasRoute: typeof AppAlertasRoute
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppContratosRoute: typeof AppContratosRoute
@@ -337,6 +357,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAcessoNegadoRoute: AppAcessoNegadoRoute,
   AppAlertasRoute: AppAlertasRoute,
   AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppContratosRoute: AppContratosRoute,

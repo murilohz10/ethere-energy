@@ -21,8 +21,9 @@ import {
 import { cn } from "@/lib/utils";
 import { useEffect, useState, type ReactNode } from "react";
 import {
-  fullName, initials, useAlerts, useContracts, useNotifications, useSession,
+  fullName, initials, useAlerts, useContracts, useNotifications, useSession, useAccessRole,
 } from "@/lib/store";
+import { can, canAccessPath } from "@/lib/rbac";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -82,6 +83,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
 function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const role = useAccessRole();
+  const visibleNav = nav.filter((n) => canAccessPath(role, n.to));
   return (
     <>
       <div className="flex h-16 items-center px-5">
@@ -97,7 +100,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
         </p>
       </div>
       <nav className="flex-1 space-y-1 px-3 py-2">
-        {nav.map((n) => {
+        {visibleNav.map((n) => {
           const active = n.exact ? pathname === n.to : pathname.startsWith(n.to);
           return (
             <Link
@@ -138,6 +141,7 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
 
 function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
   const { user, signOut } = useSession();
+  const role = useAccessRole();
   const navigate = useNavigate();
 
   return (
@@ -167,9 +171,11 @@ function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
         <DropdownMenuItem onSelect={() => { onNavigate?.(); navigate({ to: "/app/perfil" }); }}>
           <User className="mr-2 h-4 w-4" /> Meu perfil
         </DropdownMenuItem>
-        <DropdownMenuItem onSelect={() => { onNavigate?.(); navigate({ to: "/app/configuracoes" }); }}>
-          <Settings className="mr-2 h-4 w-4" /> Configurações
-        </DropdownMenuItem>
+        {can(role, "settings:view") && (
+          <DropdownMenuItem onSelect={() => { onNavigate?.(); navigate({ to: "/app/configuracoes" }); }}>
+            <Settings className="mr-2 h-4 w-4" /> Configurações
+          </DropdownMenuItem>
+        )}
         <DropdownMenuSeparator />
         <DropdownMenuItem
           onSelect={() => {
@@ -188,6 +194,8 @@ function UserMenu({ onNavigate }: { onNavigate?: () => void }) {
 function TopBar({ mobileNav }: { mobileNav?: ReactNode }) {
   const [open, setOpen] = useState(false);
   const navigate = useNavigate();
+  const role = useAccessRole();
+  const visibleNav = nav.filter((n) => canAccessPath(role, n.to));
   const { contracts } = useContracts();
   const { alerts } = useAlerts();
   const { notifications, unread, markAllRead, markRead } = useNotifications();
@@ -264,13 +272,15 @@ function TopBar({ mobileNav }: { mobileNav?: ReactNode }) {
           </PopoverContent>
         </Popover>
 
-        <button
-          onClick={() => navigate({ to: "/app/configuracoes" })}
-          className="rounded-md px-3 py-1.5 text-xs font-medium text-white shadow-blue transition-all duration-200 hover:-translate-y-0.5 hover:shadow-elegant active:translate-y-0"
-          style={{ background: "var(--gradient-brand)" }}
-        >
-          Upgrade
-        </button>
+        {can(role, "billing:manage") && (
+          <button
+            onClick={() => navigate({ to: "/app/configuracoes" })}
+            className="rounded-md px-3 py-1.5 text-xs font-medium text-white shadow-blue transition-all duration-200 hover:-translate-y-0.5 hover:shadow-elegant active:translate-y-0"
+            style={{ background: "var(--gradient-brand)" }}
+          >
+            Upgrade
+          </button>
+        )}
       </div>
 
       <CommandDialog open={open} onOpenChange={setOpen}>
@@ -278,7 +288,7 @@ function TopBar({ mobileNav }: { mobileNav?: ReactNode }) {
         <CommandList>
           <CommandEmpty>Nenhum resultado encontrado.</CommandEmpty>
           <CommandGroup heading="Navegação">
-            {[...nav, { to: "/app/perfil", label: "Meu perfil", icon: User }].map((n) => (
+            {[...visibleNav, { to: "/app/perfil", label: "Meu perfil", icon: User }].map((n) => (
               <CommandItem key={n.to} value={n.label} onSelect={() => { setOpen(false); navigate({ to: n.to }); }}>
                 <n.icon className="mr-2 h-4 w-4" /> {n.label}
               </CommandItem>
