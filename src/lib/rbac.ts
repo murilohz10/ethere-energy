@@ -59,11 +59,81 @@ const adminPermissions: Permission[] = [
   "billing:manage",
 ];
 
-export const rolePermissions: Record<AppRole, Permission[]> = {
+/** Matriz padrão (código). Serve de base e de "restaurar padrões" na UI. */
+export const defaultRolePermissions: Record<AppRole, Permission[]> = {
   Administrador: adminPermissions,
   Gestor: managerPermissions,
   Analista: analystPermissions,
 };
+
+/** @deprecated use `getRoleMatrix()` — mantido para compatibilidade. */
+export const rolePermissions = defaultRolePermissions;
+
+/** Grupos e rótulos usados na tela de gerenciamento de permissões. */
+export const permissionGroups = [
+  "Visão geral",
+  "Contratos",
+  "Alertas",
+  "Relatórios",
+  "Administração",
+] as const;
+
+export type PermissionGroup = (typeof permissionGroups)[number];
+
+export const permissionMeta: Record<Permission, { label: string; description: string; group: PermissionGroup }> = {
+  "dashboard:view": { label: "Ver dashboard", description: "Acessa KPIs, insights e páginas de métricas.", group: "Visão geral" },
+  "monitoring:view": { label: "Ver monitoramento", description: "Acompanha PLD, curvas e reservatórios.", group: "Visão geral" },
+  "contracts:view": { label: "Ver contratos", description: "Lista e consulta contratos da carteira.", group: "Contratos" },
+  "contracts:create": { label: "Criar contratos", description: "Cadastra novos contratos.", group: "Contratos" },
+  "contracts:edit": { label: "Editar contratos", description: "Altera dados de contratos existentes.", group: "Contratos" },
+  "contracts:delete": { label: "Excluir contratos", description: "Remove contratos definitivamente.", group: "Contratos" },
+  "alerts:view": { label: "Ver alertas", description: "Consulta alertas configurados e disparos.", group: "Alertas" },
+  "alerts:manage": { label: "Gerenciar alertas", description: "Cria, edita, ativa e remove alertas.", group: "Alertas" },
+  "reports:view": { label: "Ver relatórios", description: "Consulta relatórios gerados.", group: "Relatórios" },
+  "reports:create": { label: "Gerar relatórios", description: "Cria novos relatórios.", group: "Relatórios" },
+  "reports:export": { label: "Exportar relatórios", description: "Baixa em PDF, CSV e Excel.", group: "Relatórios" },
+  "settings:view": { label: "Ver configurações", description: "Acessa a área de configurações.", group: "Administração" },
+  "company:edit": { label: "Editar empresa", description: "Altera dados cadastrais da empresa.", group: "Administração" },
+  "users:manage": { label: "Gerenciar usuários", description: "Cadastra membros e define funções.", group: "Administração" },
+  "billing:manage": { label: "Gerenciar assinatura", description: "Plano, pagamento e cancelamento.", group: "Administração" },
+};
+
+export const allPermissions = Object.keys(permissionMeta) as Permission[];
+
+/**
+ * Permissões que não podem ser removidas de uma função (evita lockout).
+ * O Administrador é sempre soberano.
+ */
+export const lockedPermissions: Partial<Record<AppRole, Permission[]>> = {
+  Administrador: allPermissions,
+};
+
+export type RoleMatrix = Record<AppRole, Permission[]>;
+
+export function normalizeMatrix(matrix: Partial<RoleMatrix> | null | undefined): RoleMatrix {
+  const out = {} as RoleMatrix;
+  for (const role of appRoles) {
+    const base = matrix?.[role] ?? defaultRolePermissions[role];
+    const locked = lockedPermissions[role] ?? [];
+    out[role] = allPermissions.filter((p) => locked.includes(p) || base.includes(p));
+  }
+  return out;
+}
+
+let activeMatrix: RoleMatrix = normalizeMatrix(defaultRolePermissions);
+
+/** Aplica a matriz vigente (persistida pelo store) ao motor de permissões. */
+export function setRoleMatrix(matrix: Partial<RoleMatrix> | null | undefined) {
+  activeMatrix = normalizeMatrix(matrix);
+}
+
+export function getRoleMatrix(): RoleMatrix {
+  return activeMatrix;
+}
+
+export function isPermissionLocked(role: AppRole, permission: Permission): boolean {
+  return (lockedPermissions[role] ?? []).includes(permission);
+}
 
 export function normalizeRole(role?: string | null): AppRole {
   if (role === "Gestor" || role === "Analista" || role === "Administrador") return role;
@@ -71,12 +141,13 @@ export function normalizeRole(role?: string | null): AppRole {
 }
 
 export function can(role: AppRole | undefined | null, permission: Permission): boolean {
-  return rolePermissions[normalizeRole(role)].includes(permission);
+  return activeMatrix[normalizeRole(role)].includes(permission);
 }
 
 export function canAny(role: AppRole | undefined | null, permissions: Permission[]): boolean {
   return permissions.some((p) => can(role, p));
 }
+
 
 /** Rotas do app e a permissão exigida. `null` = livre para qualquer sessão. */
 export const routePermissions: { path: string; exact?: boolean; permission: Permission | null }[] = [
