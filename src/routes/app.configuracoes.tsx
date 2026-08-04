@@ -14,10 +14,13 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Building2, CreditCard, Bell, Users, Lock, SlidersHorizontal, Trash2, Eye, EyeOff } from "lucide-react";
+import { Building2, CreditCard, Bell, Users, Lock, SlidersHorizontal, Trash2, Eye, EyeOff, ShieldCheck, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSettings, useSession, uid, type SettingsState, type Submarket } from "@/lib/store";
-import { appRoles, roleDescriptions, type AppRole } from "@/lib/rbac";
+import { useSettings, useSession, useRolePermissions, uid, type SettingsState, type Submarket } from "@/lib/store";
+import {
+  appRoles, roleDescriptions, allPermissions, permissionGroups, permissionMeta, isPermissionLocked,
+  type AppRole, type Permission,
+} from "@/lib/rbac";
 import { ETHERE_PLAN, formatPlanPrice, subscriptionStatusLabel } from "@/lib/billing";
 
 export const Route = createFileRoute("/app/configuracoes")({
@@ -31,8 +34,10 @@ const tabs = [
   { k: "notificacoes", l: "Notificações", i: Bell },
   { k: "preferencias", l: "Preferências", i: SlidersHorizontal },
   { k: "usuarios", l: "Usuários", i: Users },
+  { k: "permissoes", l: "Permissões", i: ShieldCheck },
   { k: "seguranca", l: "Segurança", i: Lock },
 ] as const;
+
 
 
 
