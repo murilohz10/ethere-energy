@@ -1,6 +1,16 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { ETHERE_PLAN, defaultSubscription, type Subscription } from "./billing";
-import { normalizeRole, type AppRole } from "./rbac";
+import {
+  defaultRolePermissions,
+  isPermissionLocked,
+  normalizeMatrix,
+  normalizeRole,
+  setRoleMatrix,
+  type AppRole,
+  type Permission,
+  type RoleMatrix,
+} from "./rbac";
+
 
 /* ---------------------------------- core --------------------------------- */
 
@@ -294,6 +304,46 @@ export function useAccessRole(): AppRole {
   const { user } = useSession();
   return normalizeRole(user?.accessRole);
 }
+
+const permissionsStore = createPersistentStore<{ matrix: RoleMatrix }>("ethere.permissions.v1", {
+  matrix: normalizeMatrix(defaultRolePermissions),
+});
+
+/** Mantém o motor de RBAC sincronizado com a matriz persistida. */
+setRoleMatrix(permissionsStore.getSnapshot().matrix);
+permissionsStore.subscribe(() => setRoleMatrix(permissionsStore.getSnapshot().matrix));
+
+export function useRolePermissions() {
+  const [state, set] = useStore(permissionsStore);
+  const matrix = normalizeMatrix(state.matrix);
+  return {
+    matrix,
+    isDefault: JSON.stringify(matrix) === JSON.stringify(normalizeMatrix(defaultRolePermissions)),
+    toggle: (role: AppRole, permission: Permission, enabled: boolean) => {
+      if (isPermissionLocked(role, permission)) return;
+      set((s) => {
+        const current = normalizeMatrix(s.matrix);
+        const next = enabled
+          ? [...current[role], permission]
+          : current[role].filter((p) => p !== permission);
+        return { matrix: normalizeMatrix({ ...current, [role]: next }) };
+      });
+    },
+    setRole: (role: AppRole, permissions: Permission[]) =>
+      set((s) => ({ matrix: normalizeMatrix({ ...normalizeMatrix(s.matrix), [role]: permissions }) })),
+    reset: () => set({ matrix: normalizeMatrix(defaultRolePermissions) }),
+  };
+}
+
+export function useCan() {
+  const role = useAccessRole();
+  const { matrix } = useRolePermissions();
+  return useCallback(
+    (permission: Permission) => matrix[role].includes(permission),
+    [matrix, role],
+  );
+}
+
 
 
 

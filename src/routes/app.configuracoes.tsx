@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/ethere/app-shell";
 import { Button } from "@/components/ui/button";
@@ -14,10 +14,13 @@ import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent,
   AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Building2, CreditCard, Bell, Users, Lock, SlidersHorizontal, Trash2, Eye, EyeOff } from "lucide-react";
+import { Building2, CreditCard, Bell, Users, Lock, SlidersHorizontal, Trash2, Eye, EyeOff, ShieldCheck, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSettings, useSession, uid, type SettingsState, type Submarket } from "@/lib/store";
-import { appRoles, roleDescriptions, type AppRole } from "@/lib/rbac";
+import { useSettings, useSession, useRolePermissions, uid, type SettingsState, type Submarket } from "@/lib/store";
+import {
+  appRoles, roleDescriptions, allPermissions, permissionGroups, permissionMeta, isPermissionLocked,
+  type AppRole,
+} from "@/lib/rbac";
 import { ETHERE_PLAN, formatPlanPrice, subscriptionStatusLabel } from "@/lib/billing";
 
 export const Route = createFileRoute("/app/configuracoes")({
@@ -31,8 +34,10 @@ const tabs = [
   { k: "notificacoes", l: "Notificações", i: Bell },
   { k: "preferencias", l: "Preferências", i: SlidersHorizontal },
   { k: "usuarios", l: "Usuários", i: Users },
+  { k: "permissoes", l: "Permissões", i: ShieldCheck },
   { k: "seguranca", l: "Segurança", i: Lock },
 ] as const;
+
 
 
 
@@ -216,6 +221,8 @@ function SettingsPage() {
             </Section>
           )}
 
+          {tab === "permissoes" && <PermissionsMatrix />}
+
 
           {tab === "seguranca" && (
             <Section title="Segurança" desc="Proteja o acesso à sua conta.">
@@ -367,6 +374,129 @@ function SettingsPage() {
     </>
   );
 }
+
+function PermissionsMatrix() {
+  const { matrix, isDefault, toggle, setRole, reset } = useRolePermissions();
+  const { settings } = useSettings();
+  const [confirmReset, setConfirmReset] = useState(false);
+
+  const usersByRole = (role: AppRole) => settings.users.filter((u) => u.role === role).length;
+
+  return (
+    <Section title="Permissões por função" desc="Visualize e ajuste o que cada nível de acesso pode fazer. As mudanças valem para todos os usuários da função.">
+      <div className="mb-6 grid gap-3 sm:grid-cols-3">
+        {appRoles.map((r) => (
+          <div key={r} className="rounded-xl border border-border bg-surface-muted/40 p-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm font-medium">{r}</span>
+              <span className="rounded-md bg-brand-softer px-2 py-0.5 text-[11px] font-medium text-brand-dark">
+                {matrix[r].length}/{allPermissions.length}
+              </span>
+            </div>
+            <p className="mt-1.5 text-xs text-muted-foreground">{roleDescriptions[r]}</p>
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              {usersByRole(r)} usuário{usersByRole(r) === 1 ? "" : "s"} nesta função
+            </p>
+          </div>
+        ))}
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-border">
+        <table className="w-full min-w-[640px] text-sm">
+          <thead>
+            <tr className="border-b border-border bg-surface-muted/40 text-xs text-muted-foreground">
+              <th className="px-4 py-3 text-left font-medium">Permissão</th>
+              {appRoles.map((r) => (
+                <th key={r} className="px-4 py-3 text-center font-medium">{r}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {permissionGroups.map((group) => {
+              const perms = allPermissions.filter((p) => permissionMeta[p].group === group);
+              if (perms.length === 0) return null;
+              return (
+                <Fragment key={group}>
+                  <tr className="border-b border-border bg-surface-muted/20">
+                    <td colSpan={appRoles.length + 1} className="px-4 py-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
+                      {group}
+                    </td>
+                  </tr>
+                  {perms.map((p) => (
+                    <tr key={p} className="border-b border-border last:border-0 transition hover:bg-muted/40">
+                      <td className="px-4 py-3">
+                        <div className="font-medium">{permissionMeta[p].label}</div>
+                        <div className="text-xs text-muted-foreground">{permissionMeta[p].description}</div>
+                        <code className="mt-1 inline-block text-[10px] text-muted-foreground/80">{p}</code>
+                      </td>
+                      {appRoles.map((r) => {
+                        const locked = isPermissionLocked(r, p);
+                        return (
+                          <td key={r} className="px-4 py-3 text-center">
+                            <Switch
+                              checked={matrix[r].includes(p)}
+                              disabled={locked}
+                              aria-label={`${permissionMeta[p].label} para ${r}`}
+                              onCheckedChange={(v) => {
+                                toggle(r, p, v);
+                                toast.success(`${permissionMeta[p].label} ${v ? "liberada" : "removida"} para ${r}`);
+                              }}
+                            />
+                            {locked && <div className="mt-1 text-[10px] text-muted-foreground">fixo</div>}
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="mt-6 flex flex-wrap items-center gap-2">
+        {appRoles.filter((r) => !isPermissionLocked(r, "dashboard:view")).map((r) => (
+          <Button
+            key={r}
+            size="sm"
+            variant="outline"
+            onClick={() => {
+              setRole(r, [...allPermissions]);
+              toast.success(`Todas as permissões liberadas para ${r}`);
+            }}
+          >
+            Liberar tudo · {r}
+          </Button>
+        ))}
+        <Button size="sm" variant="ghost" disabled={isDefault} onClick={() => setConfirmReset(true)}>
+          <RotateCcw className="mr-1.5 h-3.5 w-3.5" /> Restaurar padrões
+        </Button>
+        {!isDefault && <span className="text-xs text-muted-foreground">Matriz personalizada em uso.</span>}
+      </div>
+
+      <AlertDialog open={confirmReset} onOpenChange={setConfirmReset}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Restaurar permissões padrão?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Todas as personalizações da matriz serão descartadas e as funções voltarão à configuração original.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Manter</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => { reset(); toast.success("Permissões restauradas ao padrão"); }}
+            >
+              Restaurar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </Section>
+  );
+}
+
 
 function SaveBar({ dirty, onSave, onCancel }: { dirty: boolean; onSave: () => void; onCancel: () => void }) {
   return (
