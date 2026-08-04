@@ -221,6 +221,8 @@ function SettingsPage() {
             </Section>
           )}
 
+          {tab === "permissoes" && <PermissionsMatrix />}
+
 
           {tab === "seguranca" && (
             <Section title="Segurança" desc="Proteja o acesso à sua conta.">
