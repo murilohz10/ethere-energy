@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/ethere/app-shell";
 import { Button } from "@/components/ui/button";
@@ -19,7 +19,7 @@ import { cn } from "@/lib/utils";
 import { useSettings, useSession, useRolePermissions, uid, type SettingsState, type Submarket } from "@/lib/store";
 import {
   appRoles, roleDescriptions, allPermissions, permissionGroups, permissionMeta, isPermissionLocked,
-  type AppRole, type Permission,
+  type AppRole,
 } from "@/lib/rbac";
 import { ETHERE_PLAN, formatPlanPrice, subscriptionStatusLabel } from "@/lib/billing";
 
@@ -416,8 +416,8 @@ function PermissionsMatrix() {
               const perms = allPermissions.filter((p) => permissionMeta[p].group === group);
               if (perms.length === 0) return null;
               return (
-                <>
-                  <tr key={group} className="border-b border-border bg-surface-muted/20">
+                <Fragment key={group}>
+                  <tr className="border-b border-border bg-surface-muted/20">
                     <td colSpan={appRoles.length + 1} className="px-4 py-2 text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                       {group}
                     </td>
@@ -448,7 +448,7 @@ function PermissionsMatrix() {
                       })}
                     </tr>
                   ))}
-                </>
+                </Fragment>
               );
             })}
           </tbody>
