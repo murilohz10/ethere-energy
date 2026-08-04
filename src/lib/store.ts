@@ -1,6 +1,16 @@
 import { useCallback, useSyncExternalStore } from "react";
 import { ETHERE_PLAN, defaultSubscription, type Subscription } from "./billing";
-import { normalizeRole, type AppRole } from "./rbac";
+import {
+  defaultRolePermissions,
+  isPermissionLocked,
+  normalizeMatrix,
+  normalizeRole,
+  setRoleMatrix,
+  type AppRole,
+  type Permission,
+  type RoleMatrix,
+} from "./rbac";
+
 
 /* ---------------------------------- core --------------------------------- */
 
