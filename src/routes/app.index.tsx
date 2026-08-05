@@ -56,16 +56,25 @@ function Overview() {
       />
 
       <section className="mb-6 rounded-2xl border border-brand-soft bg-card p-6 shadow-soft">
-        <div className="flex items-center gap-2">
-          <div className="grid h-8 w-8 place-items-center rounded-lg text-white shadow-blue" style={{ background: "var(--gradient-brand)" }}>
-            <Sparkles className="h-4 w-4" />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <div className="grid h-8 w-8 place-items-center rounded-lg text-white shadow-blue" style={{ background: "var(--gradient-brand)" }}>
+              <Sparkles className="h-4 w-4" />
+            </div>
+            <div>
+              <div className="text-sm font-semibold">Insights inteligentes</div>
+              <div className="text-xs text-muted-foreground">Os 3 insights prioritários gerados para a sua operação.</div>
+            </div>
           </div>
-          <div>
-            <div className="text-sm font-semibold">Insights inteligentes</div>
-            <div className="text-xs text-muted-foreground">Gerados a partir do seu portfólio e das condições do mercado.</div>
-          </div>
+          <Link
+            to="/app/insights"
+            className="inline-flex items-center gap-1 rounded-lg border border-brand-soft bg-brand-softer px-3 py-1.5 text-xs font-semibold text-brand-dark transition-all duration-200 hover:-translate-y-0.5"
+          >
+            Ver todos os insights <ArrowUpRight className="h-3.5 w-3.5" />
+          </Link>
         </div>
         <div className="mt-5 grid gap-3 md:grid-cols-2 xl:grid-cols-3">
+
           {loading
             ? Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="rounded-xl border border-border bg-surface p-4">
