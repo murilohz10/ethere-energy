@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/ethere/app-shell";
 import { useAlerts, useContracts } from "@/lib/store";
@@ -254,15 +254,5 @@ function Stat({ label, value, icon: Icon, tone, accent, loading }: {
         <div className="mt-3 text-2xl font-semibold tracking-tight">{value}</div>
       )}
     </div>
-  );
-}
-
-export { InsightsPage };
-
-export function InsightsOverviewLink() {
-  return (
-    <Link to="/app/insights" className="text-xs font-semibold text-brand hover:text-brand-dark">
-      Ver todos os insights
-    </Link>
   );
 }
