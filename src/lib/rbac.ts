@@ -18,6 +18,7 @@ export const roleDescriptions: Record<AppRole, string> = {
 
 export type Permission =
   | "dashboard:view"
+  | "insights:view"
   | "monitoring:view"
   | "contracts:view"
   | "contracts:create"
@@ -35,10 +36,12 @@ export type Permission =
 
 const analystPermissions: Permission[] = [
   "dashboard:view",
+  "insights:view",
   "monitoring:view",
   "alerts:view",
   "reports:view",
 ];
+
 
 const managerPermissions: Permission[] = [
   ...analystPermissions,
