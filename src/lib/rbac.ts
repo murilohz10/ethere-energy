@@ -85,6 +85,7 @@ export type PermissionGroup = (typeof permissionGroups)[number];
 
 export const permissionMeta: Record<Permission, { label: string; description: string; group: PermissionGroup }> = {
   "dashboard:view": { label: "Ver dashboard", description: "Acessa KPIs, insights e páginas de métricas.", group: "Visão geral" },
+  "insights:view": { label: "Ver central de inteligência", description: "Acessa insights inteligentes e recomendações estratégicas.", group: "Visão geral" },
   "monitoring:view": { label: "Ver monitoramento", description: "Acompanha PLD, curvas e reservatórios.", group: "Visão geral" },
   "contracts:view": { label: "Ver contratos", description: "Lista e consulta contratos da carteira.", group: "Contratos" },
   "contracts:create": { label: "Criar contratos", description: "Cadastra novos contratos.", group: "Contratos" },
@@ -155,6 +156,7 @@ export function canAny(role: AppRole | undefined | null, permissions: Permission
 /** Rotas do app e a permissão exigida. `null` = livre para qualquer sessão. */
 export const routePermissions: { path: string; exact?: boolean; permission: Permission | null }[] = [
   { path: "/app", exact: true, permission: "dashboard:view" },
+  { path: "/app/insights", permission: "insights:view" },
   { path: "/app/monitoramento", permission: "monitoring:view" },
   { path: "/app/contratos", permission: "contracts:view" },
   { path: "/app/alertas", permission: "alerts:view" },
