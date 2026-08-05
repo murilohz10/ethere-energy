@@ -6,7 +6,8 @@ import {
   BarChart, Bar,
 } from "recharts";
 import { cn } from "@/lib/utils";
-import { buildInsights, useAlerts, useContracts, useSession } from "@/lib/store";
+import { useAlerts, useContracts } from "@/lib/store";
+import { generateInsights, levelMeta } from "@/lib/insights";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useState } from "react";
 
@@ -32,7 +33,6 @@ const exposureData = [
 function Overview() {
   const { contracts } = useContracts();
   const { alerts } = useAlerts();
-  const { user } = useSession();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -40,7 +40,7 @@ function Overview() {
     return () => clearTimeout(t);
   }, []);
 
-  const insights = buildInsights(contracts, alerts, user?.firstName);
+  const topInsights = generateInsights(contracts, alerts).insights.slice(0, 3);
 
   return (
     <>
@@ -83,27 +83,29 @@ function Overview() {
                   <Skeleton className="mt-2 h-3 w-4/5" />
                 </div>
               ))
-            : insights.map((i) => (
-                <div
+            : topInsights.map((i) => (
+                <Link
                   key={i.id}
+                  to="/app/insights"
                   className={cn(
-                    "rounded-xl border bg-surface p-4 transition hover:-translate-y-0.5 hover:shadow-soft",
-                    i.tone === "warning" ? "border-amber-500/30" : i.tone === "positive" ? "border-brand-soft" : "border-border",
+                    "block rounded-xl border bg-surface p-4 transition hover:-translate-y-0.5 hover:shadow-soft",
+                    levelMeta[i.level].ring,
                   )}
                 >
-                  <div className="flex items-start gap-2">
-                    <span
-                      className={cn(
-                        "mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full",
-                        i.tone === "warning" ? "bg-amber-500" : i.tone === "positive" ? "bg-brand" : "bg-muted-foreground",
-                      )}
-                    />
-                    <div>
-                      <div className="text-sm font-semibold leading-snug">{i.title}</div>
-                      <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{i.body}</p>
-                    </div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+                      levelMeta[i.level].chip,
+                    )}>
+                      <span className={cn("h-1.5 w-1.5 rounded-full", levelMeta[i.level].dot)} />
+                      {levelMeta[i.level].label}
+                    </span>
+                    <span className="text-[10px] font-medium text-muted-foreground">{i.category}</span>
                   </div>
-                </div>
+                  <div className="mt-3 text-sm font-semibold leading-snug">{i.title}</div>
+                  <p className="mt-1.5 text-xs leading-relaxed text-muted-foreground">{i.body}</p>
+                  <p className="mt-2 text-[11px] font-medium text-brand">{i.action}</p>
+                </Link>
               ))}
         </div>
       </section>
