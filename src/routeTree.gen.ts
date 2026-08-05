@@ -20,6 +20,7 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppRelatoriosRouteImport } from './routes/app.relatorios'
 import { Route as AppPerfilRouteImport } from './routes/app.perfil'
 import { Route as AppMonitoramentoRouteImport } from './routes/app.monitoramento'
+import { Route as AppInsightsRouteImport } from './routes/app.insights'
 import { Route as AppContratosRouteImport } from './routes/app.contratos'
 import { Route as AppConfiguracoesRouteImport } from './routes/app.configuracoes'
 import { Route as AppAlertasRouteImport } from './routes/app.alertas'
@@ -81,6 +82,11 @@ const AppMonitoramentoRoute = AppMonitoramentoRouteImport.update({
   path: '/monitoramento',
   getParentRoute: () => AppRoute,
 } as any)
+const AppInsightsRoute = AppInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppContratosRoute = AppContratosRouteImport.update({
   id: '/contratos',
   path: '/contratos',
@@ -119,6 +125,7 @@ export interface FileRoutesByFullPath {
   '/app/alertas': typeof AppAlertasRoute
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
+  '/app/insights': typeof AppInsightsRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
   '/app/perfil': typeof AppPerfilRoute
   '/app/relatorios': typeof AppRelatoriosRoute
@@ -136,6 +143,7 @@ export interface FileRoutesByTo {
   '/app/alertas': typeof AppAlertasRoute
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
+  '/app/insights': typeof AppInsightsRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
   '/app/perfil': typeof AppPerfilRoute
   '/app/relatorios': typeof AppRelatoriosRoute
@@ -155,6 +163,7 @@ export interface FileRoutesById {
   '/app/alertas': typeof AppAlertasRoute
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
+  '/app/insights': typeof AppInsightsRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
   '/app/perfil': typeof AppPerfilRoute
   '/app/relatorios': typeof AppRelatoriosRoute
@@ -175,6 +184,7 @@ export interface FileRouteTypes {
     | '/app/alertas'
     | '/app/configuracoes'
     | '/app/contratos'
+    | '/app/insights'
     | '/app/monitoramento'
     | '/app/perfil'
     | '/app/relatorios'
@@ -192,6 +202,7 @@ export interface FileRouteTypes {
     | '/app/alertas'
     | '/app/configuracoes'
     | '/app/contratos'
+    | '/app/insights'
     | '/app/monitoramento'
     | '/app/perfil'
     | '/app/relatorios'
@@ -210,6 +221,7 @@ export interface FileRouteTypes {
     | '/app/alertas'
     | '/app/configuracoes'
     | '/app/contratos'
+    | '/app/insights'
     | '/app/monitoramento'
     | '/app/perfil'
     | '/app/relatorios'
@@ -306,6 +318,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMonitoramentoRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/insights': {
+      id: '/app/insights'
+      path: '/insights'
+      fullPath: '/app/insights'
+      preLoaderRoute: typeof AppInsightsRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/contratos': {
       id: '/app/contratos'
       path: '/contratos'
@@ -349,6 +368,7 @@ interface AppRouteChildren {
   AppAlertasRoute: typeof AppAlertasRoute
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppContratosRoute: typeof AppContratosRoute
+  AppInsightsRoute: typeof AppInsightsRoute
   AppMonitoramentoRoute: typeof AppMonitoramentoRoute
   AppPerfilRoute: typeof AppPerfilRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
@@ -361,6 +381,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppAlertasRoute: AppAlertasRoute,
   AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppContratosRoute: AppContratosRoute,
+  AppInsightsRoute: AppInsightsRoute,
   AppMonitoramentoRoute: AppMonitoramentoRoute,
   AppPerfilRoute: AppPerfilRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,

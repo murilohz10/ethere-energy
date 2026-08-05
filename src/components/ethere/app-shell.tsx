@@ -17,6 +17,7 @@ import {
   LogOut,
   Check,
   Menu,
+  Brain,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useEffect, useState, type ReactNode } from "react";
@@ -38,6 +39,7 @@ import { toast } from "sonner";
 type NavItem = { to: string; label: string; icon: typeof LayoutGrid; exact?: boolean };
 const nav: NavItem[] = [
   { to: "/app", label: "Visão Geral", icon: LayoutGrid, exact: true },
+  { to: "/app/insights", label: "Central de Inteligência", icon: Brain },
   { to: "/app/monitoramento", label: "Monitoramento", icon: Activity },
   { to: "/app/contratos", label: "Contratos", icon: FileText },
   { to: "/app/alertas", label: "Alertas", icon: Bell },
