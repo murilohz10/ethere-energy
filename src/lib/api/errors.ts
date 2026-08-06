@@ -44,31 +44,27 @@ export function toAppError(error: unknown): AppError {
 
   const raw = (error ?? {}) as PostgrestLike;
   const message = typeof raw.message === "string" ? raw.message : "";
+  const code = raw.code ?? "";
 
-  if (/JWT|not authenticated|session/i.test(message)) {
-    return new AppError("unauthenticated", friendly.unauthenticated);
-  }
-  if (raw.code === "42501" || /row-level security|permission denied/i.test(message)) {
+  if (code === "42501" || /row-level security|permission denied/i.test(message)) {
     return new AppError("forbidden", friendly.forbidden);
   }
-  if (raw.code === "23505" || raw.code === "23505".slice(0, 5) || raw.code === "23505") {
+  if (code === "23505" || /duplicate key/i.test(message)) {
     return new AppError("conflict", friendly.conflict);
   }
-  if (raw.code === "23505" || raw.code === "23505") {
-    return new AppError("conflict", friendly.conflict);
-  }
-  if (raw.code === "23505") return new AppError("conflict", friendly.conflict);
-  if (raw.code === "23503") {
+  if (code === "23503") {
     return new AppError("validation", "Este registro está vinculado a outros dados.");
   }
-  if (raw.code === "23514" || raw.code === "22P02") {
+  if (code === "23514" || code === "22P02" || code === "23502") {
     return new AppError("validation", friendly.validation);
   }
-  if (raw.code === "PGRST116") return new AppError("not_found", friendly.not_found);
-  if (/fetch|network|Failed to fetch/i.test(message)) {
+  if (code === "PGRST116") return new AppError("not_found", friendly.not_found);
+  if (/JWT|not authenticated|Auth session missing|invalid claim/i.test(message)) {
+    return new AppError("unauthenticated", friendly.unauthenticated);
+  }
+  if (/network|failed to fetch/i.test(message)) {
     return new AppError("network", friendly.network);
   }
-  if (message.includes("duplicate key")) return new AppError("conflict", friendly.conflict);
 
   return new AppError("unknown", message || friendly.unknown);
 }
@@ -76,4 +72,19 @@ export function toAppError(error: unknown): AppError {
 /** Mensagem sempre exibível ao usuário final. */
 export function errorMessage(error: unknown): string {
   return toAppError(error).message || friendly.unknown;
+}
+
+/** Traduz mensagens do serviço de autenticação para português. */
+export function authErrorMessage(message: string): string {
+  const m = message.toLowerCase();
+  if (m.includes("invalid login credentials")) return "E-mail ou senha incorretos.";
+  if (m.includes("email not confirmed")) return "Confirme seu e-mail antes de entrar.";
+  if (m.includes("user already registered") || m.includes("already been registered"))
+    return "Este e-mail já possui uma conta.";
+  if (m.includes("password should be at least"))
+    return "A senha precisa ter no mínimo 8 caracteres.";
+  if (m.includes("rate limit") || m.includes("too many"))
+    return "Muitas tentativas. Aguarde alguns instantes e tente novamente.";
+  if (m.includes("weak password")) return "Escolha uma senha mais forte.";
+  return message || "Não foi possível concluir a autenticação.";
 }
