@@ -16,10 +16,10 @@ import type {
   Contract, ContractInput, ContractQuery, Paginated, Report, StoredInsight, TeamUser,
 } from "./types";
 
-function unwrap<T>(result: { data: T | null; error: unknown }): T {
+function unwrap<T>(result: PostgrestSingleResponse<T>): NonNullable<T> {
   if (result.error) throw toAppError(result.error);
-  if (result.data === null) throw toAppError({ code: "PGRST116" });
-  return result.data;
+  if (result.data === null || result.data === undefined) throw toAppError({ code: "PGRST116" });
+  return result.data as NonNullable<T>;
 }
 
 /* ------------------------------- contratos -------------------------------- */
