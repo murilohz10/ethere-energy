@@ -5,6 +5,7 @@
  * de modo que nenhuma consulta pode atravessar workspaces mesmo por engano.
  */
 
+import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import { toAppError } from "./errors";
 import {
