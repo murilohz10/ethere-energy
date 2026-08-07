@@ -250,6 +250,7 @@ export type Database = {
           phone: string | null
           plan_id: string
           segment: string | null
+          settings: Json
           subscription_status: string
           updated_at: string
         }
@@ -262,6 +263,7 @@ export type Database = {
           phone?: string | null
           plan_id?: string
           segment?: string | null
+          settings?: Json
           subscription_status?: string
           updated_at?: string
         }
@@ -274,6 +276,7 @@ export type Database = {
           phone?: string | null
           plan_id?: string
           segment?: string | null
+          settings?: Json
           subscription_status?: string
           updated_at?: string
         }
@@ -454,6 +457,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      market_series: {
+        Row: {
+          created_at: string
+          id: string
+          metadata: Json
+          reference_date: string
+          series: string
+          source: string
+          submarket: string
+          updated_at: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          metadata?: Json
+          reference_date: string
+          series: string
+          source?: string
+          submarket?: string
+          updated_at?: string
+          value?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          metadata?: Json
+          reference_date?: string
+          series?: string
+          source?: string
+          submarket?: string
+          updated_at?: string
+          value?: number
+        }
+        Relationships: []
       }
       profiles: {
         Row: {
