@@ -250,6 +250,7 @@ export type Database = {
           phone: string | null
           plan_id: string
           segment: string | null
+          settings: Json
           subscription_status: string
           updated_at: string
         }
@@ -262,6 +263,7 @@ export type Database = {
           phone?: string | null
           plan_id?: string
           segment?: string | null
+          settings?: Json
           subscription_status?: string
           updated_at?: string
         }
@@ -274,6 +276,7 @@ export type Database = {
           phone?: string | null
           plan_id?: string
           segment?: string | null
+          settings?: Json
           subscription_status?: string
           updated_at?: string
         }
