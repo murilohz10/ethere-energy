@@ -173,9 +173,10 @@ function Overview() {
           </div>
           <p className="relative mt-4 text-sm leading-relaxed text-foreground/90">
             O PLD SE/CO apresenta tendência de <b className="text-brand-dark">alta moderada</b> nas próximas 48h por redução dos
-            reservatórios e temperatura acima da média. Recomendamos <b className="text-brand-dark">revisar exposição em contratos
+            reservatórios e temperatura acima da média. Recomendamos <b className="text-brand-dark">revisar contratos
             flexíveis</b> e considerar hedge parcial em 5–8% do portfólio.
           </p>
+
           <ul className="relative mt-5 space-y-2.5 text-sm">
             <IaItem label="Fator hidrológico" value="Negativo" tone="negative" />
             <IaItem label="Fator térmico" value="Positivo" tone="positive" />
