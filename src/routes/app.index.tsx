@@ -190,12 +190,13 @@ function Overview() {
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <div className="rounded-2xl border border-border bg-card p-6 shadow-soft lg:col-span-2">
           <div className="flex items-center justify-between">
-            <div className="text-sm font-semibold">Exposição por submercado</div>
+            <div className="text-sm font-semibold">Volume contratado por submercado</div>
             <span className="text-xs text-muted-foreground">MWm</span>
           </div>
           <div className="mt-4 h-56">
             <ResponsiveContainer>
-              <BarChart data={exposureData}>
+              <BarChart data={volumeData}>
+
                 <defs>
                   <linearGradient id="barG" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#60A5FA" />
