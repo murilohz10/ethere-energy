@@ -23,12 +23,13 @@ const series = Array.from({ length: 30 }).map((_, i) => ({
   receita: 400 + Math.cos(i / 4) * 80 + i * 3,
 }));
 
-const exposureData = [
+const volumeData = [
   { m: "SE/CO", v: 62 },
   { m: "S", v: 24 },
   { m: "NE", v: 10 },
   { m: "N", v: 4 },
 ];
+
 
 function Overview() {
   const { contracts } = useContracts();
