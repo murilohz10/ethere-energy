@@ -210,7 +210,7 @@ function Contracts() {
     <>
       <PageHeader
         title="Contratos"
-        description="Portfólio consolidado com exposição por contrato."
+        description="Portfólio consolidado com volume e margem por contrato."
         actions={
           <>
             <Button variant="outline" size="sm" onClick={() => exportCsv(filtered)}>
@@ -395,7 +395,7 @@ function Contracts() {
             </div>
             <p className="max-w-sm text-xs text-muted-foreground">
               {contracts.length === 0
-                ? "Cadastre seu primeiro contrato para acompanhar volume, preço e exposição."
+                ? "Cadastre seu primeiro contrato para acompanhar volume, preço e margem."
                 : "Ajuste a busca ou os filtros para visualizar contratos."}
             </p>
             {contracts.length === 0 ? (

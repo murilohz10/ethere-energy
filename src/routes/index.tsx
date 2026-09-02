@@ -172,7 +172,7 @@ const steps = [
   { icon: FileText, title: "Configure contratos e alertas", desc: "Centralize sua carteira e defina gatilhos." },
   { icon: Activity, title: "Acompanhe o PLD em tempo real", desc: "Preços por submercado, sempre atualizados." },
   { icon: Sparkles, title: "Receba análises inteligentes", desc: "A IA interpreta o comportamento do mercado." },
-  { icon: ShieldCheck, title: "Decida com mais segurança", desc: "Exposição e impacto financeiro em um só lugar." },
+  { icon: ShieldCheck, title: "Decida com mais segurança", desc: "Impacto financeiro do portfólio em um só lugar." },
 ];
 
 function HowItWorks() {
@@ -215,7 +215,7 @@ const features = [
   { icon: FileText, title: "Gestão de Contratos", desc: "Organize contratos em um único ambiente." },
   { icon: Bell, title: "Alertas Inteligentes", desc: "Receba notificações quando o mercado exigir atenção." },
   { icon: Sparkles, title: "Análise por IA", desc: "Interpreta automaticamente o comportamento do mercado." },
-  { icon: BarChart3, title: "Indicadores Financeiros", desc: "Visualize exposição e impactos financeiros." },
+  { icon: BarChart3, title: "Indicadores Financeiros", desc: "Visualize margens e impactos financeiros." },
   { icon: History, title: "Histórico do Mercado", desc: "Consulte tendências e evolução do PLD." },
 ];
 
@@ -301,8 +301,8 @@ function Audience() {
     {
       icon: Building2,
       title: "Comercializadoras",
-      desc: "Carteira de contratos, exposição e margem sob controle, com leitura diária do mercado.",
-      items: ["Curva de PLD por submercado", "Exposição consolidada", "Alertas de risco de preço"],
+      desc: "Carteira de contratos e margem sob controle, com leitura diária do mercado.",
+      items: ["Curva de PLD por submercado", "Volume contratado consolidado", "Alertas de risco de preço"],
     },
     {
       icon: Wind,

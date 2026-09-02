@@ -59,7 +59,7 @@ export function HeroDashboard() {
           {/* financial cards */}
           <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
             <MiniStat label="PLD SE/CO" value={`R$ ${last}`} delta={`+${delta}%`} up />
-            <MiniStat label="Exposição" value="R$ 1,24M" delta="-0,8%" />
+            <MiniStat label="Receita" value="R$ 1,24M" delta="+0,8%" up />
             <MiniStat label="Contratos" value="38" delta="+3" up />
             <MiniStat label="Margem" value="12,4%" delta="+1,1pp" up />
           </div>
