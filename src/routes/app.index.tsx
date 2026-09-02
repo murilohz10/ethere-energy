@@ -115,7 +115,7 @@ function Overview() {
 
         <Kpi to="pld" label="PLD Atual (SE/CO)" value="R$ 219,42" delta="+4,8%" icon={Activity} accent />
         <Kpi to="receita" label="Receita Estimada" value="R$ 12,4M" delta="+2,1%" icon={DollarSign} />
-        <Kpi to="exposicao" label="Exposição ao Mercado" value="18,2 MWm" delta="-1,4%" icon={TrendingUp} negative />
+        <Kpi to="volume" label="Volume Contratado" value="18,2 MWm" delta="+1,4%" icon={TrendingUp} />
         <Kpi to="contratos" label="Contratos Ativos" value="128" delta="+3 novos" icon={FileText} />
       </div>
 
