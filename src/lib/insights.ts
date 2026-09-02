@@ -136,7 +136,7 @@ export function generateInsights(
     .filter((c) => c.status === "Ativo")
     .reduce((s, c) => s + c.volume, 0);
 
-  const spotExposure = 8 + r(1) * 16; // %
+  const spotVolatility = 8 + r(1) * 16; // %
   const consumptionDelta = 4 + r(2) * 14; // %
   const costDelta = 2 + r(3) * 9; // %
   const savings = 3200 + Math.round(r(4) * 14000);
@@ -145,11 +145,11 @@ export function generateInsights(
   const list: SmartInsight[] = [
     {
       id: "spot",
-      level: spotExposure > 18 ? "critical" : "attention",
+      level: spotVolatility > 18 ? "critical" : "attention",
       category: "Riscos",
       icon: "alert",
-      title: "Exposição elevada ao PLD",
-      body: `Identificamos aumento de ${spotExposure.toFixed(1)}% da exposição ao mercado spot no horário de maior demanda (18h–21h) no submercado SE/CO.`,
+      title: "Volatilidade elevada do PLD",
+      body: `Identificamos aumento de ${spotVolatility.toFixed(1)}% na volatilidade do preço no horário de maior demanda (18h–21h) no submercado SE/CO.`,
       actionLabel: "Sugestão",
       action: "Avaliar revisão contratual e hedge parcial de 5% a 8% do portfólio.",
       impact: `Risco financeiro estimado de ${brl(spotSavings)} no ciclo.`,
@@ -251,7 +251,7 @@ export function generateInsights(
 
   const critical = insights.filter((i) => i.level === "critical").length;
   const opportunities = insights.filter((i) => i.level === "opportunity").length;
-  const riskScore = Math.min(98, Math.round(32 + spotExposure * 2 + critical * 9));
+  const riskScore = Math.min(98, Math.round(32 + spotVolatility * 2 + critical * 9));
   const riskLabel = riskScore > 72 ? "Elevado" : riskScore > 48 ? "Moderado" : "Baixo";
 
   const timeline = [
@@ -267,7 +267,7 @@ export function generateInsights(
     { text: "Avaliar renovação do contrato da unidade SP.", category: "Contratos" },
     { text: "Revisar consumo no horário de ponta.", category: "Consumo" },
     { text: "Monitorar variação do PLD nos próximos dias.", category: "Mercado" },
-    { text: "Reduzir exposição ao mercado spot.", category: "Riscos" },
+    { text: "Reduzir dependência do mercado spot.", category: "Riscos" },
     { text: "Atualizar parâmetros de consumo das unidades.", category: "Operacional" },
     { text: `Antecipar compra de energia para capturar economia de ${brl(savings)}.`, category: "Financeiro" },
     { text: "Revisar limiares dos alertas de preço.", category: "Operacional" },

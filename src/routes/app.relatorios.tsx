@@ -66,7 +66,7 @@ function Reports() {
       type: form.type,
       periodStart: form.periodStart,
       periodEnd: form.periodEnd,
-      summary: "Consolidado com PLD, exposição, contratos e sinais gerados por IA.",
+      summary: "Consolidado com PLD, contratos e sinais gerados por IA.",
     });
     setGenerating(false);
     setOpen(false);
@@ -142,7 +142,7 @@ function Reports() {
             <FileText className="h-5 w-5" />
           </div>
           <div className="text-sm font-semibold">Nenhum relatório encontrado</div>
-          <p className="max-w-sm text-xs text-muted-foreground">Gere um relatório para consolidar PLD, contratos e exposição do período.</p>
+          <p className="max-w-sm text-xs text-muted-foreground">Gere um relatório para consolidar PLD, contratos e margem do período.</p>
           <Button size="sm" onClick={() => setOpen(true)} className="text-white shadow-blue" style={{ background: "var(--gradient-brand)" }}>Gerar relatório</Button>
         </div>
       ) : (

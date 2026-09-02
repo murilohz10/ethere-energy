@@ -1,7 +1,7 @@
 /**
  * Cálculos financeiros centralizados (Services).
  *
- * Nenhuma tela recalcula receita, custo ou exposição por conta própria: todas
+ * Nenhuma tela recalcula receita, custo ou margem por conta própria: todas
  * consomem estas funções, garantindo consistência entre dashboard, relatórios,
  * insights e alertas.
  */
@@ -22,7 +22,6 @@ export type PortfolioMetrics = {
   margin: number;
   marginPercent: number;
   averagePrice: number;
-  exposure: number;
   expiringIn30: Contract[];
   expiringIn90: Contract[];
   overdue: Contract[];
@@ -44,8 +43,6 @@ export function portfolioMetrics(contracts: Contract[]): PortfolioMetrics {
   const revenue = active.reduce((sum, c) => sum + contractRevenue(c), 0);
   const cost = active.reduce((sum, c) => sum + contractCost(c), 0);
   const volumeMwm = active.reduce((sum, c) => sum + c.volume, 0);
-  const sold = active.filter((c) => c.type === "Venda").reduce((s, c) => s + c.volume, 0);
-  const bought = active.filter((c) => c.type === "Compra").reduce((s, c) => s + c.volume, 0);
   const margin = revenue - cost;
   const open = contracts.filter((c) => c.status !== "Encerrado");
 
@@ -60,7 +57,6 @@ export function portfolioMetrics(contracts: Contract[]): PortfolioMetrics {
     margin,
     marginPercent: revenue > 0 ? (margin / revenue) * 100 : 0,
     averagePrice: volumeMwm > 0 ? active.reduce((s, c) => s + c.price * c.volume, 0) / volumeMwm : 0,
-    exposure: sold - bought,
     expiringIn30: open.filter((c) => daysTo(c.endDate) >= 0 && daysTo(c.endDate) <= 30),
     expiringIn90: open.filter((c) => daysTo(c.endDate) >= 0 && daysTo(c.endDate) <= 90),
     overdue: open.filter((c) => daysTo(c.endDate) < 0),

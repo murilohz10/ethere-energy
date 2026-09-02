@@ -13,7 +13,7 @@ export const Route = createFileRoute("/app/metricas/$metric")({
 const metrics: Record<string, { title: string; desc: string; unit: string; base: number }> = {
   pld: { title: "PLD Atual (SE/CO)", desc: "Histórico e composição do preço de liquidação das diferenças.", unit: "R$/MWh", base: 219.42 },
   receita: { title: "Receita Estimada", desc: "Histórico de receita projetada com base no portfólio contratado.", unit: "R$ mil", base: 12400 },
-  exposicao: { title: "Exposição ao Mercado", desc: "Análise da exposição líquida por submercado e prazo.", unit: "MWm", base: 18.2 },
+  volume: { title: "Volume Contratado", desc: "Análise do volume contratado por submercado e prazo.", unit: "MWm", base: 18.2 },
   contratos: { title: "Contratos Ativos", desc: "Evolução da carteira de contratos ativos.", unit: "contratos", base: 128 },
 };
 

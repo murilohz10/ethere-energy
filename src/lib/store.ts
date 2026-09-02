@@ -180,11 +180,11 @@ export type Report = {
 };
 
 const seedReports: Report[] = [
-  { id: "r1", title: "Relatório Semanal · Semana 12", type: "Semanal", periodStart: "2025-03-10", periodEnd: "2025-03-16", createdAt: "2025-03-18", summary: "Consolidado com PLD, exposição, contratos e sinais gerados por IA." },
-  { id: "r2", title: "Relatório Semanal · Semana 11", type: "Semanal", periodStart: "2025-03-03", periodEnd: "2025-03-09", createdAt: "2025-03-11", summary: "Consolidado com PLD, exposição, contratos e sinais gerados por IA." },
+  { id: "r1", title: "Relatório Semanal · Semana 12", type: "Semanal", periodStart: "2025-03-10", periodEnd: "2025-03-16", createdAt: "2025-03-18", summary: "Consolidado com PLD, contratos e sinais gerados por IA." },
+  { id: "r2", title: "Relatório Semanal · Semana 11", type: "Semanal", periodStart: "2025-03-03", periodEnd: "2025-03-09", createdAt: "2025-03-11", summary: "Consolidado com PLD, contratos e sinais gerados por IA." },
   { id: "r3", title: "Relatório Mensal · Fevereiro", type: "Mensal", periodStart: "2025-02-01", periodEnd: "2025-02-28", createdAt: "2025-03-01", summary: "Fechamento mensal com curva de PLD e resultado por contrato." },
   { id: "r4", title: "Relatório Mensal · Janeiro", type: "Mensal", periodStart: "2025-01-01", periodEnd: "2025-01-31", createdAt: "2025-02-01", summary: "Fechamento mensal com curva de PLD e resultado por contrato." },
-  { id: "r5", title: "Relatório Trimestral · Q4 2024", type: "Trimestral", periodStart: "2024-10-01", periodEnd: "2024-12-31", createdAt: "2025-01-10", summary: "Visão trimestral de exposição, hedge e performance do portfólio." },
+  { id: "r5", title: "Relatório Trimestral · Q4 2024", type: "Trimestral", periodStart: "2024-10-01", periodEnd: "2024-12-31", createdAt: "2025-01-10", summary: "Visão trimestral de hedge e performance do portfólio." },
 ];
 
 const reportsStore = createPersistentStore<{ items: Report[] }>("ethere.reports.v1", { items: seedReports });

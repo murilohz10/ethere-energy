@@ -23,12 +23,13 @@ const series = Array.from({ length: 30 }).map((_, i) => ({
   receita: 400 + Math.cos(i / 4) * 80 + i * 3,
 }));
 
-const exposureData = [
+const volumeData = [
   { m: "SE/CO", v: 62 },
   { m: "S", v: 24 },
   { m: "NE", v: 10 },
   { m: "N", v: 4 },
 ];
+
 
 function Overview() {
   const { contracts } = useContracts();
@@ -114,7 +115,7 @@ function Overview() {
 
         <Kpi to="pld" label="PLD Atual (SE/CO)" value="R$ 219,42" delta="+4,8%" icon={Activity} accent />
         <Kpi to="receita" label="Receita Estimada" value="R$ 12,4M" delta="+2,1%" icon={DollarSign} />
-        <Kpi to="exposicao" label="Exposição ao Mercado" value="18,2 MWm" delta="-1,4%" icon={TrendingUp} negative />
+        <Kpi to="volume" label="Volume Contratado" value="18,2 MWm" delta="+1,4%" icon={TrendingUp} />
         <Kpi to="contratos" label="Contratos Ativos" value="128" delta="+3 novos" icon={FileText} />
       </div>
 
@@ -172,9 +173,10 @@ function Overview() {
           </div>
           <p className="relative mt-4 text-sm leading-relaxed text-foreground/90">
             O PLD SE/CO apresenta tendência de <b className="text-brand-dark">alta moderada</b> nas próximas 48h por redução dos
-            reservatórios e temperatura acima da média. Recomendamos <b className="text-brand-dark">revisar exposição em contratos
+            reservatórios e temperatura acima da média. Recomendamos <b className="text-brand-dark">revisar contratos
             flexíveis</b> e considerar hedge parcial em 5–8% do portfólio.
           </p>
+
           <ul className="relative mt-5 space-y-2.5 text-sm">
             <IaItem label="Fator hidrológico" value="Negativo" tone="negative" />
             <IaItem label="Fator térmico" value="Positivo" tone="positive" />
@@ -189,12 +191,13 @@ function Overview() {
       <div className="mt-6 grid gap-4 lg:grid-cols-3">
         <div className="rounded-2xl border border-border bg-card p-6 shadow-soft lg:col-span-2">
           <div className="flex items-center justify-between">
-            <div className="text-sm font-semibold">Exposição por submercado</div>
+            <div className="text-sm font-semibold">Volume contratado por submercado</div>
             <span className="text-xs text-muted-foreground">MWm</span>
           </div>
           <div className="mt-4 h-56">
             <ResponsiveContainer>
-              <BarChart data={exposureData}>
+              <BarChart data={volumeData}>
+
                 <defs>
                   <linearGradient id="barG" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0%" stopColor="#60A5FA" />
