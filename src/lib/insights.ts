@@ -1,9 +1,21 @@
 /**
- * Central de Inteligência — geração de insights simulados, porém contextualizados
- * com o portfólio real do usuário (contratos + alertas do store local).
+ * Central de Inteligência — análises simuladas, porém contextualizadas ao
+ * portfólio real (contratos + alertas) E ao perfil da empresa.
+ *
+ * Cada insight segue a estrutura: o que aconteceu → por que importa → possível
+ * impacto. Comercializadoras recebem leitura de carteira, exposição e margem;
+ * fazendas recebem leitura de geração, receita e contratos de venda.
  */
 
 import type { AlertRule, Contract } from "@/lib/store";
+import {
+  ESTIMATE_NOTE,
+  expiringContracts,
+  farmMetrics,
+  isFarmProfile,
+  traderMetrics,
+  type CompanyProfile,
+} from "@/lib/profile";
 
 export type InsightLevel = "critical" | "attention" | "opportunity" | "info";
 export type InsightCategory =
@@ -12,17 +24,36 @@ export type InsightCategory =
   | "Mercado"
   | "Operacional"
   | "Clima"
-  | "Consumo"
+  | "Geração"
+  | "Receita"
+  | "Carteira"
   | "Riscos";
 
-export const insightCategories: InsightCategory[] = [
-  "Financeiro",
-  "Contratos",
+export const traderCategories: InsightCategory[] = [
   "Mercado",
-  "Operacional",
-  "Clima",
-  "Consumo",
+  "Carteira",
+  "Contratos",
+  "Financeiro",
   "Riscos",
+  "Operacional",
+];
+
+export const farmCategories: InsightCategory[] = [
+  "Mercado",
+  "Geração",
+  "Receita",
+  "Contratos",
+  "Clima",
+  "Operacional",
+];
+
+export function categoriesFor(profile?: CompanyProfile): InsightCategory[] {
+  return isFarmProfile(profile) ? farmCategories : traderCategories;
+}
+
+/** Compatibilidade: lista completa de categorias. */
+export const insightCategories: InsightCategory[] = [
+  ...new Set([...traderCategories, ...farmCategories]),
 ];
 
 export type SmartInsight = {
@@ -30,9 +61,13 @@ export type SmartInsight = {
   level: InsightLevel;
   category: InsightCategory;
   icon: string;
+  /** O que aconteceu. */
   title: string;
   body: string;
+  /** Por que importa. */
+  why?: string;
   actionLabel: string;
+  /** Possível impacto / recomendação. */
   action: string;
   impact?: string;
   date: string; // ISO
@@ -76,12 +111,15 @@ export const levelOrder: InsightLevel[] = ["critical", "attention", "opportunity
 
 export type InsightsSnapshot = {
   generatedAt: string;
+  profile: CompanyProfile;
   insights: SmartInsight[];
   stats: {
     total: number;
     critical: number;
     opportunities: number;
-    potentialSavings: number;
+    /** Valor financeiro estimado em discussão no ciclo. */
+    financialImpact: number;
+    financialImpactLabel: string;
     risk: { label: string; score: number };
   };
   timeline: { id: string; when: string; label: string; category: InsightCategory }[];
@@ -90,6 +128,8 @@ export type InsightsSnapshot = {
 
 const brl = (v: number) =>
   v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
+
+const num = (v: number, d = 1) => v.toLocaleString("pt-BR", { maximumFractionDigits: d });
 
 function pick<T>(arr: T[], seed: number): T {
   return arr[Math.abs(Math.floor(seed)) % arr.length];
@@ -111,137 +151,225 @@ export function formatInsightDate(iso: string): string {
 }
 
 /**
- * Gera um snapshot completo. `nonce` permite variar prioridades, datas e valores
- * a cada clique em "Atualizar insights".
+ * Gera um snapshot completo para o perfil informado. `nonce` permite variar
+ * prioridades, datas e valores a cada clique em "Atualizar insights".
  */
 export function generateInsights(
   contracts: Contract[],
   alerts: AlertRule[],
   nonce = 0,
+  profile: CompanyProfile = "Comercializadora",
 ): InsightsSnapshot {
   const r = (n: number) => Math.abs(Math.sin((nonce + 1) * (n + 1.7)));
   const activeAlerts = alerts.filter((a) => a.enabled).length;
-  const now = Date.now();
+  const expiring = expiringContracts(contracts, 120);
+  const next = expiring[0];
+  const daysToNext = next
+    ? Math.ceil((new Date(`${next.endDate}T00:00:00`).getTime() - Date.now()) / 86400000)
+    : 0;
 
-  const expiring = contracts
-    .filter((c) => c.status !== "Encerrado")
-    .map((c) => ({
-      c,
-      days: Math.ceil((new Date(`${c.endDate}T00:00:00`).getTime() - now) / 86400000),
-    }))
-    .filter((x) => x.days > 0 && x.days <= 120)
-    .sort((a, b) => a.days - b.days);
+  const farm = isFarmProfile(profile);
+  const list: SmartInsight[] = [];
+  let financialImpact = 0;
+  let financialImpactLabel = "";
+  let riskBase = 0;
 
-  const volume = contracts
-    .filter((c) => c.status === "Ativo")
-    .reduce((s, c) => s + c.volume, 0);
+  if (farm) {
+    const m = farmMetrics(contracts, nonce);
+    const deviation = m.deviationPercent;
+    const revenueShift = m.projectedRevenue * (0.04 + r(2) * 0.09);
+    financialImpact = revenueShift;
+    financialImpactLabel = "Receita em variação estimada";
+    riskBase = Math.abs(deviation) * 1.6;
 
-  const spotVolatility = 8 + r(1) * 16; // %
-  const consumptionDelta = 4 + r(2) * 14; // %
-  const costDelta = 2 + r(3) * 9; // %
-  const savings = 3200 + Math.round(r(4) * 14000);
-  const spotSavings = 6000 + Math.round(r(5) * 26000);
+    list.push(
+      {
+        id: "geracao",
+        level: deviation < -8 ? "critical" : deviation < -3 ? "attention" : "opportunity",
+        category: "Geração",
+        icon: "activity",
+        title:
+          deviation < 0
+            ? `Geração realizada ${num(Math.abs(deviation))}% abaixo da prevista`
+            : `Geração realizada ${num(deviation)}% acima da prevista`,
+        body: `No ciclo atual foram ${num(m.realizedMwh, 0)} MWh realizados contra ${num(m.forecastMwh, 0)} MWh previstos.`,
+        why: "O desvio entre previsão e realização altera a energia disponível para cumprir os contratos de venda e o excedente exposto ao preço de curto prazo.",
+        actionLabel: "Possível impacto",
+        action:
+          deviation < 0
+            ? "Menor excedente para venda no curto prazo e pressão sobre a receita do período."
+            : "Excedente adicional disponível para comercialização no curto prazo.",
+        impact: ESTIMATE_NOTE,
+        date: hoursAgo(1 + r(1) * 5),
+      },
+      {
+        id: "receita",
+        level: r(3) > 0.55 ? "attention" : "info",
+        category: "Receita",
+        icon: "money",
+        title: `Receita projetada do ciclo em ${brl(m.projectedRevenue)}`,
+        body: `${brl(m.contractedRevenue)} vêm da energia contratada e ${num(m.surplusMwh, 0)} MWh de excedente são valorados ao PLD de ${brl(m.pld.value)}/MWh.`,
+        why: "Quanto maior a parcela exposta ao preço de curto prazo, mais a receita do período varia junto com o PLD.",
+        actionLabel: "Possível impacto",
+        action: `Variação estimada de ${brl(revenueShift)} na receita do período conforme o PLD se mover.`,
+        impact: ESTIMATE_NOTE,
+        date: hoursAgo(3 + r(4) * 8),
+      },
+      {
+        id: "mercado",
+        level: m.pld.delta > 3 ? "opportunity" : "info",
+        category: "Mercado",
+        icon: "market",
+        title: `PLD SE/CO em ${brl(m.pld.value)} (${m.pld.delta >= 0 ? "+" : ""}${num(m.pld.delta)}%)`,
+        body: "A curva de curto prazo se moveu no último fechamento e a expectativa para as próximas 48h segue a mesma direção.",
+        why: "O PLD define o valor do excedente de geração que não está coberto por contrato.",
+        actionLabel: "Possível impacto",
+        action:
+          m.pld.delta >= 0
+            ? "Janela mais favorável para comercializar o excedente de geração."
+            : "Excedente valorado abaixo do ciclo anterior; avaliar contratação de parte do volume.",
+        date: hoursAgo(2 + r(5) * 6),
+      },
+      {
+        id: "contratado",
+        level: "info",
+        category: "Contratos",
+        icon: "doc",
+        title: `${num(m.contractedMwm)} MWm de energia contratada em venda`,
+        body: `Preço médio contratado de ${brl(m.avgContractPrice)}/MWh sobre ${num(m.contractedMwh, 0)} MWh no ciclo.`,
+        why: "A energia contratada é a parcela previsível da receita: define quanto da geração já está protegida de variações de preço.",
+        actionLabel: "Possível impacto",
+        action: "Manter a relação entre geração prevista e energia contratada acompanhada a cada ciclo.",
+        date: hoursAgo(8 + r(6) * 14),
+      },
+      {
+        id: "clima",
+        level: "info",
+        category: "Clima",
+        icon: "weather",
+        title: "Condições climáticas alteram a previsão de geração",
+        body: `Modelos indicam anomalia de +${num(1 + r(7) * 3)}°C e mudança no regime de chuvas nas regiões de operação.`,
+        why: "Clima e hidrologia são os principais determinantes da geração prevista para os próximos ciclos.",
+        actionLabel: "Possível impacto",
+        action: "Revisar a previsão de geração do próximo ciclo antes de assumir novos compromissos de venda.",
+        date: hoursAgo(20 + r(8) * 18),
+      },
+    );
+  } else {
+    const m = traderMetrics(contracts, nonce);
+    const netAbs = Math.abs(m.netPositionMwm);
+    financialImpact = Math.abs(m.pldImpact);
+    financialImpactLabel = "Impacto estimado do PLD";
+    riskBase = netAbs * 3.2;
 
-  const list: SmartInsight[] = [
-    {
-      id: "spot",
-      level: spotVolatility > 18 ? "critical" : "attention",
-      category: "Riscos",
-      icon: "alert",
-      title: "Volatilidade elevada do PLD",
-      body: `Identificamos aumento de ${spotVolatility.toFixed(1)}% na volatilidade do preço no horário de maior demanda (18h–21h) no submercado SE/CO.`,
-      actionLabel: "Sugestão",
-      action: "Avaliar revisão contratual e hedge parcial de 5% a 8% do portfólio.",
-      impact: `Risco financeiro estimado de ${brl(spotSavings)} no ciclo.`,
-      date: hoursAgo(1 + r(6) * 5),
-    },
-    {
-      id: "consumo",
-      level: "opportunity",
-      category: "Consumo",
-      icon: "trend",
-      title: "Consumo abaixo da média",
-      body: `Seu consumo ficou ${consumptionDelta.toFixed(0)}% abaixo da média dos últimos meses, com melhor aderência à curva contratada.`,
-      actionLabel: "Impacto financeiro estimado",
-      action: `Economia aproximada de ${brl(savings)} no mês corrente.`,
-      date: hoursAgo(4 + r(7) * 12),
-    },
-    {
-      id: "custo",
-      level: costDelta > 6 ? "attention" : "info",
-      category: "Financeiro",
-      icon: "money",
-      title: `Custo médio da energia aumentou ${costDelta.toFixed(0)}%`,
-      body: "A comparação com o mês anterior mostra pressão de preço nos contratos flexíveis e no curto prazo.",
-      actionLabel: "Sugestão",
-      action: "Reavaliar a estratégia de contratação e antecipar compras de longo prazo.",
-      impact: `Portfólio ativo monitorado: ${volume.toFixed(1)} MWm.`,
-      date: hoursAgo(20 + r(8) * 10),
-    },
-    {
-      id: "clima",
-      level: "info",
-      category: "Clima",
-      icon: "weather",
-      title: "Previsão de temperaturas elevadas na próxima semana",
-      body: `Modelos indicam anomalia de +${(1 + r(9) * 3).toFixed(1)}°C acima da média histórica nas regiões Sudeste e Centro-Oeste.`,
-      actionLabel: "Impacto esperado",
-      action: "Maior consumo energético e pressão adicional sobre o PLD.",
-      date: hoursAgo(28 + r(10) * 20),
-    },
-    {
-      id: "mercado",
-      level: r(11) > 0.55 ? "attention" : "info",
-      category: "Mercado",
-      icon: "market",
-      title: `PLD SE/CO com tendência de ${r(11) > 0.55 ? "alta" : "estabilidade"} nas próximas 48h`,
-      body: `Reservatórios do subsistema Sudeste em ${(36 + r(12) * 14).toFixed(0)}% e despacho térmico acima da média semanal.`,
-      actionLabel: "Recomendação",
-      action: "Monitorar a curva forward e reavaliar posições de curto prazo.",
-      date: hoursAgo(2 + r(13) * 8),
-    },
-    {
-      id: "operacional",
-      level: activeAlerts ? "info" : "attention",
-      category: "Operacional",
-      icon: "activity",
-      title: activeAlerts
-        ? `${activeAlerts} alertas ativos monitorando sua operação`
-        : "Nenhum alerta ativo configurado",
-      body: activeAlerts
-        ? "As regras acompanham PLD, reservatórios e vencimentos contratuais em tempo real."
-        : "Sem regras ativas, movimentos relevantes de preço podem passar sem notificação.",
-      actionLabel: "Recomendação",
-      action: activeAlerts
-        ? "Revisar limiares dos alertas de preço para o horário de ponta."
-        : "Criar ao menos um alerta de variação de PLD e um de vencimento contratual.",
-      date: hoursAgo(6 + r(14) * 30),
-    },
-  ];
+    list.push(
+      {
+        id: "mercado",
+        level: Math.abs(m.pld.delta) > 4 ? "attention" : "info",
+        category: "Mercado",
+        icon: "market",
+        title: `PLD SE/CO em ${brl(m.pld.value)} (${m.pld.delta >= 0 ? "+" : ""}${num(m.pld.delta)}%)`,
+        body: "O último fechamento moveu a curva de curto prazo no submercado de maior concentração da carteira.",
+        why: "A variação do PLD observada no período altera a exposição estimada da carteira nos próximos ciclos.",
+        actionLabel: "Possível impacto",
+        action: `Impacto estimado de ${brl(Math.abs(m.pldImpact))} sobre a posição em aberto do ciclo.`,
+        impact: ESTIMATE_NOTE,
+        date: hoursAgo(1 + r(1) * 5),
+      },
+      {
+        id: "exposicao",
+        level: netAbs > 6 ? "critical" : netAbs > 3 ? "attention" : "info",
+        category: "Carteira",
+        icon: "alert",
+        title:
+          m.netPositionMwm >= 0
+            ? `Posição vendida líquida de ${num(m.netPositionMwm)} MWm`
+            : `Posição comprada líquida de ${num(netAbs)} MWm`,
+        body: `A carteira ativa soma ${num(m.saleMwm)} MWm em venda e ${num(m.purchaseMwm)} MWm em compra.`,
+        why: "A diferença entre venda e compra é a parcela da carteira que responde diretamente ao preço de curto prazo.",
+        actionLabel: "Possível impacto",
+        action: "Avaliar contratação complementar para aproximar compra e venda no ciclo.",
+        impact: ESTIMATE_NOTE,
+        date: hoursAgo(2 + r(2) * 7),
+      },
+      {
+        id: "margem",
+        level: m.marginPercent < 6 ? "attention" : "opportunity",
+        category: "Financeiro",
+        icon: "money",
+        title: `Margem projetada de ${num(m.marginPercent)}% no ciclo`,
+        body: `Receita estimada de ${brl(m.revenue)} contra custo de ${brl(m.cost)}, resultando em ${brl(m.margin)}.`,
+        why: "A margem projetada mostra quanto do resultado comercial resiste às variações de preço do período.",
+        actionLabel: "Possível impacto",
+        action:
+          m.marginPercent < 6
+            ? "Revisar preços de venda e antecipar compras para recompor a margem."
+            : "Margem com folga para negociar novos volumes de venda no curto prazo.",
+        impact: ESTIMATE_NOTE,
+        date: hoursAgo(5 + r(3) * 10),
+      },
+      {
+        id: "oportunidade",
+        level: "opportunity",
+        category: "Mercado",
+        icon: "trend",
+        title: `Preço médio de venda da carteira em ${brl(m.avgSalePrice)}/MWh`,
+        body: `O preço médio contratado está ${num(Math.abs(m.avgSalePrice - m.pld.value))} R$/MWh ${m.avgSalePrice >= m.pld.value ? "acima" : "abaixo"} do PLD atual.`,
+        why: "A relação entre preço contratado e preço de curto prazo indica onde há espaço comercial para novos negócios.",
+        actionLabel: "Possível impacto",
+        action: "Direcionar propostas comerciais para os submercados com maior diferença favorável.",
+        date: hoursAgo(9 + r(4) * 12),
+      },
+      {
+        id: "operacional",
+        level: activeAlerts ? "info" : "attention",
+        category: "Operacional",
+        icon: "activity",
+        title: activeAlerts
+          ? `${activeAlerts} alertas ativos monitorando a carteira`
+          : "Nenhum alerta ativo configurado",
+        body: activeAlerts
+          ? "As regras acompanham preço, exposição, margem e vencimentos contratuais."
+          : "Sem regras ativas, movimentos relevantes de preço podem passar sem notificação.",
+        why: "Alertas reduzem o tempo entre a movimentação do mercado e a decisão comercial.",
+        actionLabel: "Possível impacto",
+        action: activeAlerts
+          ? "Revisar limiares de preço e exposição para o ciclo atual."
+          : "Criar ao menos um alerta de PLD e um de vencimento contratual.",
+        date: hoursAgo(14 + r(5) * 20),
+      },
+    );
+  }
 
-  if (expiring[0]) {
+  if (next) {
     list.push({
-      id: `contrato-${expiring[0].c.id}`,
-      level: expiring[0].days <= 30 ? "critical" : "attention",
+      id: `contrato-${next.id}`,
+      level: daysToNext <= 30 ? "critical" : "attention",
       category: "Contratos",
       icon: "doc",
-      title: `O contrato ${expiring[0].c.name} vence em ${expiring[0].days} dias`,
-      body: `${expiring[0].c.code} · ${expiring[0].c.company} — ${expiring[0].c.volume.toFixed(1)} MWm em ${expiring[0].c.submarket}.`,
-      actionLabel: "Recomendação",
-      action: "Iniciar processo de renovação e cotar preços com fornecedores.",
-      date: hoursAgo(10 + r(15) * 20),
+      title: `O contrato ${next.code} vence em ${daysToNext} dias`,
+      body: `${next.name} · ${next.company} — ${num(next.volume)} MWm em ${next.submarket}.`,
+      why: farm
+        ? "O vencimento reduz a parcela de receita já contratada para os próximos ciclos de geração."
+        : "O vencimento altera a posição contratada e a exposição estimada dos próximos ciclos.",
+      actionLabel: "Possível impacto",
+      action: "Iniciar a renovação e cotar preços antes do encerramento do contrato.",
+      date: hoursAgo(6 + r(9) * 16),
     });
   } else {
     list.push({
-      id: "contrato-generico",
+      id: "contrato-vazio",
       level: "attention",
       category: "Contratos",
       icon: "doc",
-      title: "O contrato da Unidade Campinas vence em 28 dias",
-      body: "Nenhuma renovação registrada para o ciclo seguinte na carteira atual.",
-      actionLabel: "Recomendação",
-      action: "Iniciar processo de renovação.",
-      date: hoursAgo(12 + r(15) * 20),
+      title: "Nenhum vencimento nos próximos 120 dias",
+      body: "A carteira atual não possui contratos em janela de renovação.",
+      why: farm
+        ? "Sem renovações próximas, a receita contratada permanece estável no horizonte analisado."
+        : "Sem renovações próximas, a posição contratada permanece estável no horizonte analisado.",
+      actionLabel: "Possível impacto",
+      action: "Aproveitar a janela para prospectar novos contratos de médio prazo.",
+      date: hoursAgo(11 + r(9) * 18),
     });
   }
 
@@ -251,28 +379,56 @@ export function generateInsights(
 
   const critical = insights.filter((i) => i.level === "critical").length;
   const opportunities = insights.filter((i) => i.level === "opportunity").length;
-  const riskScore = Math.min(98, Math.round(32 + spotVolatility * 2 + critical * 9));
+  const riskScore = Math.min(98, Math.round(34 + riskBase + critical * 9));
   const riskLabel = riskScore > 72 ? "Elevado" : riskScore > 48 ? "Moderado" : "Baixo";
 
-  const timeline = [
-    { id: "t1", when: hoursAgo(2), label: "Novo insight financeiro gerado", category: "Financeiro" as InsightCategory },
-    { id: "t2", when: hoursAgo(9), label: "Reprocessamento da curva de PLD", category: "Mercado" as InsightCategory },
-    { id: "t3", when: hoursAgo(27), label: "Atualização contratual detectada", category: "Contratos" as InsightCategory },
-    { id: "t4", when: hoursAgo(52), label: "Novo alerta operacional disparado", category: "Operacional" as InsightCategory },
-    { id: "t5", when: hoursAgo(74), label: "Modelo climático revisado", category: "Clima" as InsightCategory },
-    { id: "t6", when: hoursAgo(120), label: "Auditoria de consumo concluída", category: "Consumo" as InsightCategory },
-  ];
+  const timelineLabels = farm
+    ? [
+        "Nova leitura de geração processada",
+        "Reprocessamento da curva de PLD",
+        "Atualização contratual detectada",
+        "Revisão da previsão de geração",
+        "Modelo climático revisado",
+        "Consolidação de receita concluída",
+      ]
+    : [
+        "Nova leitura de posição da carteira",
+        "Reprocessamento da curva de PLD",
+        "Atualização contratual detectada",
+        "Recálculo da margem projetada",
+        "Novo alerta operacional disparado",
+        "Consolidação de exposição concluída",
+      ];
+  const timelineCats: InsightCategory[] = farm
+    ? ["Geração", "Mercado", "Contratos", "Geração", "Clima", "Receita"]
+    : ["Carteira", "Mercado", "Contratos", "Financeiro", "Operacional", "Riscos"];
 
-  const pool: { text: string; category: InsightCategory }[] = [
-    { text: "Avaliar renovação do contrato da unidade SP.", category: "Contratos" },
-    { text: "Revisar consumo no horário de ponta.", category: "Consumo" },
-    { text: "Monitorar variação do PLD nos próximos dias.", category: "Mercado" },
-    { text: "Reduzir dependência do mercado spot.", category: "Riscos" },
-    { text: "Atualizar parâmetros de consumo das unidades.", category: "Operacional" },
-    { text: `Antecipar compra de energia para capturar economia de ${brl(savings)}.`, category: "Financeiro" },
-    { text: "Revisar limiares dos alertas de preço.", category: "Operacional" },
-    { text: "Simular impacto climático sobre a demanda semanal.", category: "Clima" },
-  ];
+  const timeline = timelineLabels.map((label, i) => ({
+    id: `t${i}`,
+    when: hoursAgo([2, 9, 27, 40, 74, 120][i]),
+    label,
+    category: timelineCats[i],
+  }));
+
+  const pool: { text: string; category: InsightCategory }[] = farm
+    ? [
+        { text: "Revisar a previsão de geração do próximo ciclo.", category: "Geração" },
+        { text: "Avaliar comercialização do excedente de geração.", category: "Receita" },
+        { text: "Acompanhar o PLD antes de fechar novos contratos de venda.", category: "Mercado" },
+        { text: "Iniciar renovação dos contratos com vencimento próximo.", category: "Contratos" },
+        { text: "Atualizar parâmetros de disponibilidade das usinas.", category: "Operacional" },
+        { text: "Monitorar condições hidrológicas e climáticas da região.", category: "Clima" },
+        { text: "Revisar limiares dos alertas de desvio de geração.", category: "Operacional" },
+      ]
+    : [
+        { text: "Aproximar compra e venda para reduzir a exposição estimada.", category: "Carteira" },
+        { text: "Revisar preços de venda dos contratos flexíveis.", category: "Financeiro" },
+        { text: "Monitorar a variação do PLD nos próximos dias.", category: "Mercado" },
+        { text: "Iniciar renovação dos contratos com vencimento próximo.", category: "Contratos" },
+        { text: "Priorizar propostas nos submercados com maior margem.", category: "Financeiro" },
+        { text: "Revisar limiares dos alertas de preço e exposição.", category: "Operacional" },
+        { text: "Reavaliar o resultado projetado por contraparte.", category: "Riscos" },
+      ];
 
   const start = Math.abs(Math.floor(r(16) * pool.length));
   const recommendations = Array.from({ length: 5 }).map((_, i) => {
@@ -282,12 +438,14 @@ export function generateInsights(
 
   return {
     generatedAt: new Date().toISOString(),
+    profile,
     insights,
     stats: {
       total: insights.length,
       critical,
       opportunities,
-      potentialSavings: savings + spotSavings,
+      financialImpact,
+      financialImpactLabel,
       risk: { label: riskLabel, score: riskScore },
     },
     timeline,
