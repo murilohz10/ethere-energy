@@ -105,7 +105,7 @@ const seedContracts: Contract[] = [
   { id: "c2", code: "C-1039", name: "Compra flexível Beta", company: "Beta Química", type: "Compra", submarket: "S", volume: 8.4, price: 205.1, startDate: "2025-02-01", endDate: "2026-07-31", status: "Ativo", notes: "" },
   { id: "c3", code: "C-1035", name: "Contrato Gama Papel", company: "Gama Papel", type: "Venda", submarket: "SE/CO", volume: 5.2, price: 189.9, startDate: "2025-03-01", endDate: "2027-03-31", status: "Ativo", notes: "" },
   { id: "c4", code: "C-1030", name: "Fornecimento Delta", company: "Delta Cimento", type: "Venda", submarket: "NE", volume: 14.7, price: 179, startDate: "2024-11-01", endDate: "2025-11-30", status: "Pendente", notes: "Renovação em negociação." },
-  { id: "c5", code: "C-1026", name: "Hedge Ômega", company: "Ômega Metais", type: "Compra", submarket: "SE/CO", volume: 9.1, price: 210.4, startDate: "2025-05-01", endDate: "2027-05-31", status: "Ativo", notes: "" },
+  { id: "c5", code: "C-1026", name: "Suprimento Ômega", company: "Ômega Metais", type: "Compra", submarket: "SE/CO", volume: 9.1, price: 210.4, startDate: "2025-05-01", endDate: "2027-05-31", status: "Ativo", notes: "" },
   { id: "c6", code: "C-1021", name: "Sigma sazonal", company: "Sigma Alimentos", type: "Venda", submarket: "S", volume: 3.8, price: 195, startDate: "2024-01-01", endDate: "2026-01-31", status: "Encerrado", notes: "" },
 ];
 
@@ -127,10 +127,28 @@ export function useContracts() {
 /* --------------------------------- alerts -------------------------------- */
 
 export type AlertPriority = "Alta" | "Média" | "Baixa" | "Info";
+
+/**
+ * Tipos de gatilho suportados. As telas oferecem apenas os tipos relevantes ao
+ * perfil da empresa (ver `alertTypesByProfile` em `@/lib/profile`), mas o
+ * modelo aceita todos para preservar regras criadas anteriormente.
+ */
+export type AlertRuleType =
+  | "PLD"
+  | "Reservatório"
+  | "Contrato"
+  | "Regulação"
+  | "Exposição"
+  | "Margem"
+  | "Geração"
+  | "Receita"
+  | "Clima"
+  | "Mercado";
+
 export type AlertRule = {
   id: string;
   name: string;
-  type: "PLD" | "Reservatório" | "Contrato" | "Regulação";
+  type: AlertRuleType;
   threshold: number;
   channel: "Email" | "SMS" | "Push";
   frequency: "Imediato" | "Diário" | "Semanal";
@@ -184,7 +202,7 @@ const seedReports: Report[] = [
   { id: "r2", title: "Relatório Semanal · Semana 11", type: "Semanal", periodStart: "2025-03-03", periodEnd: "2025-03-09", createdAt: "2025-03-11", summary: "Consolidado com PLD, contratos e sinais gerados por IA." },
   { id: "r3", title: "Relatório Mensal · Fevereiro", type: "Mensal", periodStart: "2025-02-01", periodEnd: "2025-02-28", createdAt: "2025-03-01", summary: "Fechamento mensal com curva de PLD e resultado por contrato." },
   { id: "r4", title: "Relatório Mensal · Janeiro", type: "Mensal", periodStart: "2025-01-01", periodEnd: "2025-01-31", createdAt: "2025-02-01", summary: "Fechamento mensal com curva de PLD e resultado por contrato." },
-  { id: "r5", title: "Relatório Trimestral · Q4 2024", type: "Trimestral", periodStart: "2024-10-01", periodEnd: "2024-12-31", createdAt: "2025-01-10", summary: "Visão trimestral de hedge e performance do portfólio." },
+  { id: "r5", title: "Relatório Trimestral · Q4 2024", type: "Trimestral", periodStart: "2024-10-01", periodEnd: "2024-12-31", createdAt: "2025-01-10", summary: "Visão trimestral de contratos, margem e desempenho do portfólio." },
 ];
 
 const reportsStore = createPersistentStore<{ items: Report[] }>("ethere.reports.v1", { items: seedReports });
