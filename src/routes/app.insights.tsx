@@ -74,7 +74,7 @@ function InsightsPage() {
     <>
       <PageHeader
         title="Central de Inteligência"
-        description="Análise contínua do seu portfólio, com prioridades e recomendações acionáveis."
+        description={copy.insightsDescription}
         actions={
           <div className="flex items-center gap-2">
             <span className="hidden items-center gap-1.5 rounded-full border border-brand-soft bg-brand-softer px-2.5 py-1 text-[11px] font-medium text-brand-dark sm:inline-flex">
@@ -93,14 +93,14 @@ function InsightsPage() {
         <Stat label="Total de insights" value={String(snapshot.stats.total)} icon={Brain} accent loading={loading} />
         <Stat label="Insights críticos" value={String(snapshot.stats.critical)} icon={AlertTriangle} tone="critical" loading={loading} />
         <Stat label="Oportunidades" value={String(snapshot.stats.opportunities)} icon={TrendingUp} tone="opportunity" loading={loading} />
-        <Stat label="Economia potencial" value={brl(snapshot.stats.potentialSavings)} icon={DollarSign} loading={loading} />
+        <Stat label={snapshot.stats.financialImpactLabel} value={brl(snapshot.stats.financialImpact)} icon={DollarSign} loading={loading} />
         <Stat label="Risco atual" value={`${snapshot.stats.risk.label} · ${snapshot.stats.risk.score}`} icon={ShieldAlert} tone="attention" loading={loading} />
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
         <div>
           <div className="mb-4 flex flex-wrap gap-2">
-            {(["Todos", ...insightCategories] as const).map((c) => (
+            {(["Todos", ...categories] as const).map((c) => (
               <button
                 key={c}
                 onClick={() => setFilter(c)}
