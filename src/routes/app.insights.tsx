@@ -42,17 +42,26 @@ const brl = (v: number) =>
 function InsightsPage() {
   const { contracts } = useContracts();
   const { alerts } = useAlerts();
+  const { kind, copy } = useCompanyProfile();
   const [nonce, setNonce] = useState(0);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState<"Todos" | InsightCategory>("Todos");
 
-  const snapshot = useMemo(() => generateInsights(contracts, alerts, nonce), [contracts, alerts, nonce]);
+  const snapshot = useMemo(
+    () => generateInsights(contracts, alerts, nonce, kind),
+    [contracts, alerts, nonce, kind],
+  );
+  const categories = useMemo(() => categoriesFor(kind), [kind]);
 
   useEffect(() => {
     setLoading(true);
     const t = setTimeout(() => setLoading(false), 650);
     return () => clearTimeout(t);
   }, [nonce]);
+
+  useEffect(() => {
+    setFilter("Todos");
+  }, [kind]);
 
   const visible = snapshot.insights.filter((i) => filter === "Todos" || i.category === filter);
 
