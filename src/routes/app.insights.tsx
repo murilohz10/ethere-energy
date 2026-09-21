@@ -2,8 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/ethere/app-shell";
 import { useAlerts, useContracts } from "@/lib/store";
+import { useCompanyProfile } from "@/lib/profile";
 import {
-  generateInsights, insightCategories, levelMeta, formatInsightDate, relativeDay,
+  generateInsights, categoriesFor, levelMeta, formatInsightDate, relativeDay,
   type InsightCategory, type InsightLevel, type SmartInsight,
 } from "@/lib/insights";
 import { cn } from "@/lib/utils";
