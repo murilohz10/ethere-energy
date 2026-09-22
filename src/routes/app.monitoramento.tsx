@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { PageHeader } from "@/components/ethere/app-shell";
 import {
   LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Brush,
+  AreaChart, Area, BarChart, Bar,
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,10 +13,21 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { TrendingUp, TrendingDown, RefreshCw, Download, ZoomIn, ZoomOut } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { brl, downloadFile, toCsv, type Submarket } from "@/lib/store";
+import { brl, downloadFile, toCsv, useContracts, type Submarket } from "@/lib/store";
+import {
+  useCompanyProfile, traderMetrics, farmMetrics, generationSeries, positionBySubmarket,
+  ESTIMATE_NOTE,
+} from "@/lib/profile";
 
 export const Route = createFileRoute("/app/monitoramento")({
-  head: () => ({ meta: [{ title: "Monitoramento · Ethere" }] }),
+  head: () => ({
+    meta: [
+      { title: "Monitoramento · Ethere" },
+      { name: "description", content: "Acompanhe o PLD por submercado, a posição contratada e a geração da sua operação de energia." },
+      { property: "og:title", content: "Monitoramento · Ethere" },
+      { property: "og:description", content: "PLD, posição contratada e geração prevista × realizada em um só lugar." },
+    ],
+  }),
   component: Monitor,
 });
 
@@ -28,6 +40,14 @@ const seriesKeys = [
 
 type Row = { d: string; seco: number; s: number; ne: number; n: number };
 
+const chartTooltip = {
+  borderRadius: 12,
+  border: "1px solid var(--border)",
+  background: "var(--card)",
+  fontSize: 12,
+  boxShadow: "var(--shadow-elegant)",
+} as const;
+
 const buildData = (days: number, seed: number): Row[] =>
   Array.from({ length: days }).map((_, i) => ({
     d: `D${i + 1}`,
@@ -37,12 +57,21 @@ const buildData = (days: number, seed: number): Row[] =>
     n: +(120 + Math.cos((i + seed) / 6) * 20 + i * 0.7).toFixed(2),
   }));
 
+/** Indicador hidrológico disponível (nível dos reservatórios, % da capacidade). */
+const buildHydro = (days: number, seed: number) =>
+  Array.from({ length: days }).map((_, i) => ({
+    d: `D${i + 1}`,
+    nivel: +(58 + Math.sin((i + seed) / 7) * 9 - i * 0.05).toFixed(1),
+  }));
+
 const periods = [
   { v: "7", l: "Últimos 7 dias" },
   { v: "30", l: "Últimos 30 dias" },
   { v: "60", l: "Últimos 60 dias" },
   { v: "180", l: "Últimos 180 dias" },
 ];
+
+const num = (v: number, d = 1) => v.toLocaleString("pt-BR", { maximumFractionDigits: d });
 
 function Monitor() {
   const [period, setPeriod] = useState("60");
@@ -52,7 +81,19 @@ function Monitor() {
   const [hidden, setHidden] = useState<string[]>([]);
   const [zoom, setZoom] = useState(1);
 
-  const data = useMemo(() => buildData(Number(period), seed), [period, seed]);
+  const { contracts } = useContracts();
+  const { isFarm, copy } = useCompanyProfile();
+  const trader = useMemo(() => traderMetrics(contracts, seed), [contracts, seed]);
+  const farm = useMemo(() => farmMetrics(contracts, seed), [contracts, seed]);
+
+  const days = Number(period);
+  const data = useMemo(() => buildData(days, seed), [days, seed]);
+  const hydro = useMemo(() => buildHydro(days, seed), [days, seed]);
+  const generation = useMemo(
+    () => generationSeries(farm.capacityMwm, days, seed),
+    [farm.capacityMwm, days, seed],
+  );
+  const position = useMemo(() => positionBySubmarket(contracts), [contracts]);
 
   const visible = seriesKeys.filter((s) => {
     if (submarket !== "todos" && s.label !== submarket) return false;
@@ -86,11 +127,25 @@ function Monitor() {
     return { ...s, value: v, delta, up: delta >= 0 };
   }).filter((k) => submarket === "todos" || k.label === submarket);
 
+  const profileKpis = isFarm
+    ? [
+        { l: "Geração prevista (ciclo)", v: `${num(farm.forecastMwh, 0)} MWh` },
+        { l: "Geração realizada (ciclo)", v: `${num(farm.realizedMwh, 0)} MWh` },
+        { l: "Desvio de geração", v: `${farm.deviationPercent >= 0 ? "+" : ""}${num(farm.deviationPercent)}%`, negative: farm.deviationPercent < 0 },
+        { l: "Impacto potencial na receita", v: brl(farm.surplusMwh * farm.pld.value) },
+      ]
+    : [
+        { l: "Posição de venda", v: `${num(trader.saleMwm)} MWm` },
+        { l: "Posição de compra", v: `${num(trader.purchaseMwm)} MWm` },
+        { l: "Exposição estimada", v: `${num(Math.abs(trader.netPositionMwm))} MWm`, negative: Math.abs(trader.netPositionMwm) > 5 },
+        { l: "Impacto do PLD (mês)", v: brl(Math.abs(trader.pldImpact)) },
+      ];
+
   return (
     <>
       <PageHeader
         title="Monitoramento"
-        description="Histórico do PLD e comparação por submercado."
+        description={copy.monitoringDescription}
         actions={
           <>
             <Select value={period} onValueChange={setPeriod}>
@@ -148,6 +203,19 @@ function Monitor() {
             ))}
       </div>
 
+      <div className="mt-4 grid gap-4 md:grid-cols-4">
+        {profileKpis.map((k) => (
+          <div key={k.l} className="rounded-2xl border border-border bg-card p-5 shadow-soft">
+            <div className="text-xs font-medium text-muted-foreground">{k.l}</div>
+            <div className={cn(
+              "mt-2 text-xl font-semibold tracking-tight tabular-nums",
+              k.negative && "text-red-500",
+            )}>{k.v}</div>
+          </div>
+        ))}
+      </div>
+      <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{ESTIMATE_NOTE}</p>
+
       <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-soft">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm font-semibold">Histórico do PLD por submercado</div>
@@ -192,10 +260,7 @@ function Monitor() {
                 <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
-                <Tooltip
-                  formatter={(v: number, name: string) => [brl(v), name]}
-                  contentStyle={{ borderRadius: 12, border: "1px solid var(--border)", background: "var(--card)", fontSize: 12, boxShadow: "var(--shadow-elegant)" }}
-                />
+                <Tooltip formatter={(v: number, name: string) => [brl(v), name]} contentStyle={chartTooltip} />
                 <Legend wrapperStyle={{ fontSize: 12 }} />
                 {visible.map((s) => (
                   <Line key={s.key} type="monotone" dataKey={s.key} stroke={s.color} strokeWidth={s.key === "seco" ? 2.5 : 2} dot={false} name={s.label} />
@@ -206,6 +271,84 @@ function Monitor() {
           )}
         </div>
       </div>
+
+      {isFarm ? (
+        <div className="mt-6 grid gap-6 lg:grid-cols-2">
+          <div className="rounded-2xl border border-brand-soft bg-card p-6 shadow-soft">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-semibold">Geração prevista × realizada</div>
+              <span className="text-xs text-muted-foreground">MWh/dia</span>
+            </div>
+            <div className="mt-4 h-72">
+              {loading ? (
+                <div className="h-full animate-pulse rounded-xl bg-muted/40" />
+              ) : (
+                <ResponsiveContainer>
+                  <LineChart data={generation}>
+                    <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+                    <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+                    <Tooltip formatter={(v: number, n: string) => [`${num(v)} MWh`, n]} contentStyle={chartTooltip} />
+                    <Legend wrapperStyle={{ fontSize: 12 }} />
+                    <Line type="monotone" dataKey="prevista" stroke="#60A5FA" strokeWidth={2} dot={false} name="Prevista" />
+                    <Line type="monotone" dataKey="realizada" stroke="#2563EB" strokeWidth={2.5} dot={false} name="Realizada" />
+                  </LineChart>
+                </ResponsiveContainer>
+              )}
+            </div>
+          </div>
+
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
+            <div className="flex items-center justify-between">
+              <div className="text-sm font-semibold">Nível dos reservatórios</div>
+              <span className="text-xs text-muted-foreground">% da capacidade</span>
+            </div>
+            <div className="mt-4 h-72">
+              <ResponsiveContainer>
+                <AreaChart data={hydro}>
+                  <defs>
+                    <linearGradient id="hydroG" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#2563EB" stopOpacity={0.28} />
+                      <stop offset="100%" stopColor="#2563EB" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                  <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+                  <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+                  <Tooltip formatter={(v: number) => [`${num(v)}%`, "Nível"]} contentStyle={chartTooltip} />
+                  <Area type="monotone" dataKey="nivel" stroke="#2563EB" strokeWidth={2.5} fill="url(#hydroG)" name="Nível" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+            <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+              Indicador hidrológico disponível — usado como contexto para a leitura do PLD e da geração.
+            </p>
+          </div>
+        </div>
+      ) : (
+        <div className="mt-6 rounded-2xl border border-brand-soft bg-card p-6 shadow-soft">
+          <div className="flex items-center justify-between">
+            <div className="text-sm font-semibold">Posição contratada por submercado</div>
+            <span className="text-xs text-muted-foreground">MWm</span>
+          </div>
+          <div className="mt-4 h-72">
+            <ResponsiveContainer>
+              <BarChart data={position}>
+                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="m" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+                <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
+                <Tooltip formatter={(v: number, n: string) => [`${num(v)} MWm`, n]} contentStyle={chartTooltip} />
+                <Legend wrapperStyle={{ fontSize: 12 }} />
+                <Bar dataKey="venda" fill="#2563EB" radius={[8, 8, 0, 0]} name="Venda" />
+                <Bar dataKey="compra" fill="#93C5FD" radius={[8, 8, 0, 0]} name="Compra" />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+          <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
+            A diferença entre venda e compra é a exposição estimada da carteira por submercado.
+          </p>
+        </div>
+      )}
     </>
   );
 }

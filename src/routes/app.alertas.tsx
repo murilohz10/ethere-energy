@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAlerts, fmtDate, type AlertRule, type AlertPriority } from "@/lib/store";
+import { useCompanyProfile, alertTypesByProfile, alertTypeHints } from "@/lib/profile";
 
 export const Route = createFileRoute("/app/alertas")({
   head: () => ({ meta: [{ title: "Alertas · Ethere" }] }),
@@ -36,7 +37,7 @@ const style: Record<AlertPriority, { border: string; bg: string; icon: typeof Be
 };
 
 const priorities: AlertPriority[] = ["Alta", "Média", "Baixa", "Info"];
-const alertTypes: AlertRule["type"][] = ["PLD", "Reservatório", "Contrato", "Regulação"];
+const noThresholdTypes = ["Regulação", "Clima", "Mercado"];
 const channels: AlertRule["channel"][] = ["Email", "SMS", "Push"];
 const frequencies: AlertRule["frequency"][] = ["Imediato", "Diário", "Semanal"];
 
