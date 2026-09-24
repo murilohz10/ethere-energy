@@ -47,6 +47,10 @@ const emptyForm = (): Omit<AlertRule, "id" | "createdAt"> => ({
 
 function Alerts() {
   const { alerts, add, update, remove, duplicate } = useAlerts();
+  const { kind, copy } = useCompanyProfile();
+  const profileDescription = copy.alertsDescription;
+  const alertTypes = alertTypesByProfile[kind] as AlertRule["type"][];
+  void alertTypeHints;
   const [query, setQuery] = useState("");
   const [fPriority, setFPriority] = useState("todos");
   const [fState, setFState] = useState("todos");
@@ -95,7 +99,7 @@ function Alerts() {
     <>
       <PageHeader
         title="Alertas"
-        description="Central de alertas e regras configuráveis."
+        description={profileDescription}
         actions={
           <Button size="sm" onClick={openNew} className="text-white shadow-blue hover:opacity-95" style={{ background: "var(--gradient-brand)" }}>
             <Plus className="mr-1 h-4 w-4" /> Nova regra

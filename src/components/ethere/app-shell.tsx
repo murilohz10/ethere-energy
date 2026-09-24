@@ -1,5 +1,6 @@
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { EthereLogo } from "./logo";
+import { useCompanyProfile } from "@/lib/profile";
 import { ThemeToggle } from "./theme-toggle";
 import {
   LayoutGrid,
@@ -87,10 +88,14 @@ function SidebarContent({ onNavigate }: { onNavigate?: () => void }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const role = useAccessRole();
   const visibleNav = nav.filter((n) => canAccessPath(role, n.to));
+  const { copy } = useCompanyProfile();
   return (
     <>
-      <div className="flex h-16 items-center px-5">
+      <div className="flex h-16 items-center justify-between gap-2 px-5">
         <Link to="/app" onClick={onNavigate}><EthereLogo /></Link>
+        <span className="truncate rounded-full bg-brand-softer px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-brand-dark">
+          {copy.badge}
+        </span>
       </div>
       <div className="mx-3 mb-2 rounded-xl border border-brand-soft bg-brand-softer p-3">
         <div className="flex items-center gap-2 text-[11px] font-medium text-brand-dark">

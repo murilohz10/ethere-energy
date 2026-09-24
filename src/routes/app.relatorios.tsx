@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useCompanyProfile, reportSuggestionsByProfile } from "@/lib/profile";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/ethere/app-shell";
@@ -33,6 +34,9 @@ const types: Report["type"][] = ["Semanal", "Mensal", "Trimestral", "Personaliza
 function Reports() {
   const { reports, add, remove } = useReports();
   const { contracts } = useContracts();
+  const { kind, isFarm, copy } = useCompanyProfile();
+  const suggestions = reportSuggestionsByProfile[kind];
+  const [summary, setSummary] = useState("");
   const [filter, setFilter] = useState("Todos");
   const [open, setOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
@@ -66,7 +70,9 @@ function Reports() {
       type: form.type,
       periodStart: form.periodStart,
       periodEnd: form.periodEnd,
-      summary: "Consolidado com PLD, contratos e sinais gerados por IA.",
+      summary: summary || (isFarm
+        ? "Consolidado de geração, receita estimada, contratos de venda e PLD do período."
+        : "Consolidado de carteira, margem projetada, contratos e PLD do período."),
     });
     setGenerating(false);
     setOpen(false);
@@ -113,13 +119,26 @@ function Reports() {
     <>
       <PageHeader
         title="Relatórios"
-        description="Exportações semanais, mensais e trimestrais."
+        description={copy.reportsDescription}
         actions={
           <Button size="sm" onClick={() => { setErrors({}); setOpen(true); }} className="text-white shadow-blue hover:opacity-95" style={{ background: "var(--gradient-brand)" }}>
             Gerar novo
           </Button>
         }
       />
+
+      <div className="mb-6 grid gap-3 sm:grid-cols-2 xl:grid-cols-4">
+        {suggestions.map((s) => (
+          <button
+            key={s.title}
+            onClick={() => { setErrors({}); setForm({ ...form, title: s.title }); setSummary(s.summary); setOpen(true); }}
+            className="rounded-xl border border-border bg-card p-4 text-left shadow-soft transition hover:border-brand-soft"
+          >
+            <div className="text-sm font-semibold">{s.title}</div>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{s.summary}</p>
+          </button>
+        ))}
+      </div>
 
       <div className="mb-6 flex gap-2 text-xs">
         {["Todos", ...types].map((t) => (
