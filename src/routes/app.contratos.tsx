@@ -31,6 +31,7 @@ import {
 } from "@/lib/store";
 import { useAccessRole } from "@/lib/store";
 import { can } from "@/lib/rbac";
+import { useCompanyProfile } from "@/lib/profile";
 
 export const Route = createFileRoute("/app/contratos")({
   head: () => ({ meta: [{ title: "Contratos · Ethere" }] }),
@@ -88,6 +89,7 @@ function Contracts() {
   const [formOpen, setFormOpen] = useState(false);
   const [editing, setEditing] = useState<Contract | null>(null);
   const [form, setForm] = useState(emptyForm());
+  const { isFarm, copy } = useCompanyProfile();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [toDelete, setToDelete] = useState<string[] | null>(null);
@@ -130,7 +132,12 @@ function Contracts() {
     const volume = filtered.reduce((s, c) => s + c.volume, 0);
     const avg = filtered.length ? filtered.reduce((s, c) => s + c.price, 0) / filtered.length : 0;
     const expiring = filtered.filter((c) => c.endDate && daysTo(c.endDate) >= 0 && daysTo(c.endDate) <= 90).length;
-    return { total: filtered.length, active: active.length, volume, avg, expiring };
+    const soldActiveList = active.filter((c) => c.type === "Venda");
+    const soldActive = soldActiveList.reduce((s, c) => s + c.volume, 0);
+    const boughtActive = active.filter((c) => c.type === "Compra").reduce((s, c) => s + c.volume, 0);
+    const salesRevenue = soldActiveList.reduce((s, c) => s + c.volume * c.price * 730, 0);
+    const sales = filtered.filter((c) => c.type === "Venda").length;
+    return { total: filtered.length, active: active.length, volume, avg, expiring, soldActive, net: soldActive - boughtActive, salesRevenue, sales };
   }, [filtered]);
 
   const hasFilters = query || fStatus !== "todos" || fSub !== "todos" || fType !== "todos" || fDue !== "todos";
@@ -210,7 +217,7 @@ function Contracts() {
     <>
       <PageHeader
         title="Contratos"
-        description="Portfólio consolidado com volume e margem por contrato."
+        description={copy.contractsDescription}
         actions={
           <>
             <Button variant="outline" size="sm" onClick={() => exportCsv(filtered)}>
@@ -224,10 +231,21 @@ function Contracts() {
       />
 
       <div className="mb-6 grid gap-4 md:grid-cols-4">
-        <Kpi label="Contratos" value={String(kpis.total)} />
-        <Kpi label="Ativos" value={String(kpis.active)} accent />
-        <Kpi label="Volume total" value={`${kpis.volume.toFixed(1)} MWm`} />
-        <Kpi label="Preço médio" value={brl(kpis.avg)} />
+        {isFarm ? (
+          <>
+            <Kpi label="Contratos de venda" value={String(kpis.sales)} />
+            <Kpi label="Energia contratada" value={`${kpis.soldActive.toFixed(1)} MWm`} accent />
+            <Kpi label="Receita contratada/mês (est.)" value={brl(kpis.salesRevenue)} />
+            <Kpi label="Vencem em 90 dias" value={String(kpis.expiring)} />
+          </>
+        ) : (
+          <>
+            <Kpi label="Contratos" value={String(kpis.total)} />
+            <Kpi label="Ativos" value={String(kpis.active)} accent />
+            <Kpi label="Posição líquida (est.)" value={`${kpis.net >= 0 ? "+" : ""}${kpis.net.toFixed(1)} MWm`} />
+            <Kpi label="Vencem em 90 dias" value={String(kpis.expiring)} />
+          </>
+        )}
       </div>
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
