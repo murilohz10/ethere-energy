@@ -98,7 +98,7 @@ function Alerts() {
     <>
       <PageHeader
         title="Alertas"
-        description="Central de alertas e regras configuráveis."
+        description={profileDescription}
         actions={
           <Button size="sm" onClick={openNew} className="text-white shadow-blue hover:opacity-95" style={{ background: "var(--gradient-brand)" }}>
             <Plus className="mr-1 h-4 w-4" /> Nova regra
