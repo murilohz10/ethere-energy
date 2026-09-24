@@ -47,6 +47,9 @@ const emptyForm = (): Omit<AlertRule, "id" | "createdAt"> => ({
 
 function Alerts() {
   const { alerts, add, update, remove, duplicate } = useAlerts();
+  const { kind } = useCompanyProfile();
+  const alertTypes = alertTypesByProfile[kind] as AlertRule["type"][];
+  void alertTypeHints;
   const [query, setQuery] = useState("");
   const [fPriority, setFPriority] = useState("todos");
   const [fState, setFState] = useState("todos");
