@@ -14,6 +14,7 @@ export function MarketingNav() {
         <nav className="hidden items-center gap-8 text-sm text-muted-foreground md:flex">
           <a href="#solucao" className="link-underline transition hover:text-brand-dark">Como funciona</a>
           <a href="#funcionalidades" className="link-underline transition hover:text-brand-dark">Funcionalidades</a>
+          <a href="#intelligence" className="link-underline transition hover:text-brand-dark">Intelligence</a>
           <a href="#publico" className="link-underline transition hover:text-brand-dark">Para quem</a>
           <a href="#plano" className="link-underline transition hover:text-brand-dark">Plano</a>
         </nav>
@@ -41,6 +42,7 @@ export function MarketingNav() {
 const productLinks = [
   { label: "Como funciona", href: "#solucao" },
   { label: "Funcionalidades", href: "#funcionalidades" },
+  { label: "Intelligence", href: "#intelligence" },
   { label: "Para quem", href: "#publico" },
   { label: "Plano", href: "#plano" },
 ];
