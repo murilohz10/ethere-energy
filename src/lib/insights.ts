@@ -193,7 +193,7 @@ export function generateInsights(
             ? `Geração realizada ${num(Math.abs(deviation))}% abaixo da prevista`
             : `Geração realizada ${num(deviation)}% acima da prevista`,
         body: `No ciclo atual foram ${num(m.realizedMwh, 0)} MWh realizados contra ${num(m.forecastMwh, 0)} MWh previstos.`,
-        why: "O desvio entre previsão e realização altera a energia disponível para cumprir os contratos de venda e o excedente exposto ao preço de curto prazo.",
+        why: "O desvio entre previsão e realização altera a energia disponível para cumprir os contratos de venda e o excedente valorado ao preço de curto prazo.",
         actionLabel: "Possível impacto",
         action:
           deviation < 0

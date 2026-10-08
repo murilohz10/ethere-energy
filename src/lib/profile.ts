@@ -52,8 +52,8 @@ export const profileCopy: Record<CompanyProfile, ProfileCopy> = {
       "Leitura do PLD, da posição da carteira e dos contratos, com o impacto financeiro estimado.",
     monitoringDescription: "PLD por submercado, posição contratada e margem da carteira.",
     contractsDescription: "Carteira de compra e venda, com vencimentos e impacto na posição.",
-    alertsDescription: "Regras de preço, exposição, margem e vencimentos da carteira.",
-    reportsDescription: "Consolidados de carteira, contratos, exposição, margem e mercado.",
+    alertsDescription: "Regras de preço, margem e vencimentos da carteira.",
+    reportsDescription: "Consolidados de carteira, contratos, margem e mercado.",
   },
   "Fazenda de Energia": {
     badge: "Fazenda de geração",
