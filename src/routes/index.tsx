@@ -594,8 +594,12 @@ const faq = [
     a: "Não. A Ethere é 100% web: você cria a conta, cadastra sua empresa e começa a usar em minutos.",
   },
   {
+    q: "O que é o Ethere Intelligence?",
+    a: "É o assistente de IA da plataforma. Você pergunta em linguagem natural e ele consulta seus contratos, alertas e os dados do mercado antes de responder, sempre indicando as fontes. Disponível nos dois planos — com limite mensal no Core e ilimitado no Pro.",
+  },
+  {
     q: "Existe limite de contratos?",
-    a: "Não. O Plano Ethere inclui cadastro ilimitado de contratos.",
+    a: "No plano Core, até 100 contratos. No plano Pro, o cadastro é ilimitado.",
   },
   {
     q: "Como funcionam os alertas?",
