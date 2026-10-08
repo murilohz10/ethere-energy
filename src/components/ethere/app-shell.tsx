@@ -36,11 +36,15 @@ import {
   CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
 } from "@/components/ui/command";
 import { toast } from "sonner";
+import { MessageSquareText } from "lucide-react";
+import { IntelligenceChat } from "./intelligence-chat";
+import ethereMark from "@/assets/ethere-logo.png.asset.json";
 
 type NavItem = { to: string; label: string; icon: typeof LayoutGrid; exact?: boolean };
 const nav: NavItem[] = [
   { to: "/app", label: "Visão Geral", icon: LayoutGrid, exact: true },
   { to: "/app/insights", label: "Central de Inteligência", icon: Brain },
+  { to: "/app/intelligence", label: "Ethere Intelligence", icon: MessageSquareText },
   { to: "/app/monitoramento", label: "Monitoramento", icon: Activity },
   { to: "/app/contratos", label: "Contratos", icon: FileText },
   { to: "/app/alertas", label: "Alertas", icon: Bell },
@@ -80,6 +84,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <div className="w-full">{children}</div>
         </main>
       </div>
+      <IntelligenceLauncher />
     </div>
   );
 }
@@ -362,5 +367,29 @@ export function PageHeader({ title, description, actions }: { title: string; des
       </div>
       {actions && <div className="flex items-center gap-2">{actions}</div>}
     </div>
+  );
+}
+
+function IntelligenceLauncher() {
+  const pathname = useRouterState({ select: (st) => st.location.pathname });
+  const [open, setOpen] = useState(false);
+  if (pathname === "/app/intelligence") return null;
+  return (
+    <Sheet open={open} onOpenChange={setOpen}>
+      <SheetTrigger asChild>
+        <button
+          aria-label="Abrir Ethere Intelligence"
+          className="fixed bottom-5 right-5 z-40 grid h-11 w-11 place-items-center rounded-full border border-border bg-card shadow-soft transition hover:border-brand-soft"
+        >
+          <img src={ethereMark.url} alt="" className="h-6 w-6 object-contain" />
+        </button>
+      </SheetTrigger>
+      <SheetContent side="right" className="flex w-full flex-col gap-0 border-border bg-card p-0 sm:max-w-md">
+        <div className="border-b border-border px-4 py-3">
+          <SheetTitle className="text-sm font-semibold">Ethere Intelligence</SheetTitle>
+        </div>
+        <div className="min-h-0 flex-1">{open && <IntelligenceChat variant="panel" />}</div>
+      </SheetContent>
+    </Sheet>
   );
 }
