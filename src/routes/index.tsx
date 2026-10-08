@@ -218,6 +218,7 @@ const features = [
   { icon: FileText, title: "Gestão de Contratos", desc: "Organize contratos em um único ambiente." },
   { icon: Bell, title: "Alertas Inteligentes", desc: "Receba notificações quando o mercado exigir atenção." },
   { icon: Sparkles, title: "Análise por IA", desc: "Interpreta automaticamente o comportamento do mercado." },
+  { icon: MessageSquareText, title: "Ethere Intelligence", desc: "Converse com um assistente que consulta seus dados e o mercado em tempo real." },
   { icon: BarChart3, title: "Indicadores Financeiros", desc: "Visualize margens e impactos financeiros." },
   { icon: History, title: "Histórico do Mercado", desc: "Consulte tendências e evolução do PLD." },
 ];
@@ -252,6 +253,123 @@ function Features() {
         ))}
       </div>
     </Section>
+  );
+}
+
+/* ------------------------- Ethere Intelligence ----------------------- */
+
+const intelligencePoints = [
+  {
+    icon: LineIcon,
+    title: "Consulta seus dados em tempo real",
+    desc: "PLD por submercado, contratos, vencimentos, posição da carteira e geração — o assistente busca os números antes de responder.",
+  },
+  {
+    icon: Sparkles,
+    title: "Interpreta, não decide",
+    desc: "Explica o que aconteceu, por que importa e qual pode ser o impacto. A decisão continua com você.",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Fontes e evidências em cada resposta",
+    desc: "Toda análise indica de onde veio o dado e separa claramente o que é fato do que é estimativa gerencial.",
+  },
+  {
+    icon: FileText,
+    title: "Entende seus documentos",
+    desc: "Anexe PDFs de contratos e faturas para cruzar cláusulas com o comportamento do mercado.",
+  },
+];
+
+const chatPreview = [
+  { from: "user", text: "Como está o PLD do Sudeste esta semana e o que isso significa para minha carteira?" },
+  {
+    from: "ai",
+    text: "O PLD do submercado SE/CO subiu 12% nos últimos 7 dias, para R$ 148,20/MWh. Com seus contratos atuais, o impacto estimado na margem projetada é de +2,1 p.p. no mês. Fonte: CCEE · estimativa gerencial, não é liquidação oficial.",
+  },
+  { from: "user", text: "Quais contratos vencem nos próximos 90 dias?" },
+  {
+    from: "ai",
+    text: "Você tem 3 contratos vencendo em até 90 dias, totalizando 4,6 MWm. O mais próximo vence em 18 dias (Fornecedor Alfa, 1,8 MWm a R$ 189,00/MWh).",
+  },
+];
+
+function Intelligence() {
+  return (
+    <section id="intelligence" className="relative overflow-hidden border-y border-border/60 py-24">
+      <div className="pointer-events-none absolute inset-0 aurora opacity-50" aria-hidden />
+      <div className="relative mx-auto max-w-7xl px-6">
+        <div className="grid items-center gap-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+          <div>
+            <Reveal>
+              <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-medium text-brand-dark">
+                <MessageSquareText className="h-3.5 w-3.5" />
+                Ethere Intelligence
+              </span>
+              <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
+                Um especialista em energia, <span className="text-gradient-cyan">disponível 24/7</span>
+              </h2>
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+                Converse em linguagem natural com um assistente treinado no contexto do Mercado Livre de Energia.
+                Ele consulta seus contratos, alertas e os dados do mercado antes de responder — e adapta a análise
+                ao perfil da sua empresa, seja comercializadora ou fazenda de geração.
+              </p>
+            </Reveal>
+            <div className="mt-10 grid gap-4 sm:grid-cols-2">
+              {intelligencePoints.map((p, i) => (
+                <Reveal key={p.title} delay={i * 90}>
+                  <div className="group h-full rounded-2xl border border-border/60 bg-card/60 p-5 backdrop-blur transition-all duration-300 hover:-translate-y-1 hover:border-primary/35">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary/12 text-primary transition-transform duration-300 group-hover:scale-110">
+                      <p.icon className="h-4 w-4" />
+                    </div>
+                    <h3 className="mt-4 text-sm font-semibold">{p.title}</h3>
+                    <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{p.desc}</p>
+                  </div>
+                </Reveal>
+              ))}
+            </div>
+          </div>
+
+          <Reveal variant="right" delay={140}>
+            <div className="relative overflow-hidden rounded-2xl glass-panel hairline-top p-6">
+              <div className="flex items-center gap-2.5 border-b border-border/60 pb-4">
+                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/15 text-primary">
+                  <MessageSquareText className="h-4 w-4" />
+                </span>
+                <div>
+                  <p className="text-sm font-semibold">Ethere Intelligence</p>
+                  <p className="text-[11px] text-muted-foreground">Contexto: Comercializadora · Visão Geral</p>
+                </div>
+                <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-medium text-brand-dark">
+                  <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-primary" />
+                  Online
+                </span>
+              </div>
+              <div className="mt-5 space-y-4">
+                {chatPreview.map((m, i) => (
+                  <div key={i} className={"flex " + (m.from === "user" ? "justify-end" : "justify-start")}>
+                    <div
+                      className={
+                        "max-w-[85%] rounded-2xl px-4 py-3 text-[13px] leading-relaxed " +
+                        (m.from === "user"
+                          ? "bg-primary text-primary-foreground"
+                          : "border border-border/60 bg-surface/70 text-muted-foreground")
+                      }
+                    >
+                      {m.text}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-5 flex items-center gap-2 rounded-xl border border-border/60 bg-surface/60 px-4 py-3">
+                <span className="flex-1 text-[13px] text-muted-foreground/70">Pergunte sobre PLD, contratos, geração...</span>
+                <ArrowRight className="h-4 w-4 text-primary" />
+              </div>
+            </div>
+          </Reveal>
+        </div>
+      </div>
+    </section>
   );
 }
 
