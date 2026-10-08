@@ -31,7 +31,6 @@ const toolLabels: Record<string, string> = {
   get_contracts_summary: "Resumo de contratos",
   get_contract_expirations: "Vencimentos de contratos",
   get_portfolio_position: "Posição da carteira",
-  calculate_exposure: "Exposição estimada",
   get_active_alerts: "Alertas configurados",
   get_generation_data: "Dados de geração",
 };

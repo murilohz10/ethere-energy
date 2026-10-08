@@ -133,7 +133,7 @@ function buildTools(ctx: CompanyContext) {
       }),
     }),
     get_portfolio_position: tool({
-      description: "Posição contratada: volume de venda e compra ativos, posição líquida, receita, custo e margem mensais (estimativa gerencial).",
+      description: "Posição contratada: volume de venda e compra ativos, receita, custo e margem mensais (estimativa gerencial).",
       inputSchema: z.object({}),
       execute: async () => {
         const sale = active.filter((c) => c.type === "Venda");
@@ -147,22 +147,6 @@ function buildTools(ctx: CompanyContext) {
           monthlyRevenue: Math.round(revenue),
           monthlyCost: Math.round(cost),
           monthlyMargin: Math.round(revenue - cost),
-        };
-      },
-    }),
-    calculate_exposure: tool({
-      description: "Exposição estimada (venda − compra, em MWm) por submercado e valoração ao PLD atual. Estimativa gerencial.",
-      inputSchema: z.object({ submarket: subArg }),
-      execute: async ({ submarket }) => {
-        const subs = submarket ? [submarket] : [...SUBMARKETS];
-        return {
-          source: "Cálculo Ethere — contratos ativos × PLD atual (estimativa gerencial, não é liquidação CCEE)",
-          bySubmarket: subs.map((s) => {
-            const net = active
-              .filter((c) => c.submarket === s)
-              .reduce((acc, c) => acc + (c.type === "Venda" ? c.volume : -c.volume), 0);
-            return { submarket: s, netMwm: +net.toFixed(2), valuedAtPldMonthly: Math.round(net * pld(s, today) * HOURS_PER_MONTH) };
-          }),
         };
       },
     }),
@@ -222,10 +206,11 @@ Contexto da sessão (determinado pela plataforma, não pelo usuário):
 Princípios:
 - Ajude a entender o que aconteceu, como, por quê, quais dados sustentam, qual o contexto e o que pode significar.
 - Mercado primeiro, empresa quando necessário: só consulte contratos, alertas, posição ou geração se a pergunta exigir.
-- ${ctx.profile === "Comercializadora" ? "Para comercializadora, considere quando relevante: contratos, exposição, posição, PLD, contexto de mercado e impacto na carteira." : "Para fazenda de geração, considere quando relevante: geração prevista/realizada, contratos, PLD, receita e contexto de mercado."}
+- ${ctx.profile === "Comercializadora" ? "Para comercializadora, considere quando relevante: contratos, posição contratada, margem, PLD, contexto de mercado e impacto na carteira." : "Para fazenda de geração, considere quando relevante: geração prevista/realizada, contratos, PLD, receita e contexto de mercado."}
 - Use as ferramentas para obter dados; nunca invente números, datas ou fontes. Se faltar dado, diga claramente.
 - Diferencie explicitamente dado, cálculo, interpretação e hipótese. Nunca apresente hipótese como fato.
-- Cálculos de exposição, margem, receita e geração são estimativas gerenciais, não liquidação oficial da CCEE. Os dados de mercado da base atual são uma série demonstrativa: informe isso quando apresentar valores.
+- Não calcule nem apresente indicadores de posição líquida entre compra e venda; esse conceito não faz parte da Ethere.
+- Cálculos de margem, receita e geração são estimativas gerenciais, não liquidação oficial da CCEE. Os dados de mercado da base atual são uma série demonstrativa: informe isso quando apresentar valores.
 - Indique data/período e fonte dos dados factuais (ex.: "**Fonte:** Base Ethere — histórico de PLD (CCEE), 01/09 a 08/10").
 - Não tome decisões pelo cliente nem faça recomendações categóricas ("você deve vender/renovar"). Prefira "os dados indicam", "merece atenção", "pode impactar". Para decisões, oriente a consultar a Central de Inteligência.
 - Pedidos para gerar relatórios: oriente a usar a página Relatórios. Relatórios anexados podem ser analisados.

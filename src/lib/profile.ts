@@ -5,7 +5,7 @@
  * derivados do perfil da empresa da sessão. Nenhuma tela duplica regra de
  * negócio — todas consomem estas funções.
  *
- * IMPORTANTE: todos os valores de exposição, margem, geração e receita são
+ * IMPORTANTE: todos os valores de margem, geração e receita são
  * ESTIMATIVAS GERENCIAIS calculadas com os dados disponíveis na plataforma.
  * Não representam contabilização ou liquidação oficial da CCEE.
  */
@@ -47,13 +47,13 @@ export const profileCopy: Record<CompanyProfile, ProfileCopy> = {
     overviewTitle: "Inteligência da sua carteira",
     overviewDescription: "Posição comercial, margem projetada e impacto do mercado sobre os contratos.",
     question: "Como está minha posição comercial e qual é o impacto financeiro do mercado?",
-    chain: ["Mercado", "Contratos", "Exposição", "Margem", "Decisão"],
+    chain: ["Mercado", "Contratos", "Margem", "Decisão"],
     insightsDescription:
       "Leitura do PLD, da posição da carteira e dos contratos, com o impacto financeiro estimado.",
-    monitoringDescription: "PLD por submercado, posição contratada e exposição estimada da carteira.",
+    monitoringDescription: "PLD por submercado, posição contratada e margem da carteira.",
     contractsDescription: "Carteira de compra e venda, com vencimentos e impacto na posição.",
-    alertsDescription: "Regras de preço, exposição, margem e vencimentos da carteira.",
-    reportsDescription: "Consolidados de carteira, contratos, exposição, margem e mercado.",
+    alertsDescription: "Regras de preço, margem e vencimentos da carteira.",
+    reportsDescription: "Consolidados de carteira, contratos, margem e mercado.",
   },
   "Fazenda de Energia": {
     badge: "Fazenda de geração",
@@ -112,16 +112,12 @@ export type TraderMetrics = {
   saleMwm: number;
   purchaseMwm: number;
   contractedMwm: number;
-  /** Diferença estimada entre venda e compra contratadas (MW médios). */
-  netPositionMwm: number;
   revenue: number;
   cost: number;
   margin: number;
   marginPercent: number;
   avgSalePrice: number;
   pld: PldSnapshot;
-  /** Impacto financeiro estimado do PLD sobre a posição em aberto (mês). */
-  pldImpact: number;
   expiring30: Contract[];
   expiring90: Contract[];
 };
@@ -135,21 +131,18 @@ export function traderMetrics(contracts: Contract[], nonce = 0): TraderMetrics {
   const revenue = sale.reduce((s, c) => s + c.volume * c.price * HOURS_PER_MONTH, 0);
   const cost = purchase.reduce((s, c) => s + c.volume * c.price * HOURS_PER_MONTH, 0);
   const margin = revenue - cost;
-  const netPositionMwm = +(saleMwm - purchaseMwm).toFixed(2);
   const pld = pldSnapshot("SE/CO", nonce);
 
   return {
     saleMwm,
     purchaseMwm,
     contractedMwm: +(saleMwm + purchaseMwm).toFixed(2),
-    netPositionMwm,
     revenue,
     cost,
     margin,
     marginPercent: revenue > 0 ? (margin / revenue) * 100 : 0,
     avgSalePrice: saleMwm > 0 ? sale.reduce((s, c) => s + c.price * c.volume, 0) / saleMwm : 0,
     pld,
-    pldImpact: netPositionMwm * HOURS_PER_MONTH * pld.value,
     expiring30: expiringContracts(contracts, 30),
     expiring90: expiringContracts(contracts, 90),
   };
@@ -272,13 +265,12 @@ export function expirationBuckets(contracts: Contract[]) {
 /* -------------------------- alertas e relatórios -------------------------- */
 
 export const alertTypesByProfile: Record<CompanyProfile, string[]> = {
-  Comercializadora: ["PLD", "Exposição", "Margem", "Contrato", "Mercado", "Regulação"],
+  Comercializadora: ["PLD", "Margem", "Contrato", "Mercado", "Regulação"],
   "Fazenda de Energia": ["PLD", "Geração", "Receita", "Contrato", "Clima", "Regulação"],
 };
 
 export const alertTypeHints: Record<string, string> = {
   PLD: "Dispara quando o preço do submercado cruza o limite (R$/MWh).",
-  Exposição: "Dispara quando a diferença estimada entre venda e compra excede o limite (MWm).",
   Margem: "Dispara quando a margem projetada varia além do limite (%).",
   Geração: "Dispara quando a geração realizada se desvia da prevista além do limite (%).",
   Receita: "Dispara quando a receita projetada varia além do limite (%).",
@@ -290,7 +282,7 @@ export const alertTypeHints: Record<string, string> = {
 
 export const reportSuggestionsByProfile: Record<CompanyProfile, { title: string; summary: string }[]> = {
   Comercializadora: [
-    { title: "Carteira e posição contratada", summary: "Posição de compra e venda, exposição estimada e preço médio da carteira." },
+    { title: "Carteira e posição contratada", summary: "Volume de compra e venda e preço médio da carteira." },
     { title: "Margem projetada do período", summary: "Receita, custo e margem projetada por contrato, com impacto do PLD." },
     { title: "Contratos e vencimentos", summary: "Contratos ativos, pendentes e vencimentos dos próximos 90 dias." },
     { title: "PLD e mercado", summary: "Evolução do PLD por submercado e leitura das movimentações do período." },

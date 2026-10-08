@@ -92,9 +92,8 @@ function Overview() {
       ]
     : [
         { to: "energia-contratada", label: "Energia contratada", value: `${num(trader.contractedMwm)} MWm`, delta: `${num(trader.saleMwm)} venda · ${num(trader.purchaseMwm)} compra`, icon: Zap, accent: true },
-        { to: "exposicao", label: "Exposição estimada", value: `${num(Math.abs(trader.netPositionMwm))} MWm`, delta: trader.netPositionMwm >= 0 ? "posição vendida" : "posição comprada", icon: Scale, negative: Math.abs(trader.netPositionMwm) > 5 },
         { to: "margem", label: "Margem projetada", value: compactBrl(trader.margin), delta: `${num(trader.marginPercent)}% da receita`, icon: DollarSign, negative: trader.margin < 0 },
-        { to: "pld", label: "Impacto do PLD", value: compactBrl(Math.abs(trader.pldImpact)), delta: `PLD ${brl(pld.value)} (${pld.delta >= 0 ? "+" : ""}${num(pld.delta)}%)`, icon: Activity, negative: pld.delta < 0 },
+        { to: "pld", label: "PLD atual (SE/CO)", value: brl(pld.value), delta: `PLD ${brl(pld.value)} (${pld.delta >= 0 ? "+" : ""}${num(pld.delta)}%)`, icon: Activity, negative: pld.delta < 0 },
         { to: "contratos", label: "Contratos a vencer (90d)", value: String(trader.expiring90.length), delta: `${trader.expiring30.length} em 30 dias`, icon: CalendarClock },
       ];
 
@@ -255,10 +254,10 @@ function Overview() {
               </>
             ) : (
               <>
-                A carteira está {trader.netPositionMwm >= 0 ? "vendida" : "comprada"} em{" "}
-                <b className="text-brand-dark">{num(Math.abs(trader.netPositionMwm))} MWm</b> e o PLD SE/CO está em{" "}
-                <b className="text-brand-dark">{brl(pld.value)}</b>. A variação observada altera a exposição estimada da
-                carteira e a margem projetada dos próximos ciclos.
+                A carteira soma{" "}
+                <b className="text-brand-dark">{num(trader.contractedMwm)} MWm</b> contratados e o PLD SE/CO está em{" "}
+                <b className="text-brand-dark">{brl(pld.value)}</b>. A variação observada pode alterar a margem
+                projetada dos próximos ciclos.
               </>
             )}
           </p>
