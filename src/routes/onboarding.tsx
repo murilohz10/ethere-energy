@@ -13,6 +13,9 @@ import {
   type AlertPriority, type Submarket,
 } from "@/lib/store";
 import { toast } from "sonner";
+import { showPlanLimit } from "@/lib/plan-limit";
+import { limitMessages } from "@/lib/billing";
+
 
 export const Route = createFileRoute("/onboarding")({
   head: () => ({
@@ -74,7 +77,7 @@ function Onboarding() {
 
   function saveContract() {
     if (!contract.name.trim() || !contract.company.trim()) return toast.error("Preencha nome e contraparte do contrato.");
-    contracts.add({
+    const okC = contracts.add({
       name: contract.name.trim(),
       company: contract.company.trim(),
       type: "Venda",
@@ -86,13 +89,14 @@ function Onboarding() {
       status: "Ativo",
       notes: "Criado no onboarding.",
     });
+    if (!okC) return showPlanLimit(limitMessages.contracts(100));
     toast.success("Contrato criado.");
     setStep(3);
   }
 
   function saveAlert() {
     if (!alert.name.trim()) return toast.error("Informe o nome do alerta.");
-    alerts.add({
+    const okA = alerts.add({
       name: alert.name.trim(),
       type: "PLD",
       threshold: Number(alert.threshold) || 0,
@@ -101,6 +105,7 @@ function Onboarding() {
       priority: alert.priority,
       enabled: true,
     });
+    if (!okA) return showPlanLimit(limitMessages.alerts(5));
     toast.success("Alerta criado.");
     setStep(4);
   }

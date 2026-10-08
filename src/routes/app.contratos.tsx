@@ -32,6 +32,9 @@ import {
 import { useAccessRole } from "@/lib/store";
 import { can } from "@/lib/rbac";
 import { useCompanyProfile } from "@/lib/profile";
+import { showPlanLimit } from "@/lib/plan-limit";
+import { limitMessages } from "@/lib/billing";
+
 
 export const Route = createFileRoute("/app/contratos")({
   head: () => ({ meta: [{ title: "Contratos · Ethere" }] }),
@@ -180,7 +183,7 @@ function Contracts() {
       update(editing.id, form);
       toast.success("Contrato atualizado", { description: `${form.name} foi salvo com sucesso.` });
     } else {
-      add(form);
+      if (!add(form)) { setSaving(false); return showPlanLimit(limitMessages.contracts(100)); }
       toast.success("Contrato criado", { description: `${form.name} foi adicionado ao portfólio.` });
     }
     setSaving(false);
@@ -384,7 +387,7 @@ function Contracts() {
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => { add({ ...r, name: `${r.name} (cópia)` }); toast.success("Contrato duplicado"); }}>
+                          <DropdownMenuItem onClick={() => { if (!add({ ...r, name: `${r.name} (cópia)` })) return showPlanLimit(limitMessages.contracts(100)); toast.success("Contrato duplicado"); }}>
                             Duplicar
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => exportCsv([r])}>Exportar CSV</DropdownMenuItem>

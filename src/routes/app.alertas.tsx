@@ -22,6 +22,8 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAlerts, fmtDate, type AlertRule, type AlertPriority } from "@/lib/store";
+import { showPlanLimit } from "@/lib/plan-limit";
+import { limitMessages } from "@/lib/billing";
 import { useCompanyProfile, alertTypesByProfile, alertTypeHints } from "@/lib/profile";
 
 export const Route = createFileRoute("/app/alertas")({
@@ -91,7 +93,7 @@ function Alerts() {
     setErrors(e);
     if (Object.keys(e).length) return toast.error("Verifique os campos obrigatórios.");
     if (editing) { update(editing.id, form); toast.success("Alerta atualizado"); }
-    else { add(form); toast.success("Alerta criado", { description: form.name }); }
+    else { if (!add(form)) return showPlanLimit(limitMessages.alerts(5)); toast.success("Alerta criado", { description: form.name }); }
     setOpen(false);
   };
 
@@ -189,7 +191,7 @@ function Alerts() {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => { duplicate(a.id); toast.success("Alerta duplicado"); }}>
+                    <DropdownMenuItem onClick={() => { if (!duplicate(a.id)) return showPlanLimit(limitMessages.alerts(5)); toast.success("Alerta duplicado"); }}>
                       <Copy className="mr-2 h-3.5 w-3.5" /> Duplicar
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => { update(a.id, { enabled: !a.enabled }); toast.success(a.enabled ? "Alerta pausado" : "Alerta ativado"); }}>
