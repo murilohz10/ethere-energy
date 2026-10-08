@@ -13,6 +13,7 @@ import {
   Gauge,
   History,
   LineChart as LineIcon,
+  MessageSquareText,
   Rocket,
   ShieldCheck,
   Sparkles,
@@ -58,6 +59,7 @@ function Landing() {
       <Metrics />
       <HowItWorks />
       <Features />
+      <Intelligence />
       <Differentials />
       <Audience />
       <Pricing />
