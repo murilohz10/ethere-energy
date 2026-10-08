@@ -20,11 +20,13 @@ import { Route as AppIndexRouteImport } from './routes/app.index'
 import { Route as AppRelatoriosRouteImport } from './routes/app.relatorios'
 import { Route as AppPerfilRouteImport } from './routes/app.perfil'
 import { Route as AppMonitoramentoRouteImport } from './routes/app.monitoramento'
+import { Route as AppIntelligenceRouteImport } from './routes/app.intelligence'
 import { Route as AppInsightsRouteImport } from './routes/app.insights'
 import { Route as AppContratosRouteImport } from './routes/app.contratos'
 import { Route as AppConfiguracoesRouteImport } from './routes/app.configuracoes'
 import { Route as AppAlertasRouteImport } from './routes/app.alertas'
 import { Route as AppAcessoNegadoRouteImport } from './routes/app.acesso-negado'
+import { Route as ApiIntelligenceRouteImport } from './routes/api/intelligence'
 import { Route as AppMetricasMetricRouteImport } from './routes/app.metricas.$metric'
 
 const SignupRoute = SignupRouteImport.update({
@@ -82,6 +84,11 @@ const AppMonitoramentoRoute = AppMonitoramentoRouteImport.update({
   path: '/monitoramento',
   getParentRoute: () => AppRoute,
 } as any)
+const AppIntelligenceRoute = AppIntelligenceRouteImport.update({
+  id: '/intelligence',
+  path: '/intelligence',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppInsightsRoute = AppInsightsRouteImport.update({
   id: '/insights',
   path: '/insights',
@@ -107,6 +114,11 @@ const AppAcessoNegadoRoute = AppAcessoNegadoRouteImport.update({
   path: '/acesso-negado',
   getParentRoute: () => AppRoute,
 } as any)
+const ApiIntelligenceRoute = ApiIntelligenceRouteImport.update({
+  id: '/api/intelligence',
+  path: '/api/intelligence',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppMetricasMetricRoute = AppMetricasMetricRouteImport.update({
   id: '/metricas/$metric',
   path: '/metricas/$metric',
@@ -121,11 +133,13 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/signup': typeof SignupRoute
+  '/api/intelligence': typeof ApiIntelligenceRoute
   '/app/acesso-negado': typeof AppAcessoNegadoRoute
   '/app/alertas': typeof AppAlertasRoute
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
   '/app/insights': typeof AppInsightsRoute
+  '/app/intelligence': typeof AppIntelligenceRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
   '/app/perfil': typeof AppPerfilRoute
   '/app/relatorios': typeof AppRelatoriosRoute
@@ -139,11 +153,13 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/signup': typeof SignupRoute
+  '/api/intelligence': typeof ApiIntelligenceRoute
   '/app/acesso-negado': typeof AppAcessoNegadoRoute
   '/app/alertas': typeof AppAlertasRoute
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
   '/app/insights': typeof AppInsightsRoute
+  '/app/intelligence': typeof AppIntelligenceRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
   '/app/perfil': typeof AppPerfilRoute
   '/app/relatorios': typeof AppRelatoriosRoute
@@ -159,11 +175,13 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/redefinir-senha': typeof RedefinirSenhaRoute
   '/signup': typeof SignupRoute
+  '/api/intelligence': typeof ApiIntelligenceRoute
   '/app/acesso-negado': typeof AppAcessoNegadoRoute
   '/app/alertas': typeof AppAlertasRoute
   '/app/configuracoes': typeof AppConfiguracoesRoute
   '/app/contratos': typeof AppContratosRoute
   '/app/insights': typeof AppInsightsRoute
+  '/app/intelligence': typeof AppIntelligenceRoute
   '/app/monitoramento': typeof AppMonitoramentoRoute
   '/app/perfil': typeof AppPerfilRoute
   '/app/relatorios': typeof AppRelatoriosRoute
@@ -180,11 +198,13 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/redefinir-senha'
     | '/signup'
+    | '/api/intelligence'
     | '/app/acesso-negado'
     | '/app/alertas'
     | '/app/configuracoes'
     | '/app/contratos'
     | '/app/insights'
+    | '/app/intelligence'
     | '/app/monitoramento'
     | '/app/perfil'
     | '/app/relatorios'
@@ -198,11 +218,13 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/redefinir-senha'
     | '/signup'
+    | '/api/intelligence'
     | '/app/acesso-negado'
     | '/app/alertas'
     | '/app/configuracoes'
     | '/app/contratos'
     | '/app/insights'
+    | '/app/intelligence'
     | '/app/monitoramento'
     | '/app/perfil'
     | '/app/relatorios'
@@ -217,11 +239,13 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/redefinir-senha'
     | '/signup'
+    | '/api/intelligence'
     | '/app/acesso-negado'
     | '/app/alertas'
     | '/app/configuracoes'
     | '/app/contratos'
     | '/app/insights'
+    | '/app/intelligence'
     | '/app/monitoramento'
     | '/app/perfil'
     | '/app/relatorios'
@@ -237,6 +261,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   RedefinirSenhaRoute: typeof RedefinirSenhaRoute
   SignupRoute: typeof SignupRoute
+  ApiIntelligenceRoute: typeof ApiIntelligenceRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -318,6 +343,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppMonitoramentoRouteImport
       parentRoute: typeof AppRoute
     }
+    '/app/intelligence': {
+      id: '/app/intelligence'
+      path: '/intelligence'
+      fullPath: '/app/intelligence'
+      preLoaderRoute: typeof AppIntelligenceRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/insights': {
       id: '/app/insights'
       path: '/insights'
@@ -353,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppAcessoNegadoRouteImport
       parentRoute: typeof AppRoute
     }
+    '/api/intelligence': {
+      id: '/api/intelligence'
+      path: '/api/intelligence'
+      fullPath: '/api/intelligence'
+      preLoaderRoute: typeof ApiIntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/app/metricas/$metric': {
       id: '/app/metricas/$metric'
       path: '/metricas/$metric'
@@ -369,6 +408,7 @@ interface AppRouteChildren {
   AppConfiguracoesRoute: typeof AppConfiguracoesRoute
   AppContratosRoute: typeof AppContratosRoute
   AppInsightsRoute: typeof AppInsightsRoute
+  AppIntelligenceRoute: typeof AppIntelligenceRoute
   AppMonitoramentoRoute: typeof AppMonitoramentoRoute
   AppPerfilRoute: typeof AppPerfilRoute
   AppRelatoriosRoute: typeof AppRelatoriosRoute
@@ -382,6 +422,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppConfiguracoesRoute: AppConfiguracoesRoute,
   AppContratosRoute: AppContratosRoute,
   AppInsightsRoute: AppInsightsRoute,
+  AppIntelligenceRoute: AppIntelligenceRoute,
   AppMonitoramentoRoute: AppMonitoramentoRoute,
   AppPerfilRoute: AppPerfilRoute,
   AppRelatoriosRoute: AppRelatoriosRoute,
@@ -399,6 +440,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   RedefinirSenhaRoute: RedefinirSenhaRoute,
   SignupRoute: SignupRoute,
+  ApiIntelligenceRoute: ApiIntelligenceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

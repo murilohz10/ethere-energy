@@ -157,6 +157,7 @@ export function canAny(role: AppRole | undefined | null, permissions: Permission
 export const routePermissions: { path: string; exact?: boolean; permission: Permission | null }[] = [
   { path: "/app", exact: true, permission: "dashboard:view" },
   { path: "/app/insights", permission: "insights:view" },
+  { path: "/app/intelligence", permission: null },
   { path: "/app/monitoramento", permission: "monitoring:view" },
   { path: "/app/contratos", permission: "contracts:view" },
   { path: "/app/alertas", permission: "alerts:view" },
