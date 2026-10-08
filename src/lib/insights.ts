@@ -3,7 +3,7 @@
  * portfólio real (contratos + alertas) E ao perfil da empresa.
  *
  * Cada insight segue a estrutura: o que aconteceu → por que importa → possível
- * impacto. Comercializadoras recebem leitura de carteira, exposição e margem;
+ * impacto. Comercializadoras recebem leitura de carteira, contratos e margem;
  * fazendas recebem leitura de geração, receita e contratos de venda.
  */
 
@@ -257,10 +257,9 @@ export function generateInsights(
     );
   } else {
     const m = traderMetrics(contracts, nonce);
-    const netAbs = Math.abs(m.netPositionMwm);
-    financialImpact = Math.abs(m.pldImpact);
-    financialImpactLabel = "Impacto estimado do PLD";
-    riskBase = netAbs * 3.2;
+    financialImpact = Math.abs(m.margin);
+    financialImpactLabel = "Margem projetada";
+    riskBase = m.expiring90.length * 3.2;
 
     list.push(
       {
@@ -270,27 +269,11 @@ export function generateInsights(
         icon: "market",
         title: `PLD SE/CO em ${brl(m.pld.value)} (${m.pld.delta >= 0 ? "+" : ""}${num(m.pld.delta)}%)`,
         body: "O último fechamento moveu a curva de curto prazo no submercado de maior concentração da carteira.",
-        why: "A variação do PLD observada no período altera a exposição estimada da carteira nos próximos ciclos.",
+        why: "A variação do PLD observada no período pode alterar a margem projetada da carteira nos próximos ciclos.",
         actionLabel: "Possível impacto",
-        action: `Impacto estimado de ${brl(Math.abs(m.pldImpact))} sobre a posição em aberto do ciclo.`,
+        action: `Margem projetada atual de ${brl(m.margin)} no ciclo.`,
         impact: ESTIMATE_NOTE,
         date: hoursAgo(1 + r(1) * 5),
-      },
-      {
-        id: "exposicao",
-        level: netAbs > 6 ? "critical" : netAbs > 3 ? "attention" : "info",
-        category: "Carteira",
-        icon: "alert",
-        title:
-          m.netPositionMwm >= 0
-            ? `Posição vendida líquida de ${num(m.netPositionMwm)} MWm`
-            : `Posição comprada líquida de ${num(netAbs)} MWm`,
-        body: `A carteira ativa soma ${num(m.saleMwm)} MWm em venda e ${num(m.purchaseMwm)} MWm em compra.`,
-        why: "A diferença entre venda e compra é a parcela da carteira que responde diretamente ao preço de curto prazo.",
-        actionLabel: "Possível impacto",
-        action: "Avaliar contratação complementar para aproximar compra e venda no ciclo.",
-        impact: ESTIMATE_NOTE,
-        date: hoursAgo(2 + r(2) * 7),
       },
       {
         id: "margem",
@@ -329,12 +312,12 @@ export function generateInsights(
           ? `${activeAlerts} alertas ativos monitorando a carteira`
           : "Nenhum alerta ativo configurado",
         body: activeAlerts
-          ? "As regras acompanham preço, exposição, margem e vencimentos contratuais."
+          ? "As regras acompanham preço, margem e vencimentos contratuais."
           : "Sem regras ativas, movimentos relevantes de preço podem passar sem notificação.",
         why: "Alertas reduzem o tempo entre a movimentação do mercado e a decisão comercial.",
         actionLabel: "Possível impacto",
         action: activeAlerts
-          ? "Revisar limiares de preço e exposição para o ciclo atual."
+          ? "Revisar limiares de preço e margem para o ciclo atual."
           : "Criar ao menos um alerta de PLD e um de vencimento contratual.",
         date: hoursAgo(14 + r(5) * 20),
       },
@@ -351,7 +334,7 @@ export function generateInsights(
       body: `${next.name} · ${next.company} — ${num(next.volume)} MWm em ${next.submarket}.`,
       why: farm
         ? "O vencimento reduz a parcela de receita já contratada para os próximos ciclos de geração."
-        : "O vencimento altera a posição contratada e a exposição estimada dos próximos ciclos.",
+        : "O vencimento altera a energia contratada e a margem dos próximos ciclos.",
       actionLabel: "Possível impacto",
       action: "Iniciar a renovação e cotar preços antes do encerramento do contrato.",
       date: hoursAgo(6 + r(9) * 16),
@@ -397,7 +380,7 @@ export function generateInsights(
         "Atualização contratual detectada",
         "Recálculo da margem projetada",
         "Novo alerta operacional disparado",
-        "Consolidação de exposição concluída",
+        "Consolidação da carteira concluída",
       ];
   const timelineCats: InsightCategory[] = farm
     ? ["Geração", "Mercado", "Contratos", "Geração", "Clima", "Receita"]
@@ -421,12 +404,11 @@ export function generateInsights(
         { text: "Revisar limiares dos alertas de desvio de geração.", category: "Operacional" },
       ]
     : [
-        { text: "Aproximar compra e venda para reduzir a exposição estimada.", category: "Carteira" },
         { text: "Revisar preços de venda dos contratos flexíveis.", category: "Financeiro" },
         { text: "Monitorar a variação do PLD nos próximos dias.", category: "Mercado" },
         { text: "Iniciar renovação dos contratos com vencimento próximo.", category: "Contratos" },
         { text: "Priorizar propostas nos submercados com maior margem.", category: "Financeiro" },
-        { text: "Revisar limiares dos alertas de preço e exposição.", category: "Operacional" },
+        { text: "Revisar limiares dos alertas de preço e margem.", category: "Operacional" },
         { text: "Reavaliar o resultado projetado por contraparte.", category: "Riscos" },
       ];
 

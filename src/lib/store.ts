@@ -142,7 +142,6 @@ export type AlertRuleType =
   | "Reservatório"
   | "Contrato"
   | "Regulação"
-  | "Exposição"
   | "Margem"
   | "Geração"
   | "Receita"

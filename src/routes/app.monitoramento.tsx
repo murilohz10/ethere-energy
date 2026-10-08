@@ -137,8 +137,8 @@ function Monitor() {
     : [
         { l: "Posição de venda", v: `${num(trader.saleMwm)} MWm` },
         { l: "Posição de compra", v: `${num(trader.purchaseMwm)} MWm` },
-        { l: "Exposição estimada", v: `${num(Math.abs(trader.netPositionMwm))} MWm`, negative: Math.abs(trader.netPositionMwm) > 5 },
-        { l: "Impacto do PLD (mês)", v: brl(Math.abs(trader.pldImpact)) },
+        { l: "Margem projetada (mês)", v: brl(trader.margin), negative: trader.margin < 0 },
+        { l: "Contratos a vencer (90d)", v: String(trader.expiring90.length) },
       ];
 
   return (
@@ -345,7 +345,7 @@ function Monitor() {
             </ResponsiveContainer>
           </div>
           <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
-            A diferença entre venda e compra é a exposição estimada da carteira por submercado.
+            Volume de venda e compra dos contratos ativos por submercado.
           </p>
         </div>
       )}

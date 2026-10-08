@@ -27,7 +27,6 @@ export const Route = createFileRoute("/app/metricas/$metric")({
 const titles: Record<string, string> = {
   pld: "PLD atual (SE/CO)",
   margem: "Margem projetada",
-  exposicao: "Exposição estimada",
   "energia-contratada": "Energia contratada",
   contratos: "Contratos a vencer",
   receita: "Receita projetada",
@@ -126,13 +125,6 @@ function MetricDetail() {
             unit: "R$",
             base: Math.max(1, Math.abs(trader.margin)),
             currency: true,
-            estimate: true,
-          },
-          exposicao: {
-            title: "Exposição estimada",
-            desc: "Diferença entre energia vendida e comprada nos contratos ativos.",
-            unit: "MWm",
-            base: Math.max(0.1, Math.abs(trader.netPositionMwm)),
             estimate: true,
           },
           receita: {

@@ -54,7 +54,7 @@ export function buildReportSections(report: Report, contracts: Contract[], kind:
       `PLD SE/CO variou ${pld.delta >= 0 ? "+" : ""}${pld.delta}% em relação ao dia anterior.`,
       isFarm
         ? `Desvio de geração no período: ${n1(farmMetrics(contracts).deviationPercent)}%.`
-        : `Posição líquida estimada: ${n1(traderMetrics(contracts).netPositionMwm)} MWm.`,
+        : `Margem projetada (estimativa): ${brl(traderMetrics(contracts).margin)}.`,
       `${expiring.length} contrato(s) com vencimento nos próximos 90 dias.`,
     ],
   };
@@ -74,11 +74,11 @@ export function buildReportSections(report: Report, contracts: Contract[], kind:
       items: isFarm
         ? [
             `A receita da operação depende da geração realizada e do preço de liquidação do excedente; com PLD em ${brl(pld.value)}/MWh, cada MWh fora dos contratos tem peso direto no resultado.`,
-            `A energia contratada cobre parte da geração prevista; o restante fica exposto à variação do PLD.`,
+            `A energia contratada cobre parte da geração prevista; o restante é valorado ao PLD.`,
           ]
         : [
             `A carteira combina posições de compra e venda; a margem projetada reflete o spread entre preços contratados e o custo de suprimento.`,
-            `A posição líquida indica quanto da carteira depende do PLD para ser equilibrada.`,
+            `O preço médio dos contratos, comparado ao PLD, contextualiza a margem do período.`,
           ],
     },
     ...sections,
@@ -101,8 +101,8 @@ export function buildReportSections(report: Report, contracts: Contract[], kind:
             "Vencimentos próximos ampliam a parcela da geração sujeita ao preço de mercado.",
           ]
         : [
-            "Alta do PLD favorece posições compradas e pressiona a margem de posições vendidas sem lastro.",
-            "Contratos a vencer alteram a posição líquida e devem ser considerados na recomposição da carteira.",
+            "Alta do PLD favorece posições compradas e pode pressionar a margem da carteira.",
+            "Contratos a vencer alteram a energia contratada e devem ser considerados na recomposição da carteira.",
           ],
     },
     { title: "Nota", items: [ESTIMATE_NOTE] },
