@@ -509,6 +509,7 @@ export type Database = {
           onboarded: boolean
           phone: string
           profile_kind: string
+          receives_alerts: boolean
           updated_at: string
         }
         Insert: {
@@ -525,6 +526,7 @@ export type Database = {
           onboarded?: boolean
           phone?: string
           profile_kind?: string
+          receives_alerts?: boolean
           updated_at?: string
         }
         Update: {
@@ -541,6 +543,7 @@ export type Database = {
           onboarded?: boolean
           phone?: string
           profile_kind?: string
+          receives_alerts?: boolean
           updated_at?: string
         }
         Relationships: [
@@ -670,6 +673,7 @@ export type Database = {
     }
     Functions: {
       can_write: { Args: never; Returns: boolean }
+      company_plan: { Args: { _company: string }; Returns: string }
       current_company_id: { Args: never; Returns: string }
       has_role: {
         Args: {

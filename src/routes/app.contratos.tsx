@@ -29,9 +29,12 @@ import {
   useContracts, brl, fmtDate, downloadFile, toCsv,
   type Contract, type ContractStatus, type ContractType, type Submarket,
 } from "@/lib/store";
-import { useAccessRole } from "@/lib/store";
+import { useAccessRole, usePlan } from "@/lib/store";
 import { can } from "@/lib/rbac";
 import { useCompanyProfile } from "@/lib/profile";
+import { showPlanLimit } from "@/lib/plan-limit";
+import { limitMessages } from "@/lib/billing";
+
 
 export const Route = createFileRoute("/app/contratos")({
   head: () => ({ meta: [{ title: "Contratos · Ethere" }] }),
@@ -90,6 +93,7 @@ function Contracts() {
   const [editing, setEditing] = useState<Contract | null>(null);
   const [form, setForm] = useState(emptyForm());
   const { isFarm, copy } = useCompanyProfile();
+  const planInfo = usePlan();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [toDelete, setToDelete] = useState<string[] | null>(null);
@@ -147,6 +151,7 @@ function Contracts() {
   };
 
   const openNew = () => {
+    if (!planInfo.canAddContract) return showPlanLimit(limitMessages.contracts(100));
     setEditing(null); setForm(emptyForm()); setErrors({}); setFormOpen(true);
   };
   const openEdit = (c: Contract) => {
@@ -180,7 +185,7 @@ function Contracts() {
       update(editing.id, form);
       toast.success("Contrato atualizado", { description: `${form.name} foi salvo com sucesso.` });
     } else {
-      add(form);
+      if (!add(form)) { setSaving(false); return showPlanLimit(limitMessages.contracts(100)); }
       toast.success("Contrato criado", { description: `${form.name} foi adicionado ao portfólio.` });
     }
     setSaving(false);
@@ -217,7 +222,7 @@ function Contracts() {
     <>
       <PageHeader
         title="Contratos"
-        description={copy.contractsDescription}
+        description={planInfo.plan.limits.contracts === null ? copy.contractsDescription : `${copy.contractsDescription} · ${planInfo.usage.contracts}/${planInfo.plan.limits.contracts} contratos no plano Core`}
         actions={
           <>
             <Button variant="outline" size="sm" onClick={() => exportCsv(filtered)}>
@@ -384,7 +389,7 @@ function Contracts() {
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => { add({ ...r, name: `${r.name} (cópia)` }); toast.success("Contrato duplicado"); }}>
+                          <DropdownMenuItem onClick={() => { if (!add({ ...r, name: `${r.name} (cópia)` })) return showPlanLimit(limitMessages.contracts(100)); toast.success("Contrato duplicado"); }}>
                             Duplicar
                           </DropdownMenuItem>
                           <DropdownMenuItem onClick={() => exportCsv([r])}>Exportar CSV</DropdownMenuItem>

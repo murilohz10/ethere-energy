@@ -15,7 +15,10 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { FileDown, FileText, FileSpreadsheet, Trash2, Eye, Loader2 } from "lucide-react";
-import { useContracts, useReports, brl, fmtDate, downloadFile, toCsv, type Report } from "@/lib/store";
+import { buildReportSections } from "@/lib/report-content";
+import { showPlanLimit } from "@/lib/plan-limit";
+import { limitMessages } from "@/lib/billing";
+import { useContracts, useReports, usePlan, brl, fmtDate, downloadFile, toCsv, type Report } from "@/lib/store";
 
 export const Route = createFileRoute("/app/relatorios")({
   head: () => ({ meta: [{ title: "Relatórios · Ethere" }] }),
@@ -35,6 +38,8 @@ function Reports() {
   const { reports, add, remove } = useReports();
   const { contracts } = useContracts();
   const { kind, isFarm, copy } = useCompanyProfile();
+  const planInfo = usePlan();
+  const reportLimit = planInfo.plan.limits.reportsPerMonth;
   const suggestions = reportSuggestionsByProfile[kind];
   const [summary, setSummary] = useState("");
   const [filter, setFilter] = useState("Todos");
@@ -63,9 +68,10 @@ function Reports() {
     setErrors(e);
     if (Object.keys(e).length) return toast.error("Verifique os campos obrigatórios.");
 
+    if (!planInfo.canAddReport) return showPlanLimit(limitMessages.reports(reportLimit ?? 3));
     setGenerating(true);
     await new Promise((r) => setTimeout(r, 900));
-    add({
+    const ok = add({
       title: form.title,
       type: form.type,
       periodStart: form.periodStart,
@@ -75,6 +81,7 @@ function Reports() {
         : "Consolidado de carteira, margem projetada, contratos e PLD do período."),
     });
     setGenerating(false);
+    if (!ok) return showPlanLimit(limitMessages.reports(reportLimit ?? 3));
     setOpen(false);
     setForm({ ...form, title: "" });
     toast.success("Relatório gerado", { description: form.title });
@@ -107,6 +114,8 @@ function Reports() {
       <h1>${r.title}</h1>
       <div class="sub">Ethere Energy · Período ${fmtDate(r.periodStart)} a ${fmtDate(r.periodEnd)} · Emitido em ${fmtDate(r.createdAt)}</div>
       <p style="font-size:13px">${r.summary}</p>
+      ${buildReportSections(r, contracts, kind).map((sec) => `<h2 style="font-size:14px;margin:20px 0 6px">${sec.title}</h2><ul style="font-size:12px;margin:0;padding-left:18px">${sec.items.map((i) => `<li>${i}</li>`).join("")}</ul>`).join("")}
+      <h2 style="font-size:14px;margin:20px 0 6px">Contratos</h2>
       <table><thead><tr><th>Contrato</th><th>Empresa</th><th>Submercado</th><th>Volume</th><th>Preço</th><th>Status</th></tr></thead><tbody>${rows}</tbody></table>
       </body></html>`);
     win.document.close();
@@ -119,9 +128,9 @@ function Reports() {
     <>
       <PageHeader
         title="Relatórios"
-        description={copy.reportsDescription}
+        description={reportLimit === null ? `${copy.reportsDescription} · Relatórios com análise aprofundada` : `${copy.reportsDescription} · ${planInfo.usage.reportsThisMonth}/${reportLimit} relatórios básicos este mês`}
         actions={
-          <Button size="sm" onClick={() => { setErrors({}); setOpen(true); }} className="text-white shadow-blue hover:opacity-95" style={{ background: "var(--gradient-brand)" }}>
+          <Button size="sm" onClick={() => { if (!planInfo.canAddReport) return showPlanLimit(limitMessages.reports(reportLimit ?? 3)); setErrors({}); setOpen(true); }} className="text-white shadow-blue hover:opacity-95" style={{ background: "var(--gradient-brand)" }}>
             Gerar novo
           </Button>
         }
@@ -131,7 +140,7 @@ function Reports() {
         {suggestions.map((s) => (
           <button
             key={s.title}
-            onClick={() => { setErrors({}); setForm({ ...form, title: s.title }); setSummary(s.summary); setOpen(true); }}
+            onClick={() => { if (!planInfo.canAddReport) return showPlanLimit(limitMessages.reports(reportLimit ?? 3)); setErrors({}); setForm({ ...form, title: s.title }); setSummary(s.summary); setOpen(true); }}
             className="rounded-xl border border-border bg-card p-4 text-left shadow-soft transition hover:border-brand-soft"
           >
             <div className="text-sm font-semibold">{s.title}</div>
@@ -247,6 +256,17 @@ function Reports() {
             </DialogDescription>
           </DialogHeader>
           <p className="text-sm text-muted-foreground">{viewing?.summary}</p>
+          <span className="w-fit rounded-full bg-brand-softer px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-brand-dark">
+            {viewing?.tier === "pro" ? "Análise aprofundada · Pro" : "Relatório informativo"}
+          </span>
+          {viewing && buildReportSections(viewing, contracts, kind).map((sec) => (
+            <div key={sec.title}>
+              <div className="text-sm font-semibold">{sec.title}</div>
+              <ul className="mt-1.5 space-y-1 text-xs leading-relaxed text-muted-foreground">
+                {sec.items.map((i) => <li key={i}>• {i}</li>)}
+              </ul>
+            </div>
+          ))}
           <div className="mt-2 overflow-hidden rounded-xl border border-border">
             <table className="w-full text-xs">
               <thead className="bg-brand-softer/70 text-[10px] uppercase tracking-wider text-brand-dark/80">

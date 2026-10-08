@@ -1,5 +1,5 @@
 import { useCallback, useSyncExternalStore } from "react";
-import { ETHERE_PLAN, defaultSubscription, type Subscription } from "./billing";
+import { ETHERE_PLAN, defaultSubscription, getPlan, monthKey, withinLimit, type Plan, type Subscription } from "./billing";
 import {
   defaultRolePermissions,
   isPermissionLocked,
@@ -115,8 +115,12 @@ export function useContracts() {
   const [state, set] = useStore(contractsStore);
   return {
     contracts: state.items,
-    add: (c: Omit<Contract, "id" | "code">) =>
-      set((s) => ({ items: [{ ...c, id: uid(), code: `C-${1000 + Math.floor(Math.random() * 9000)}` }, ...s.items] })),
+    /** Retorna `false` quando o limite do plano impede o cadastro. */
+    add: (c: Omit<Contract, "id" | "code">): boolean => {
+      if (!withinLimit(currentPlan().limits.contracts, contractsStore.getSnapshot().items.length)) return false;
+      set((s) => ({ items: [{ ...c, id: uid(), code: `C-${1000 + Math.floor(Math.random() * 9000)}` }, ...s.items] }));
+      return true;
+    },
     update: (id: string, patch: Partial<Contract>) =>
       set((s) => ({ items: s.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) })),
     remove: (ids: string[]) => set((s) => ({ items: s.items.filter((i) => !ids.includes(i.id)) })),
@@ -171,17 +175,24 @@ export function useAlerts() {
   const [state, set] = useStore(alertsStore);
   return {
     alerts: state.items,
-    add: (a: Omit<AlertRule, "id" | "createdAt">) =>
-      set((s) => ({ items: [{ ...a, id: uid(), createdAt: new Date().toISOString() }, ...s.items] })),
+    /** Retorna `false` quando o limite do plano impede a criação. */
+    add: (a: Omit<AlertRule, "id" | "createdAt">): boolean => {
+      if (!withinLimit(currentPlan().limits.alerts, alertsStore.getSnapshot().items.length)) return false;
+      set((s) => ({ items: [{ ...a, id: uid(), createdAt: new Date().toISOString() }, ...s.items] }));
+      return true;
+    },
     update: (id: string, patch: Partial<AlertRule>) =>
       set((s) => ({ items: s.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) })),
     remove: (ids: string[]) => set((s) => ({ items: s.items.filter((i) => !ids.includes(i.id)) })),
-    duplicate: (id: string) =>
+    duplicate: (id: string): boolean => {
+      if (!withinLimit(currentPlan().limits.alerts, alertsStore.getSnapshot().items.length)) return false;
       set((s) => {
         const found = s.items.find((i) => i.id === id);
         if (!found) return s;
         return { items: [{ ...found, id: uid(), name: `${found.name} (cópia)`, createdAt: new Date().toISOString() }, ...s.items] };
-      }),
+      });
+      return true;
+    },
   };
 }
 
@@ -195,6 +206,8 @@ export type Report = {
   periodEnd: string;
   createdAt: string;
   summary: string;
+  /** "basic" = relatório informativo (Core); "pro" = análise aprofundada. */
+  tier?: "basic" | "pro";
 };
 
 const seedReports: Report[] = [
@@ -211,15 +224,62 @@ export function useReports() {
   const [state, set] = useStore(reportsStore);
   return {
     reports: state.items,
-    add: (r: Omit<Report, "id" | "createdAt">) =>
-      set((s) => ({ items: [{ ...r, id: uid(), createdAt: new Date().toISOString().slice(0, 10) }, ...s.items] })),
+    /** Retorna `false` quando o limite mensal do plano foi atingido. */
+    add: (r: Omit<Report, "id" | "createdAt" | "tier">): boolean => {
+      const plan = currentPlan();
+      if (!withinLimit(plan.limits.reportsPerMonth, reportsThisMonth(reportsStore.getSnapshot().items))) return false;
+      const tier: Report["tier"] = plan.limits.deepReports ? "pro" : "basic";
+      set((s) => ({ items: [{ ...r, tier, id: uid(), createdAt: new Date().toISOString().slice(0, 10) }, ...s.items] }));
+      return true;
+    },
     remove: (id: string) => set((s) => ({ items: s.items.filter((i) => i.id !== id) })),
   };
 }
 
 /* -------------------------------- settings -------------------------------- */
 
-export type TeamUser = { id: string; name: string; email: string; role: AppRole };
+export type TeamUser = {
+  id: string; name: string; email: string; role: AppRole;
+  /** Recebe notificações de alertas (Core: até 2 usuários). */
+  notify?: boolean;
+};
+
+/** Relatórios gerados no mês corrente (o contador reinicia a cada mês). */
+export function reportsThisMonth(items: Report[], now: Date = new Date()) {
+  const key = monthKey(now);
+  return items.filter((r) => monthKey(r.createdAt) === key).length;
+}
+
+function currentPlan(): Plan {
+  return getPlan(settingsStore.getSnapshot().subscription?.planId);
+}
+
+export const notifiedCount = (users: TeamUser[]) => users.filter((u) => u.notify).length;
+
+/** Plano vigente e uso atual dos limites. */
+export function usePlan() {
+  const [settings] = useStore(settingsStore);
+  const [contracts] = useStore(contractsStore);
+  const [alerts] = useStore(alertsStore);
+  const [reports] = useStore(reportsStore);
+  const plan = getPlan(settings.subscription?.planId);
+  const usage = {
+    contracts: contracts.items.length,
+    alerts: alerts.items.length,
+    reportsThisMonth: reportsThisMonth(reports.items),
+    notifiedUsers: notifiedCount(settings.users),
+  };
+  const l = plan.limits;
+  return {
+    plan,
+    usage,
+    isPro: plan.id === "ethere-pro",
+    canAddContract: withinLimit(l.contracts, usage.contracts),
+    canAddAlert: withinLimit(l.alerts, usage.alerts),
+    canAddReport: withinLimit(l.reportsPerMonth, usage.reportsThisMonth),
+    canNotifyMore: withinLimit(l.notifiedUsers, usage.notifiedUsers),
+  };
+}
 
 export type SettingsState = {
   company: { name: string; cnpj: string; email: string; phone: string };
@@ -243,8 +303,8 @@ const settingsStore = createPersistentStore<SettingsState>("ethere.settings.v2",
   },
   preferences: { defaultSubmarket: "SE/CO", period: "30 dias", density: "Confortável" },
   users: [
-    { id: "u1", name: "Lucas Gomes", email: "lucas@ethere.com", role: "Administrador" },
-    { id: "u2", name: "Marina Alves", email: "marina@ethere.com", role: "Gestor" },
+    { id: "u1", name: "Lucas Gomes", email: "lucas@ethere.com", role: "Administrador", notify: true },
+    { id: "u2", name: "Marina Alves", email: "marina@ethere.com", role: "Gestor", notify: true },
     { id: "u3", name: "Rafael Silva", email: "rafael@ethere.com", role: "Analista" },
   ],
   twoFactor: false,

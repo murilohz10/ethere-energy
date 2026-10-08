@@ -8,8 +8,7 @@ import { Camera, Check, Eye, EyeOff, Loader2, ShieldCheck, Sparkles, Trash2 } fr
 import {
   fullName, initials, isEmail, isStrongPassword, maskCnpj, maskPhone, useSession, useSettings,
 } from "@/lib/store";
-import { useAccessRole } from "@/lib/store";
-import { ETHERE_PLAN } from "@/lib/billing";
+import { useAccessRole, usePlan } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -28,6 +27,7 @@ export const Route = createFileRoute("/app/perfil")({
 function ProfilePage() {
   const { user, updateUser } = useSession();
   const role = useAccessRole();
+  const ETHERE_PLAN = usePlan().plan;
   const { settings } = useSettings();
   const fileRef = useRef<HTMLInputElement>(null);
   const [saving, setSaving] = useState(false);

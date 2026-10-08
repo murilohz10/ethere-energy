@@ -21,7 +21,9 @@ import {
   Bell, Plus, AlertTriangle, AlertCircle, Info, TrendingDown, Pencil, Trash2, Copy, MoreHorizontal, BellOff, Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAlerts, fmtDate, type AlertRule, type AlertPriority } from "@/lib/store";
+import { useAlerts, usePlan, fmtDate, type AlertRule, type AlertPriority } from "@/lib/store";
+import { showPlanLimit } from "@/lib/plan-limit";
+import { limitMessages } from "@/lib/billing";
 import { useCompanyProfile, alertTypesByProfile, alertTypeHints } from "@/lib/profile";
 
 export const Route = createFileRoute("/app/alertas")({
@@ -48,7 +50,8 @@ const emptyForm = (): Omit<AlertRule, "id" | "createdAt"> => ({
 function Alerts() {
   const { alerts, add, update, remove, duplicate } = useAlerts();
   const { kind, copy } = useCompanyProfile();
-  const profileDescription = copy.alertsDescription;
+  const planInfo = usePlan();
+  const profileDescription = planInfo.plan.limits.alerts === null ? copy.alertsDescription : `${copy.alertsDescription} · ${planInfo.usage.alerts}/${planInfo.plan.limits.alerts} alertas no plano Core`;
   const alertTypes = alertTypesByProfile[kind] as AlertRule["type"][];
   void alertTypeHints;
   const [query, setQuery] = useState("");
@@ -77,7 +80,7 @@ function Alerts() {
     low: alerts.filter((a) => a.priority === "Baixa" || a.priority === "Info").length,
   }), [alerts]);
 
-  const openNew = () => { setEditing(null); setForm(emptyForm()); setErrors({}); setOpen(true); };
+  const openNew = () => { if (!planInfo.canAddAlert) return showPlanLimit(limitMessages.alerts(5)); setEditing(null); setForm(emptyForm()); setErrors({}); setOpen(true); };
   const openEdit = (a: AlertRule) => {
     setEditing(a);
     const { id: _id, createdAt: _c, ...rest } = a;
@@ -91,7 +94,7 @@ function Alerts() {
     setErrors(e);
     if (Object.keys(e).length) return toast.error("Verifique os campos obrigatórios.");
     if (editing) { update(editing.id, form); toast.success("Alerta atualizado"); }
-    else { add(form); toast.success("Alerta criado", { description: form.name }); }
+    else { if (!add(form)) return showPlanLimit(limitMessages.alerts(5)); toast.success("Alerta criado", { description: form.name }); }
     setOpen(false);
   };
 
@@ -189,7 +192,7 @@ function Alerts() {
                     </button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => { duplicate(a.id); toast.success("Alerta duplicado"); }}>
+                    <DropdownMenuItem onClick={() => { if (!duplicate(a.id)) return showPlanLimit(limitMessages.alerts(5)); toast.success("Alerta duplicado"); }}>
                       <Copy className="mr-2 h-3.5 w-3.5" /> Duplicar
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => { update(a.id, { enabled: !a.enabled }); toast.success(a.enabled ? "Alerta pausado" : "Alerta ativado"); }}>

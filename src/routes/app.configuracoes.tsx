@@ -16,12 +16,13 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Building2, CreditCard, Bell, Users, Lock, SlidersHorizontal, Trash2, Eye, EyeOff, ShieldCheck, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSettings, useSession, useRolePermissions, uid, type SettingsState, type Submarket } from "@/lib/store";
+import { useSettings, usePlan, notifiedCount, useSession, useRolePermissions, uid, type SettingsState, type Submarket } from "@/lib/store";
 import {
   appRoles, roleDescriptions, allPermissions, permissionGroups, permissionMeta, isPermissionLocked,
   type AppRole,
 } from "@/lib/rbac";
-import { ETHERE_PLAN, formatPlanPrice, subscriptionStatusLabel } from "@/lib/billing";
+import { PLAN_LIST, getPlan, formatPlanPrice, limitMessages, subscriptionStatusLabel, type PlanId } from "@/lib/billing";
+import { showPlanLimit } from "@/lib/plan-limit";
 
 export const Route = createFileRoute("/app/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações · Ethere" }] }),
@@ -49,6 +50,27 @@ function SettingsPage() {
   const dirty = JSON.stringify(draft) !== JSON.stringify(settings);
 
   useEffect(() => setDraft(settings), [settings]);
+  const planInfo = usePlan();
+
+  useEffect(() => {
+    const t = new URLSearchParams(window.location.search).get("tab");
+    if (t && tabs.some((x) => x.k === t)) setTab(t as (typeof tabs)[number]["k"]);
+  }, []);
+
+  const changePlan = (id: PlanId) => {
+    const next = getPlan(id);
+    if (next.limits.notifiedUsers !== null && notifiedCount(settings.users) > next.limits.notifiedUsers) {
+      return toast.error(limitMessages.notified(next.limits.notifiedUsers), { description: "Ajuste os usuários notificados antes de mudar para o Core." });
+    }
+    setSettings({ ...settings, plan: next.name, subscription: { ...settings.subscription, planId: id, status: "active" } });
+    if (user) signIn({ ...user, plan: next.name });
+    toast.success(`Plano alterado para ${next.name}`, { description: "Simulação: nenhuma cobrança foi realizada." });
+  };
+
+  const toggleNotify = (id: string, on: boolean) => {
+    if (on && !planInfo.canNotifyMore) return showPlanLimit(limitMessages.notified(2));
+    setSettings({ ...settings, users: settings.users.map((x) => (x.id === id ? { ...x, notify: on } : x)) });
+  };
 
   const save = () => {
     setSettings(draft);
@@ -98,34 +120,53 @@ function SettingsPage() {
           )}
 
           {tab === "assinatura" && (
-            <Section title="Assinatura" desc="Plano atual e faturamento.">
-              <div className="rounded-xl border border-border p-5">
-                <div className="text-xs text-muted-foreground">Plano</div>
-                <div className="mt-1 text-lg font-medium">{ETHERE_PLAN.name}</div>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  {formatPlanPrice(ETHERE_PLAN)} · {subscriptionStatusLabel(settings.subscription.status)}
-                  {settings.subscription.renewsAt ? ` · Renova em ${settings.subscription.renewsAt}` : ""}
-                </div>
-                <ul className="mt-4 grid gap-2 text-sm text-muted-foreground sm:grid-cols-2">
-                  {ETHERE_PLAN.features.map((f) => (
-                    <li key={f}>• {f}</li>
-                  ))}
-                </ul>
-                <div className="mt-5 flex flex-wrap gap-2">
-                  <Button
-                    size="sm"
-                    className="text-white shadow-blue hover:opacity-95"
-                    style={{ background: "var(--gradient-brand)" }}
-                    onClick={() => toast.info("Pagamentos via Stripe serão habilitados em breve.")}
-                  >
-                    Gerenciar pagamento
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => setCancelPlan(true)}>Cancelar assinatura</Button>
-                </div>
+            <Section title="Assinatura" desc="Plano atual, uso e faturamento. Ambos os planos incluem dados CCEE, ONS e ANA.">
+              <div className="mb-4 text-sm text-muted-foreground">
+                {subscriptionStatusLabel(settings.subscription.status)}
+                {settings.subscription.renewsAt ? ` · Renova em ${settings.subscription.renewsAt}` : ""}
+                {planInfo.plan.limits.contracts !== null && (
+                  <> · Uso: {planInfo.usage.contracts}/100 contratos · {planInfo.usage.alerts}/5 alertas · {planInfo.usage.reportsThisMonth}/3 relatórios este mês · {planInfo.usage.notifiedUsers}/2 usuários notificados</>
+                )}
+              </div>
+              <div className="grid gap-4 md:grid-cols-2">
+                {PLAN_LIST.map((p) => {
+                  const current = p.id === planInfo.plan.id;
+                  const pro = p.id === "ethere-pro";
+                  return (
+                    <div key={p.id} className={cn("relative rounded-xl border p-5", pro ? "border-brand-soft bg-brand-softer/40" : "border-border")}>
+                      {pro && <span className="absolute right-4 top-4 rounded-full bg-brand-softer px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-brand-dark">Mais completo</span>}
+                      <div className="text-lg font-medium">{p.name}</div>
+                      <div className="mt-1 text-sm text-muted-foreground">{formatPlanPrice(p)}</div>
+                      <ul className="mt-4 space-y-1.5 text-sm text-muted-foreground">
+                        {p.features.map((f) => <li key={f}>• {f}</li>)}
+                      </ul>
+                      <div className="mt-5">
+                        {current ? (
+                          <span className="text-xs font-medium text-brand-dark">Plano atual</span>
+                        ) : (
+                          <Button
+                            size="sm"
+                            variant={pro ? "default" : "outline"}
+                            className={pro ? "text-white shadow-blue hover:opacity-95" : ""}
+                            style={pro ? { background: "var(--gradient-brand)" } : undefined}
+                            onClick={() => changePlan(p.id)}
+                          >
+                            {pro ? "Fazer upgrade para o Pro" : "Mudar para o Core"}
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              <div className="mt-5 flex flex-wrap gap-2">
+                <Button size="sm" variant="outline" onClick={() => toast.info("Pagamentos via Stripe serão habilitados em breve.")}>
+                  Gerenciar pagamento
+                </Button>
+                <Button size="sm" variant="ghost" onClick={() => setCancelPlan(true)}>Cancelar assinatura</Button>
               </div>
             </Section>
           )}
-
 
           {tab === "notificacoes" && (
             <Section title="Notificações" desc="Escolha como deseja ser avisado.">
@@ -174,7 +215,7 @@ function SettingsPage() {
           )}
 
           {tab === "usuarios" && (
-            <Section title="Usuários" desc="Cadastre, edite e remova membros e defina o nível de acesso.">
+            <Section title="Usuários" desc={planInfo.plan.limits.notifiedUsers === null ? "Cadastre, edite e remova membros, defina o nível de acesso e quem recebe alertas." : `Cadastre, edite e remova membros. No Ethere Core, até 2 usuários recebem notificações de alertas (${planInfo.usage.notifiedUsers}/2).`}>
               <ul className="divide-y divide-border">
                 {settings.users.map((u) => (
                   <li key={u.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
@@ -183,6 +224,10 @@ function SettingsPage() {
                       <div className="text-xs text-muted-foreground">{u.email}</div>
                     </div>
                     <div className="flex items-center gap-3">
+                      <label className="flex items-center gap-2 text-xs text-muted-foreground">
+                        <Switch checked={!!u.notify} onCheckedChange={(v) => toggleNotify(u.id, v)} aria-label={`Notificações de alertas para ${u.name}`} />
+                        Alertas
+                      </label>
                       <Select
                         value={u.role}
                         onValueChange={(role) => {

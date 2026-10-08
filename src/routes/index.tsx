@@ -1,3 +1,4 @@
+import { PLAN_LIST } from "@/lib/billing";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   Activity,
@@ -342,79 +343,67 @@ function Audience() {
 
 /* ------------------------------- Plano ------------------------------ */
 
-const planItems = [
-  "Monitoramento do PLD",
-  "Gestão de contratos",
-  "Alertas personalizados",
-  "Dashboard executivo",
-  "Histórico do mercado",
-  "Indicadores financeiros",
-  "Análises diárias por IA",
-  "Cadastro ilimitado de contratos",
-  "Suporte",
-];
-
 function Pricing() {
   return (
-    <Section id="plano" eyebrow="Plano" title="Um plano completo, sem letras miúdas">
-      <div className="mt-14 flex justify-center">
-        <Reveal variant="zoom" className="w-full max-w-2xl">
-          <div className="relative">
-            <div className="absolute -inset-4 rounded-[2rem] bg-primary/10 blur-3xl" aria-hidden />
-            <div className="relative overflow-hidden rounded-2xl glass-panel hairline-top p-8 sm:p-10">
-              <div
-                className="pointer-events-none absolute inset-0"
-                style={{ background: "radial-gradient(600px 220px at 50% 0%, rgba(34,211,238,0.12), transparent 70%)" }}
-                aria-hidden
-              />
-              <div className="relative flex flex-wrap items-center justify-between gap-3">
-                <h3 className="text-xl font-semibold">Plano Ethere</h3>
-                <span className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[11px] font-medium text-brand-dark">
-                  Plano único
-                </span>
-              </div>
-              <div className="relative mt-6 flex items-end gap-2">
-                <span className="text-4xl font-semibold tracking-tight sm:text-5xl">R$ 799,90</span>
-                <span className="pb-1 text-sm text-muted-foreground">/mês</span>
-              </div>
-              <p className="relative mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground">
-                A solução completa para comercializadoras e fazendas de energia monitorarem o Mercado Livre de Energia
-                com inteligência, organização e apoio à tomada de decisão.
-              </p>
-              <ul className="relative mt-8 grid gap-3 sm:grid-cols-2">
-                {planItems.map((i) => (
-                  <li key={i} className="flex items-center gap-2.5 text-sm">
-                    <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-primary">
-                      <Check className="h-3 w-3" />
+    <Section id="plano" eyebrow="Planos" title="Os mesmos dados, dois níveis de análise">
+      <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground">
+        Core e Pro têm a mesma cobertura completa de dados CCEE, ONS e ANA. A diferença está na profundidade das análises e nos limites de uso.
+      </p>
+      <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
+        {PLAN_LIST.map((p) => {
+          const pro = p.id === "ethere-pro";
+          return (
+            <Reveal key={p.id} variant="zoom">
+              <div className={"relative h-full overflow-hidden rounded-2xl glass-panel hairline-top p-8 " + (pro ? "ring-1 ring-primary/30" : "")}>
+                {pro && (
+                  <div
+                    className="pointer-events-none absolute inset-0"
+                    style={{ background: "radial-gradient(500px 200px at 50% 0%, rgba(34,211,238,0.10), transparent 70%)" }}
+                    aria-hidden
+                  />
+                )}
+                <div className="relative flex flex-wrap items-center justify-between gap-3">
+                  <h3 className="text-xl font-semibold">{p.name}</h3>
+                  {pro && (
+                    <span className="rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-[11px] font-medium text-brand-dark">
+                      Mais completo
                     </span>
-                    <span className="text-muted-foreground">{i}</span>
-                  </li>
-                ))}
-              </ul>
-              <div className="relative mt-9 flex flex-col gap-3 sm:flex-row">
-                <Link to="/signup" className="flex-1">
+                  )}
+                </div>
+                <div className="relative mt-6 flex items-end gap-2">
+                  <span className="text-4xl font-semibold tracking-tight">{p.priceLabel}</span>
+                  <span className="pb-1 text-sm text-muted-foreground">/{p.interval}</span>
+                </div>
+                <p className="relative mt-4 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
+                <ul className="relative mt-8 space-y-3">
+                  {p.features.map((i) => (
+                    <li key={i} className="flex items-center gap-2.5 text-sm">
+                      <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-primary">
+                        <Check className="h-3 w-3" />
+                      </span>
+                      <span className="text-muted-foreground">{i}</span>
+                    </li>
+                  ))}
+                </ul>
+                <Link to="/signup" className="relative mt-9 block">
                   <Button
                     size="lg"
-                    className="group w-full text-primary-foreground shadow-blue hover:opacity-95"
-                    style={{ background: "var(--gradient-brand)" }}
+                    variant={pro ? "default" : "outline"}
+                    className={"group w-full " + (pro ? "text-primary-foreground shadow-blue hover:opacity-95" : "")}
+                    style={pro ? { background: "var(--gradient-brand)" } : undefined}
                   >
                     Começar teste gratuito
                     <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                   </Button>
                 </Link>
-                <a href="mailto:contato@ethere.energy" className="sm:w-auto">
-                  <Button size="lg" variant="ghost" className="w-full hover:bg-secondary sm:w-auto">
-                    Falar com especialista
-                  </Button>
-                </a>
               </div>
-              <p className="relative mt-4 text-center text-xs text-muted-foreground sm:text-left">
-                14 dias de teste · sem cartão de crédito · cancele quando quiser
-              </p>
-            </div>
-          </div>
-        </Reveal>
+            </Reveal>
+          );
+        })}
       </div>
+      <p className="mt-6 text-center text-xs text-muted-foreground">
+        14 dias de teste · sem cartão de crédito · cancele quando quiser
+      </p>
     </Section>
   );
 }
