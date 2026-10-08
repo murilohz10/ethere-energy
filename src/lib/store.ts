@@ -1,6 +1,18 @@
 import { useCallback, useSyncExternalStore } from "react";
-import { ETHERE_PLAN, defaultSubscription, getPlan, monthKey, withinLimit, type Plan, type Subscription } from "./billing";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { errorMessage } from "./api/errors";
 import {
+  alertsRepository, companyRepository, contractsRepository, permissionsRepository,
+  reportsRepository, usersRepository,
+} from "./api/repositories";
+import type { AlertRuleInput } from "./api/types";
+import {
+  ETHERE_PLAN, defaultSubscription, getPlan, monthKey, withinLimit,
+  type Plan, type Subscription, type SubscriptionStatus,
+} from "./billing";
+import {
+  appRoles,
   defaultRolePermissions,
   isPermissionLocked,
   normalizeMatrix,
@@ -79,6 +91,9 @@ function useStore<T>(store: Store<T>) {
 
 export const uid = () => Math.random().toString(36).slice(2, 9);
 
+/** Id no formato do banco (uuid), para que a tela e o Supabase usem o mesmo. */
+const newId = () => crypto.randomUUID();
+
 /* -------------------------------- contracts ------------------------------- */
 
 export type Submarket = "SE/CO" | "S" | "NE" | "N";
@@ -100,16 +115,7 @@ export type Contract = {
   notes: string;
 };
 
-const seedContracts: Contract[] = [
-  { id: "c1", code: "C-1042", name: "Suprimento anual Alfa", company: "Alfa Indústria", type: "Venda", submarket: "SE/CO", volume: 12, price: 198.5, startDate: "2025-01-01", endDate: "2026-12-31", status: "Ativo", notes: "" },
-  { id: "c2", code: "C-1039", name: "Compra flexível Beta", company: "Beta Química", type: "Compra", submarket: "S", volume: 8.4, price: 205.1, startDate: "2025-02-01", endDate: "2026-07-31", status: "Ativo", notes: "" },
-  { id: "c3", code: "C-1035", name: "Contrato Gama Papel", company: "Gama Papel", type: "Venda", submarket: "SE/CO", volume: 5.2, price: 189.9, startDate: "2025-03-01", endDate: "2027-03-31", status: "Ativo", notes: "" },
-  { id: "c4", code: "C-1030", name: "Fornecimento Delta", company: "Delta Cimento", type: "Venda", submarket: "NE", volume: 14.7, price: 179, startDate: "2024-11-01", endDate: "2025-11-30", status: "Pendente", notes: "Renovação em negociação." },
-  { id: "c5", code: "C-1026", name: "Suprimento Ômega", company: "Ômega Metais", type: "Compra", submarket: "SE/CO", volume: 9.1, price: 210.4, startDate: "2025-05-01", endDate: "2027-05-31", status: "Ativo", notes: "" },
-  { id: "c6", code: "C-1021", name: "Sigma sazonal", company: "Sigma Alimentos", type: "Venda", submarket: "S", volume: 3.8, price: 195, startDate: "2024-01-01", endDate: "2026-01-31", status: "Encerrado", notes: "" },
-];
-
-const contractsStore = createPersistentStore<{ items: Contract[] }>("ethere.contracts.v1", { items: seedContracts });
+const contractsStore = createPersistentStore<{ items: Contract[] }>("ethere.contracts.v2", { items: [] });
 
 export function useContracts() {
   const [state, set] = useStore(contractsStore);
@@ -118,12 +124,22 @@ export function useContracts() {
     /** Retorna `false` quando o limite do plano impede o cadastro. */
     add: (c: Omit<Contract, "id" | "code">): boolean => {
       if (!withinLimit(currentPlan().limits.contracts, contractsStore.getSnapshot().items.length)) return false;
-      set((s) => ({ items: [{ ...c, id: uid(), code: `C-${1000 + Math.floor(Math.random() * 9000)}` }, ...s.items] }));
+      const id = newId();
+      const code = `C-${1000 + Math.floor(Math.random() * 9000)}`;
+      set((s) => ({ items: [{ ...c, id, code }, ...s.items] }));
+      push(({ companyId, userId }) =>
+        contractsRepository.create(companyId, { ...c, supplier: "", consumer: "" }, code, userId, id),
+      );
       return true;
     },
-    update: (id: string, patch: Partial<Contract>) =>
-      set((s) => ({ items: s.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) })),
-    remove: (ids: string[]) => set((s) => ({ items: s.items.filter((i) => !ids.includes(i.id)) })),
+    update: (id: string, patch: Partial<Contract>) => {
+      set((s) => ({ items: s.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) }));
+      push(() => contractsRepository.update(id, patch));
+    },
+    remove: (ids: string[]) => {
+      set((s) => ({ items: s.items.filter((i) => !ids.includes(i.id)) }));
+      push(() => contractsRepository.remove(ids));
+    },
     reset: () => contractsStore.reset(),
   };
 }
@@ -160,15 +176,23 @@ export type AlertRule = {
   createdAt: string;
 };
 
-const seedAlerts: AlertRule[] = [
-  { id: "a1", name: "PLD SE/CO acima de R$ 220", type: "PLD", threshold: 220, channel: "Email", frequency: "Imediato", priority: "Alta", enabled: true, createdAt: "2025-03-18T10:00:00Z" },
-  { id: "a2", name: "Reservatório SE abaixo de 40%", type: "Reservatório", threshold: 40, channel: "Email", frequency: "Diário", priority: "Média", enabled: true, createdAt: "2025-03-17T10:00:00Z" },
-  { id: "a3", name: "Contratos vencendo em 7 dias", type: "Contrato", threshold: 7, channel: "Push", frequency: "Diário", priority: "Média", enabled: true, createdAt: "2025-03-15T10:00:00Z" },
-  { id: "a4", name: "Novas resoluções ANEEL", type: "Regulação", threshold: 0, channel: "Email", frequency: "Semanal", priority: "Info", enabled: false, createdAt: "2025-03-10T10:00:00Z" },
-  { id: "a5", name: "Tendência de queda no PLD S", type: "PLD", threshold: 180, channel: "SMS", frequency: "Imediato", priority: "Baixa", enabled: true, createdAt: "2025-03-08T10:00:00Z" },
-];
+const alertsStore = createPersistentStore<{ items: AlertRule[] }>("ethere.alerts.v2", { items: [] });
 
-const alertsStore = createPersistentStore<{ items: AlertRule[] }>("ethere.alerts.v1", { items: seedAlerts });
+const alertColumns = ["name", "type", "threshold", "channel", "frequency", "priority", "enabled"] as const;
+
+/** Campos de uma regra que existem como coluna em `alert_rules`. */
+function alertFields(rule: Partial<AlertRule>): Partial<AlertRuleInput> {
+  const out: Record<string, unknown> = {};
+  for (const key of alertColumns) if (rule[key] !== undefined) out[key] = rule[key];
+  return out as Partial<AlertRuleInput>;
+}
+
+function createAlert(rule: AlertRule) {
+  alertsStore.set((s) => ({ items: [rule, ...s.items] }));
+  push(({ companyId, userId }) =>
+    alertsRepository.create(companyId, { id: rule.id, ...alertFields(rule) } as AlertRuleInput, userId),
+  );
+}
 
 export function useAlerts() {
   const [state, set] = useStore(alertsStore);
@@ -177,19 +201,23 @@ export function useAlerts() {
     /** Retorna `false` quando o limite do plano impede a criação. */
     add: (a: Omit<AlertRule, "id" | "createdAt">): boolean => {
       if (!withinLimit(currentPlan().limits.alerts, alertsStore.getSnapshot().items.length)) return false;
-      set((s) => ({ items: [{ ...a, id: uid(), createdAt: new Date().toISOString() }, ...s.items] }));
+      createAlert({ ...a, id: newId(), createdAt: new Date().toISOString() });
       return true;
     },
-    update: (id: string, patch: Partial<AlertRule>) =>
-      set((s) => ({ items: s.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) })),
-    remove: (ids: string[]) => set((s) => ({ items: s.items.filter((i) => !ids.includes(i.id)) })),
+    update: (id: string, patch: Partial<AlertRule>) => {
+      set((s) => ({ items: s.items.map((i) => (i.id === id ? { ...i, ...patch } : i)) }));
+      push(() => alertsRepository.update(id, alertFields(patch)));
+    },
+    remove: (ids: string[]) => {
+      set((s) => ({ items: s.items.filter((i) => !ids.includes(i.id)) }));
+      push(() => alertsRepository.remove(ids));
+    },
     duplicate: (id: string): boolean => {
       if (!withinLimit(currentPlan().limits.alerts, alertsStore.getSnapshot().items.length)) return false;
-      set((s) => {
-        const found = s.items.find((i) => i.id === id);
-        if (!found) return s;
-        return { items: [{ ...found, id: uid(), name: `${found.name} (cópia)`, createdAt: new Date().toISOString() }, ...s.items] };
-      });
+      const found = alertsStore.getSnapshot().items.find((i) => i.id === id);
+      if (found) {
+        createAlert({ ...found, id: newId(), name: `${found.name} (cópia)`, createdAt: new Date().toISOString() });
+      }
       return true;
     },
   };
@@ -209,15 +237,7 @@ export type Report = {
   tier?: "basic" | "pro";
 };
 
-const seedReports: Report[] = [
-  { id: "r1", title: "Relatório Semanal · Semana 12", type: "Semanal", periodStart: "2025-03-10", periodEnd: "2025-03-16", createdAt: "2025-03-18", summary: "Consolidado com PLD, contratos e sinais gerados por IA." },
-  { id: "r2", title: "Relatório Semanal · Semana 11", type: "Semanal", periodStart: "2025-03-03", periodEnd: "2025-03-09", createdAt: "2025-03-11", summary: "Consolidado com PLD, contratos e sinais gerados por IA." },
-  { id: "r3", title: "Relatório Mensal · Fevereiro", type: "Mensal", periodStart: "2025-02-01", periodEnd: "2025-02-28", createdAt: "2025-03-01", summary: "Fechamento mensal com curva de PLD e resultado por contrato." },
-  { id: "r4", title: "Relatório Mensal · Janeiro", type: "Mensal", periodStart: "2025-01-01", periodEnd: "2025-01-31", createdAt: "2025-02-01", summary: "Fechamento mensal com curva de PLD e resultado por contrato." },
-  { id: "r5", title: "Relatório Trimestral · Q4 2024", type: "Trimestral", periodStart: "2024-10-01", periodEnd: "2024-12-31", createdAt: "2025-01-10", summary: "Visão trimestral de contratos, margem e desempenho do portfólio." },
-];
-
-const reportsStore = createPersistentStore<{ items: Report[] }>("ethere.reports.v1", { items: seedReports });
+const reportsStore = createPersistentStore<{ items: Report[] }>("ethere.reports.v2", { items: [] });
 
 export function useReports() {
   const [state, set] = useStore(reportsStore);
@@ -228,10 +248,17 @@ export function useReports() {
       const plan = currentPlan();
       if (!withinLimit(plan.limits.reportsPerMonth, reportsThisMonth(reportsStore.getSnapshot().items))) return false;
       const tier: Report["tier"] = plan.limits.deepReports ? "pro" : "basic";
-      set((s) => ({ items: [{ ...r, tier, id: uid(), createdAt: new Date().toISOString().slice(0, 10) }, ...s.items] }));
+      const id = newId();
+      set((s) => ({ items: [{ ...r, tier, id, createdAt: new Date().toISOString().slice(0, 10) }, ...s.items] }));
+      push(({ companyId, userId }) =>
+        reportsRepository.create(companyId, { ...r, payload: { tier } }, userId, id),
+      );
       return true;
     },
-    remove: (id: string) => set((s) => ({ items: s.items.filter((i) => i.id !== id) })),
+    remove: (id: string) => {
+      set((s) => ({ items: s.items.filter((i) => i.id !== id) }));
+      push(() => reportsRepository.remove(id));
+    },
   };
 }
 
@@ -290,8 +317,8 @@ export type SettingsState = {
   twoFactor: boolean;
 };
 
-const settingsStore = createPersistentStore<SettingsState>("ethere.settings.v2", {
-  company: { name: "Ethere Ltda.", cnpj: "12.345.678/0001-90", email: "contato@ethere.com", phone: "+55 11 3000-0000" },
+const settingsStore = createPersistentStore<SettingsState>("ethere.settings.v3", {
+  company: { name: "", cnpj: "", email: "", phone: "" },
   plan: ETHERE_PLAN.name,
   subscription: defaultSubscription,
   notifications: {
@@ -301,17 +328,52 @@ const settingsStore = createPersistentStore<SettingsState>("ethere.settings.v2",
     "Vencimentos de contrato": true,
   },
   preferences: { defaultSubmarket: "SE/CO", period: "30 dias", density: "Confortável" },
-  users: [
-    { id: "u1", name: "Lucas Gomes", email: "lucas@ethere.com", role: "Administrador", notify: true },
-    { id: "u2", name: "Marina Alves", email: "marina@ethere.com", role: "Gestor", notify: true },
-    { id: "u3", name: "Rafael Silva", email: "rafael@ethere.com", role: "Analista" },
-  ],
+  users: [],
   twoFactor: false,
 });
 
+const companyFields = ["name", "cnpj", "email", "phone"] as const;
+
+/**
+ * Envia ao Supabase o que mudou nas configurações: dados da empresa, papel e
+ * notificação de cada usuário. Notificações, preferências e 2FA ainda ficam
+ * apenas neste navegador.
+ */
+function pushSettings(prev: SettingsState, next: SettingsState) {
+  const company: Partial<SettingsState["company"]> = {};
+  for (const key of companyFields) {
+    if (next.company[key] !== prev.company[key]) company[key] = next.company[key];
+  }
+  if (Object.keys(company).length) {
+    push(({ companyId }) => companyRepository.update(companyId, company));
+    sessionStore.set((s) =>
+      s.user ? { user: { ...s.user, company: next.company.name, cnpj: next.company.cnpj } } : s,
+    );
+  }
+
+  for (const user of next.users) {
+    const before = prev.users.find((u) => u.id === user.id);
+    if (!before) continue;
+    if (before.role !== user.role) {
+      push(({ companyId }) => usersRepository.setRole(user.id, companyId, user.role));
+      sessionStore.set((s) =>
+        s.user?.id === user.id ? { user: { ...s.user, accessRole: user.role } } : s,
+      );
+    }
+    if (!!before.notify !== !!user.notify) {
+      push(() => usersRepository.updateProfile(user.id, { receives_alerts: !!user.notify }));
+    }
+  }
+}
+
 export function useSettings() {
-  const [settings, set] = useStore(settingsStore);
-  return { settings, setSettings: set };
+  const [settings] = useStore(settingsStore);
+  const setSettings = useCallback((next: SettingsState | ((prev: SettingsState) => SettingsState)) => {
+    const prev = settingsStore.getSnapshot();
+    settingsStore.set(next);
+    pushSettings(prev, settingsStore.getSnapshot());
+  }, []);
+  return { settings, setSettings };
 }
 
 /* -------------------------------- session --------------------------------- */
@@ -319,6 +381,9 @@ export function useSettings() {
 export type UserProfileKind = "Comercializadora" | "Fazenda de Energia";
 
 export type SessionUser = {
+  /** Id do usuário no Supabase Auth. */
+  id: string;
+  companyId: string;
   email: string;
   firstName: string;
   lastName: string;
@@ -339,6 +404,8 @@ export type SessionUser = {
 export type Session = SessionUser | null;
 
 export const emptyUser: SessionUser = {
+  id: "",
+  companyId: "",
   email: "",
   firstName: "",
   lastName: "",
@@ -354,18 +421,58 @@ export const emptyUser: SessionUser = {
   onboarded: false,
 };
 
-const sessionStore = createPersistentStore<{ user: Session }>("ethere.session.v2", { user: null });
+const sessionStore = createPersistentStore<{ user: Session }>("ethere.session.v3", { user: null });
+
+/**
+ * Altera os dados do usuário logado e grava no Supabase o que tem coluna no
+ * banco. E-mail, papel de acesso e plano não mudam por aqui.
+ */
+function updateSessionUser(patch: Partial<SessionUser>) {
+  const allowed = { ...patch };
+  for (const key of ["id", "companyId", "email", "accessRole", "plan"] as const) delete allowed[key];
+  sessionStore.set((s) => (s.user ? { user: { ...s.user, ...allowed } } : s));
+
+  const profile: Parameters<typeof usersRepository.updateProfile>[1] = {};
+  if (allowed.firstName !== undefined) profile.first_name = allowed.firstName;
+  if (allowed.lastName !== undefined) profile.last_name = allowed.lastName;
+  if (allowed.role !== undefined) profile.job_title = allowed.role;
+  if (allowed.phone !== undefined) profile.phone = allowed.phone;
+  if (allowed.onboarded !== undefined) profile.onboarded = allowed.onboarded;
+  if (Object.keys(profile).length) {
+    push(({ userId }) => usersRepository.updateProfile(userId, profile));
+  }
+
+  // Só o Administrador pode alterar a empresa (regra do banco).
+  if (allowed.company !== undefined || allowed.cnpj !== undefined) {
+    const prev = settingsStore.getSnapshot();
+    settingsStore.set({
+      ...prev,
+      company: {
+        ...prev.company,
+        ...(allowed.company !== undefined ? { name: allowed.company } : {}),
+        ...(allowed.cnpj !== undefined ? { cnpj: allowed.cnpj } : {}),
+      },
+    });
+    const next = settingsStore.getSnapshot();
+    const changed = next.company.name !== prev.company.name || next.company.cnpj !== prev.company.cnpj;
+    if (changed && backendScope()?.isAdmin) {
+      push(({ companyId }) =>
+        companyRepository.update(companyId, { name: next.company.name, cnpj: next.company.cnpj }),
+      );
+    }
+  }
+}
 
 export function useSession() {
-  const [state, set] = useStore(sessionStore);
+  const [state] = useStore(sessionStore);
   return {
     user: state.user,
-    isAuthenticated: !!state.user,
-    signIn: (user: Partial<SessionUser> & { email: string }) =>
-      set({ user: { ...emptyUser, ...user } }),
-    updateUser: (patch: Partial<SessionUser>) =>
-      set((s) => (s.user ? { user: { ...s.user, ...patch } } : s)),
-    signOut: () => set({ user: null }),
+    isAuthenticated: !!state.user?.id,
+    updateUser: updateSessionUser,
+    signOut: () => {
+      void supabase.auth.signOut();
+      clearLocalData();
+    },
   };
 }
 
@@ -382,7 +489,7 @@ export function useAccessRole(): AppRole {
   return normalizeRole(user?.accessRole);
 }
 
-const permissionsStore = createPersistentStore<{ matrix: RoleMatrix }>("ethere.permissions.v1", {
+const permissionsStore = createPersistentStore<{ matrix: RoleMatrix }>("ethere.permissions.v2", {
   matrix: normalizeMatrix(defaultRolePermissions),
 });
 
@@ -391,25 +498,35 @@ setRoleMatrix(permissionsStore.getSnapshot().matrix);
 permissionsStore.subscribe(() => setRoleMatrix(permissionsStore.getSnapshot().matrix));
 
 export function useRolePermissions() {
-  const [state, set] = useStore(permissionsStore);
+  const [state] = useStore(permissionsStore);
   const matrix = normalizeMatrix(state.matrix);
   return {
     matrix,
     isDefault: JSON.stringify(matrix) === JSON.stringify(normalizeMatrix(defaultRolePermissions)),
     toggle: (role: AppRole, permission: Permission, enabled: boolean) => {
       if (isPermissionLocked(role, permission)) return;
-      set((s) => {
-        const current = normalizeMatrix(s.matrix);
-        const next = enabled
-          ? [...current[role], permission]
-          : current[role].filter((p) => p !== permission);
-        return { matrix: normalizeMatrix({ ...current, [role]: next }) };
-      });
+      const current = normalizeMatrix(permissionsStore.getSnapshot().matrix);
+      const next = enabled
+        ? [...current[role], permission]
+        : current[role].filter((p) => p !== permission);
+      saveRolePermissions({ ...current, [role]: next }, [role]);
     },
     setRole: (role: AppRole, permissions: Permission[]) =>
-      set((s) => ({ matrix: normalizeMatrix({ ...normalizeMatrix(s.matrix), [role]: permissions }) })),
-    reset: () => set({ matrix: normalizeMatrix(defaultRolePermissions) }),
+      saveRolePermissions(
+        { ...normalizeMatrix(permissionsStore.getSnapshot().matrix), [role]: permissions },
+        [role],
+      ),
+    reset: () => saveRolePermissions(defaultRolePermissions, appRoles),
   };
+}
+
+/** Aplica a matriz na tela e grava as funções alteradas em `role_permissions`. */
+function saveRolePermissions(matrix: Partial<RoleMatrix>, changed: AppRole[]) {
+  const next = normalizeMatrix(matrix);
+  permissionsStore.set({ matrix: next });
+  for (const role of changed) {
+    push(({ companyId }) => permissionsRepository.setRole(companyId, role, next[role]));
+  }
 }
 
 export function useCan() {
@@ -449,6 +566,144 @@ export function useNotifications() {
   };
 }
 
+/* ------------------------------ sincronização ----------------------------- */
+//
+// As telas leem e alteram os stores acima de forma síncrona. O Supabase é a
+// fonte da verdade: `syncFromBackend` carrega tudo no login e `push` grava cada
+// alteração em seguida. O localStorage funciona só como cache entre recargas.
+
+type BackendScope = { userId: string; companyId: string; isAdmin: boolean };
+
+/** Usuário e empresa da sessão Supabase; `null` quando não há login. */
+function backendScope(): BackendScope | null {
+  const user = sessionStore.getSnapshot().user;
+  if (!user?.id || !user.companyId) return null;
+  return { userId: user.id, companyId: user.companyId, isAdmin: user.accessRole === "Administrador" };
+}
+
+/**
+ * Grava no Supabase uma alteração já aplicada na tela. Se o banco recusar
+ * (permissão, limite do plano, rede), avisa o usuário e recarrega os dados.
+ */
+function push(write: (scope: BackendScope) => Promise<unknown>) {
+  const scope = backendScope();
+  if (!scope) return;
+  write(scope).catch((error: unknown) => {
+    toast.error("Não foi possível salvar a alteração.", {
+      description: errorMessage(error).replace(/^PLAN_LIMIT:\s*/, ""),
+    });
+    syncFromBackend(scope.userId).catch(() => undefined);
+  });
+}
+
+async function listAllContracts(): Promise<Contract[]> {
+  const pageSize = 200;
+  const items: Contract[] = [];
+  for (let page = 1; ; page += 1) {
+    const result = await contractsRepository.list({ page, pageSize });
+    items.push(...result.items);
+    if (items.length >= result.total || !result.items.length) return items;
+  }
+}
+
+async function loadBackend(userId: string): Promise<SessionUser> {
+  const profile = await usersRepository.getProfile(userId);
+  const [role, company, contracts, alerts, reports, users, permissions] = await Promise.all([
+    usersRepository.getRole(userId),
+    companyRepository.get(profile.company_id),
+    listAllContracts(),
+    alertsRepository.list(),
+    reportsRepository.list(),
+    usersRepository.list(),
+    permissionsRepository.get(),
+  ]);
+
+  const plan = getPlan(company.planId);
+  const previous = sessionStore.getSnapshot().user;
+  const user: SessionUser = {
+    id: userId,
+    companyId: company.id,
+    email: profile.email,
+    firstName: profile.first_name,
+    lastName: profile.last_name,
+    role: profile.job_title,
+    // Sem papel no banco, assume o de menor acesso.
+    accessRole: normalizeRole(role ?? "Analista"),
+    company: company.name,
+    cnpj: company.cnpj,
+    phone: profile.phone,
+    profile: profile.profile_kind === "Fazenda de Energia" ? "Fazenda de Energia" : "Comercializadora",
+    plan: plan.name,
+    // A foto de perfil ainda fica apenas neste navegador.
+    avatar: previous?.id === userId ? previous.avatar : "",
+    remember: true,
+    onboarded: profile.onboarded,
+  };
+
+  sessionStore.set({ user });
+  contractsStore.set({ items: contracts });
+  alertsStore.set({ items: alerts });
+  reportsStore.set({
+    items: reports.map((r) => ({
+      id: r.id,
+      title: r.title,
+      type: r.type,
+      periodStart: r.periodStart,
+      periodEnd: r.periodEnd,
+      createdAt: r.createdAt,
+      summary: r.summary,
+      tier: r.payload.tier === "pro" ? "pro" : "basic",
+    })),
+  });
+  settingsStore.set((s) => ({
+    ...s,
+    company: { name: company.name, cnpj: company.cnpj, email: company.email, phone: company.phone },
+    plan: plan.name,
+    subscription: {
+      ...s.subscription,
+      planId: plan.id,
+      status: company.subscriptionStatus as SubscriptionStatus,
+    },
+    users: users.map((u) => ({ id: u.id, name: u.name, email: u.email, role: u.role, notify: u.notify })),
+  }));
+  permissionsStore.set({
+    matrix: normalizeMatrix(
+      Object.keys(permissions).length ? (permissions as Partial<RoleMatrix>) : defaultRolePermissions,
+    ),
+  });
+  onboardingStore.set((s) => ({ ...s, done: profile.onboarded }));
+  return user;
+}
+
+let syncing: { userId: string; promise: Promise<SessionUser> } | null = null;
+
+/** Carrega do Supabase os dados do usuário e da empresa para os stores. */
+export function syncFromBackend(userId: string): Promise<SessionUser> {
+  if (syncing?.userId === userId) return syncing.promise;
+  const promise = loadBackend(userId).finally(() => {
+    if (syncing?.promise === promise) syncing = null;
+  });
+  syncing = { userId, promise };
+  return promise;
+}
+
+/** Remove deste navegador tudo o que pertence à sessão encerrada. */
+export function clearLocalData() {
+  syncing = null;
+  sessionStore.reset();
+  contractsStore.reset();
+  alertsStore.reset();
+  reportsStore.reset();
+  settingsStore.reset();
+  permissionsStore.reset();
+  onboardingStore.reset();
+  try {
+    window.localStorage.removeItem("ethere.intelligence.v1");
+  } catch {
+    /* modo privado */
+  }
+}
+
 /* --------------------------------- utils ---------------------------------- */
 
 export const brl = (v: number) =>
@@ -479,7 +734,7 @@ export function toCsv(rows: Record<string, string | number>[]) {
 
 /* ------------------------------- onboarding ------------------------------- */
 
-const onboardingStore = createPersistentStore<{ done: boolean; step: number }>("ethere.onboarding.v1", {
+const onboardingStore = createPersistentStore<{ done: boolean; step: number }>("ethere.onboarding.v2", {
   done: false,
   step: 0,
 });

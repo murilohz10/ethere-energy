@@ -1,13 +1,15 @@
 /**
  * Camada de dados de mercado (PLD, reservatórios e carga).
  *
- * A fonte de dados fica isolada em `marketProvider`. Hoje ela gera uma série
- * determinística (mock), mas a assinatura é a mesma que será usada quando a
- * integração oficial (CCEE / ONS) entrar no lugar: basta trocar a implementação
- * do provider — repositório, processamento e frontend continuam iguais.
+ * O PLD vem de `market_series`, carregado a partir dos dados abertos da CCEE
+ * (ver `scripts/import-pld.ts`). `marketProvider` ainda gera uma série
+ * determinística (mock) para reservatórios e carga, que não têm fonte oficial
+ * integrada.
  */
 
+import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { CCEE_SOURCE } from "./ccee";
 import { toAppError } from "./errors";
 import { submarkets, type Submarket } from "./types";
 
@@ -78,13 +80,15 @@ const columnBySubmarket: Record<Submarket, keyof Omit<PldRow, "d" | "date">> = {
 };
 
 export const marketRepository = {
+  /** Últimos `days` dias publicados pela CCEE (não necessariamente até hoje). */
   async listSeries(series: MarketSeriesKey, days = 180): Promise<MarketPoint[]> {
     const { data, error } = await supabase
       .from("market_series")
       .select("series, submarket, reference_date, value")
+      .eq("source", CCEE_SOURCE)
       .eq("series", series)
-      .gte("reference_date", isoDaysAgo(days))
-      .order("reference_date", { ascending: true });
+      .order("reference_date", { ascending: false })
+      .limit(days * submarkets.length);
     if (error) throw toAppError(error);
     return (data ?? []).map((row) => ({
       series: row.series as MarketSeriesKey,
@@ -107,9 +111,18 @@ export const marketRepository = {
     }
     return [...byDate.values()]
       .sort((a, b) => a.date.localeCompare(b.date))
-      .map((row, i) => ({ ...row, d: `D${i + 1}` }));
+      .map((row) => ({ ...row, d: `${row.date.slice(8)}/${row.date.slice(5, 7)}` }));
   },
 };
+
+/** PLD médio diário da CCEE, do mais antigo ao mais recente. */
+export function usePldRows(days = 180) {
+  return useQuery({
+    queryKey: ["market", "pld", days],
+    queryFn: () => marketRepository.pldRows(days),
+    staleTime: 15 * 60 * 1000,
+  });
+}
 
 /** Última leitura e variação por submercado. */
 export function pldSummary(rows: PldRow[]) {

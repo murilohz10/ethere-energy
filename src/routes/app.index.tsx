@@ -16,6 +16,7 @@ import {
   positionBySubmarket, contractedByContract, financialSeries, expirationBuckets,
   ESTIMATE_NOTE,
 } from "@/lib/profile";
+import { pldSummary, usePldRows } from "@/lib/api/market";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useMemo, useState } from "react";
 
@@ -69,8 +70,18 @@ function Overview() {
 
   const trader = useMemo(() => traderMetrics(contracts), [contracts]);
   const farm = useMemo(() => farmMetrics(contracts), [contracts]);
-  const pld = isFarm ? farm.pld : trader.pld;
-  const pldData = useMemo(() => pldSeries(30), []);
+  // PLD da CCEE (média diária). Sem leitura do banco, cai na série simulada.
+  const pldRows = usePldRows(180).data;
+  const realPld = pldRows?.length ? pldRows : null;
+  const pld = useMemo(() => {
+    const current = realPld && pldSummary(realPld).find((p) => p.submarket === "SE/CO");
+    if (current) return { value: current.value, delta: current.delta };
+    return isFarm ? farm.pld : trader.pld;
+  }, [realPld, isFarm, farm.pld, trader.pld]);
+  const pldData = useMemo(
+    () => (realPld ? realPld.slice(-30).map((r) => ({ d: r.d, pld: r.seco })) : pldSeries(30)),
+    [realPld],
+  );
   const genData = useMemo(() => generationSeries(farm.capacityMwm, 30), [farm.capacityMwm]);
   const positionData = useMemo(() => positionBySubmarket(contracts), [contracts]);
   const contractedData = useMemo(() => contractedByContract(contracts), [contracts]);
@@ -188,7 +199,9 @@ function Overview() {
                 <span className="rounded-md bg-brand-softer px-1.5 py-0.5 text-[10px] font-medium text-brand-dark">30 dias</span>
               </div>
               <div className="mt-0.5 text-xs text-muted-foreground">
-                {isFarm ? "MWh por dia · usinas da empresa" : "Submercado SE/CO · R$/MWh"}
+                {isFarm
+                  ? "MWh por dia · usinas da empresa"
+                  : `Submercado SE/CO · R$/MWh · ${realPld ? "média diária CCEE" : "dados simulados"}`}
               </div>
             </div>
             <div className="flex gap-3 text-xs text-muted-foreground">

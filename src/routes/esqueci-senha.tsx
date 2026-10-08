@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { EthereLogo } from "@/components/ethere/logo";
 import { ArrowLeft, Loader2, MailCheck } from "lucide-react";
 import { isEmail } from "@/lib/store";
+import { requestPasswordReset } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/esqueci-senha")({
@@ -25,17 +26,20 @@ function ForgotPassword() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const navigate = useNavigate();
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     if (!isEmail(email)) return setError("Informe um e-mail válido.");
     setError("");
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      await requestPasswordReset(email);
       setSent(true);
-    }, 900);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Não foi possível enviar o link.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -74,16 +78,10 @@ function ForgotPassword() {
             </div>
             <h1 className="mt-6 text-2xl font-semibold tracking-tight">Verifique seu e-mail</h1>
             <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              Enviamos um link de redefinição para <b className="text-foreground">{email}</b>. O link expira em 30 minutos.
+              Se houver uma conta com <b className="text-foreground">{email}</b>, enviamos um link de redefinição. Abra o link
+              no mesmo navegador para definir a nova senha.
             </p>
             <div className="mt-6 space-y-3">
-              <Button
-                className="w-full text-white shadow-blue hover:opacity-95"
-                style={{ background: "var(--gradient-brand)" }}
-                onClick={() => navigate({ to: "/redefinir-senha" })}
-              >
-                Abrir tela de redefinição
-              </Button>
               <Button variant="outline" className="w-full" onClick={() => setSent(false)}>
                 Reenviar para outro e-mail
               </Button>

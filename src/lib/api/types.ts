@@ -217,6 +217,8 @@ export type TeamUser = {
   role: AppRole;
   jobTitle: string;
   active: boolean;
+  /** Recebe notificações de alertas. */
+  notify: boolean;
   createdAt: string;
 };
 

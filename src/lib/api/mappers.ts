@@ -162,6 +162,7 @@ export function mapTeamUser(
     role: normalizeRole(role),
     jobTitle: row.job_title,
     active: row.active,
+    notify: row.receives_alerts,
     createdAt: row.created_at,
   };
 }

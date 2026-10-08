@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label";
 import { EthereLogo } from "@/components/ethere/logo";
 import { ArrowLeft, Eye, EyeOff, Loader2, ShieldCheck } from "lucide-react";
 import { isStrongPassword } from "@/lib/store";
+import { hasAuthSession, updatePassword } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
@@ -29,7 +30,7 @@ function ResetPassword() {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     const next: typeof errors = {};
     if (!isStrongPassword(password)) next.password = "Mínimo de 8 caracteres.";
@@ -37,11 +38,20 @@ function ResetPassword() {
     setErrors(next);
     if (Object.keys(next).length) return;
     setLoading(true);
-    setTimeout(() => {
+    try {
+      // A sessão é aberta pelo link enviado por e-mail; sem ela não há o que redefinir.
+      if (!(await hasAuthSession())) {
+        setErrors({ password: "Link inválido ou expirado. Solicite um novo em \"Esqueci minha senha\"." });
+        return;
+      }
+      await updatePassword(password);
+      toast.success("Senha redefinida com sucesso.");
+      navigate({ to: "/app" });
+    } catch (error) {
+      setErrors({ password: error instanceof Error ? error.message : "Não foi possível redefinir a senha." });
+    } finally {
       setLoading(false);
-      toast.success("Senha redefinida com sucesso. Faça login novamente.");
-      navigate({ to: "/login" });
-    }, 900);
+    }
   }
 
   return (

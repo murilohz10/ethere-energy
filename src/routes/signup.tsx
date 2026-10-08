@@ -7,10 +7,10 @@ import { EthereLogo } from "@/components/ethere/logo";
 import { Building2, Wind, Check, ArrowRight, ArrowLeft, Eye, EyeOff, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  isCnpj, isEmail, isPhone, isStrongPassword, maskCnpj, maskPhone,
-  useSession, useSettings, uid, type UserProfileKind,
+  isCnpj, isEmail, isPhone, isStrongPassword, maskCnpj, maskPhone, type UserProfileKind,
 } from "@/lib/store";
-import { ETHERE_PLAN, defaultSubscription } from "@/lib/billing";
+import { signUp } from "@/lib/auth";
+import { ETHERE_PLAN } from "@/lib/billing";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/signup")({
@@ -45,8 +45,6 @@ function SignupPage() {
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { signIn } = useSession();
-  const { settings, setSettings } = useSettings();
 
   const set = (patch: Partial<Form>) => setForm((f) => ({ ...f, ...patch }));
 
@@ -76,36 +74,35 @@ function SignupPage() {
     setStep((s) => s + 1);
   }
 
-  function finish() {
-    if (!validate(3)) return;
+  async function finish() {
+    if (!validate(3) || !form.profile) return;
     setLoading(true);
-    setTimeout(() => {
-      const name = [form.firstName.trim(), form.lastName.trim()].filter(Boolean).join(" ");
-      signIn({
-        email: form.email.trim(),
-        firstName: form.firstName.trim(),
-        lastName: form.lastName.trim(),
-        role: form.role.trim(),
-        accessRole: "Administrador",
-        company: form.company.trim(),
-        cnpj: form.cnpj,
+    try {
+      const user = await signUp({
+        email: form.email,
+        password: form.password,
+        firstName: form.firstName,
+        lastName: form.lastName,
+        jobTitle: form.role,
         phone: form.phone,
-        profile: form.profile!,
-        plan: ETHERE_PLAN.name,
-        remember: true,
-        onboarded: false,
+        companyName: form.company,
+        cnpj: form.cnpj,
+        profileKind: form.profile,
       });
-      setSettings({
-        ...settings,
-        plan: ETHERE_PLAN.name,
-        subscription: { ...defaultSubscription, status: "trialing" },
-        company: { ...settings.company, name: form.company.trim(), cnpj: form.cnpj, email: form.email.trim(), phone: form.phone },
-        users: [{ id: uid(), name: name || form.email.trim(), email: form.email.trim(), role: "Administrador" }],
-      });
+      if (user) {
+        toast.success("Empresa e usuário administrador criados. Vamos configurar seu ambiente.");
+        navigate({ to: "/onboarding" });
+      } else {
+        toast.success("Conta criada. Confirme seu e-mail para entrar.", {
+          description: `Enviamos um link de confirmação para ${form.email.trim()}.`,
+        });
+        navigate({ to: "/login" });
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Não foi possível criar a conta.");
+    } finally {
       setLoading(false);
-      toast.success("Empresa e usuário administrador criados. Vamos configurar seu ambiente.");
-      navigate({ to: "/onboarding" });
-    }, 1000);
+    }
   }
 
 

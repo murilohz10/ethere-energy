@@ -6,7 +6,8 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { EthereLogo } from "@/components/ethere/logo";
 import { ArrowRight, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
-import { isEmail, isStrongPassword, useSession, useOnboarding } from "@/lib/store";
+import { isEmail, isStrongPassword } from "@/lib/store";
+import { signInWithPassword } from "@/lib/auth";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/login")({
@@ -23,8 +24,6 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const { signIn } = useSession();
-  const onboarding = useOnboarding();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [remember, setRemember] = useState(true);
@@ -32,7 +31,7 @@ function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<{ email?: string; password?: string; form?: string }>({});
 
-  function submit(e: React.FormEvent) {
+  async function submit(e: React.FormEvent) {
     e.preventDefault();
     const next: typeof errors = {};
     if (!email.trim()) next.email = "Informe seu e-mail.";
@@ -43,22 +42,15 @@ function LoginPage() {
     if (Object.keys(next).length) return;
 
     setLoading(true);
-    setTimeout(() => {
-      setLoading(false);
-      const name = email.split("@")[0].replace(/[._-]/g, " ");
-      const [first = "", last = ""] = name.split(" ");
-      signIn({
-        email: email.trim(),
-        firstName: first.charAt(0).toUpperCase() + first.slice(1),
-        lastName: last.charAt(0).toUpperCase() + last.slice(1),
-        company: "Ethere Ltda.",
-        role: "Analista de Energia",
-        remember,
-        onboarded: onboarding.done,
-      });
+    try {
+      const user = await signInWithPassword(email, password);
       toast.success("Login realizado com sucesso.");
-      navigate({ to: onboarding.done ? "/app" : "/onboarding" });
-    }, 900);
+      navigate({ to: user.onboarded ? "/app" : "/onboarding" });
+    } catch (error) {
+      setErrors({ form: error instanceof Error ? error.message : "Não foi possível entrar." });
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

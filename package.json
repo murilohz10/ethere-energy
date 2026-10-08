@@ -9,7 +9,8 @@
     "build:dev": "vite build --mode development",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "import:pld": "node --env-file=.env scripts/import-pld.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^4.0.84",

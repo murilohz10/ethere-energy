@@ -7,6 +7,7 @@
 
 import type { PostgrestSingleResponse } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import type { AppRole } from "@/lib/rbac";
 import { toAppError } from "./errors";
 import {
   mapAlertEvent, mapAlertRule, mapAttachment, mapAuditLog, mapCompany, mapConsumption,
@@ -69,11 +70,13 @@ export const contractsRepository = {
     return mapContract(row);
   },
 
-  async create(companyId: string, input: ContractInput, code: string, userId: string) {
+  /** `id` opcional: permite gravar com o mesmo id já usado na interface. */
+  async create(companyId: string, input: ContractInput, code: string, userId: string, id?: string) {
     const row = unwrap(
       await supabase
         .from("contracts")
         .insert({
+          ...(id ? { id } : {}),
           company_id: companyId,
           code,
           name: input.name,
@@ -252,11 +255,13 @@ export const reportsRepository = {
       payload: Record<string, unknown>;
     },
     userId: string,
+    id?: string,
   ) {
     const row = unwrap(
       await supabase
         .from("reports")
         .insert({
+          ...(id ? { id } : {}),
           company_id: companyId,
           title: input.title,
           type: input.type,
@@ -457,9 +462,19 @@ export const usersRepository = {
       onboarded?: boolean;
       active?: boolean;
       last_seen_at?: string;
+      receives_alerts?: boolean;
     },
   ) {
     const { error } = await supabase.from("profiles").update(patch).eq("id", userId);
+    if (error) throw toAppError(error);
+  },
+
+  async setRole(userId: string, companyId: string, role: AppRole) {
+    const { error } = await supabase
+      .from("user_roles")
+      .update({ role })
+      .eq("user_id", userId)
+      .eq("company_id", companyId);
     if (error) throw toAppError(error);
   },
 

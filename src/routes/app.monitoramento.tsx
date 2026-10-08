@@ -18,6 +18,7 @@ import {
   useCompanyProfile, traderMetrics, farmMetrics, generationSeries, positionBySubmarket,
   ESTIMATE_NOTE,
 } from "@/lib/profile";
+import { usePldRows } from "@/lib/api/market";
 
 export const Route = createFileRoute("/app/monitoramento")({
   head: () => ({
@@ -77,7 +78,7 @@ function Monitor() {
   const [period, setPeriod] = useState("60");
   const [submarket, setSubmarket] = useState<"todos" | Submarket>("todos");
   const [seed, setSeed] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [hidden, setHidden] = useState<string[]>([]);
   const [zoom, setZoom] = useState(1);
 
@@ -87,7 +88,15 @@ function Monitor() {
   const farm = useMemo(() => farmMetrics(contracts, seed), [contracts, seed]);
 
   const days = Number(period);
-  const data = useMemo(() => buildData(days, seed), [days, seed]);
+  const pld = usePldRows(180);
+  const loading = refreshing || pld.isPending;
+  // Sem leitura da CCEE (tabela vazia ou sem acesso), a tela mostra a série simulada.
+  const real = pld.data?.length ? pld.data : null;
+  const data = useMemo<Row[]>(
+    () => (real ? real.slice(-days) : buildData(days, seed)),
+    [real, days, seed],
+  );
+  const lastDate = real?.[real.length - 1]?.date;
   const hydro = useMemo(() => buildHydro(days, seed), [days, seed]);
   const generation = useMemo(
     () => generationSeries(farm.capacityMwm, days, seed),
@@ -106,11 +115,15 @@ function Monitor() {
   }, [data, zoom]);
 
   const refresh = async () => {
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 700));
+    setRefreshing(true);
+    const result = await pld.refetch();
     setSeed((s) => s + 3);
-    setLoading(false);
-    toast.success("Dados atualizados", { description: "Curvas sincronizadas com a última leitura." });
+    setRefreshing(false);
+    if (result.data?.length) {
+      toast.success("Dados atualizados", { description: "PLD sincronizado com a última leitura da CCEE." });
+    } else {
+      toast.error("PLD da CCEE indisponível", { description: "Exibindo a série simulada." });
+    }
   };
 
   const exportData = () => {
@@ -220,6 +233,13 @@ function Monitor() {
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm font-semibold">Histórico do PLD por submercado</div>
           <div className="flex items-center gap-2">
+            {!loading && (
+              <span className="rounded-md border border-border px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                {lastDate
+                  ? `Fonte: CCEE · média diária até ${lastDate.slice(8)}/${lastDate.slice(5, 7)}`
+                  : "Dados simulados"}
+              </span>
+            )}
             <span className="rounded-md bg-brand-softer px-2 py-0.5 text-[10px] font-semibold text-brand-dark">
               {periods.find((p) => p.v === period)?.l}
             </span>

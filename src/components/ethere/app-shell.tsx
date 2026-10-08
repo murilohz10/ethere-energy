@@ -26,6 +26,7 @@ import {
   fullName, initials, useAlerts, useContracts, useNotifications, useSession, useAccessRole,
 } from "@/lib/store";
 import { can, canAccessPath } from "@/lib/rbac";
+import { pldSummary, usePldRows } from "@/lib/api/market";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
   DropdownMenuSeparator, DropdownMenuTrigger,
@@ -327,11 +328,23 @@ function TopBar({ mobileNav }: { mobileNav?: ReactNode }) {
 }
 
 function Ticker() {
+  const { data: pldRows } = usePldRows(180);
+  // Enquanto não há leitura da CCEE, o ticker mostra valores ilustrativos.
+  const pld = pldRows?.length
+    ? pldSummary(pldRows).map((p) => ({
+        l: `PLD ${p.submarket}`,
+        v: p.value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" }),
+        d: `${p.delta >= 0 ? "+" : ""}${p.delta.toFixed(1).replace(".", ",")}%`,
+        up: p.up,
+      }))
+    : [
+        { l: "PLD SE/CO", v: "R$ 219,42", d: "+4,8%", up: true },
+        { l: "PLD S", v: "R$ 201,10", d: "+2,1%", up: true },
+        { l: "PLD NE", v: "R$ 188,30", d: "-1,2%", up: false },
+        { l: "PLD N", v: "R$ 175,88", d: "+0,4%", up: true },
+      ];
   const items = [
-    { l: "PLD SE/CO", v: "R$ 219,42", d: "+4,8%", up: true },
-    { l: "PLD S", v: "R$ 201,10", d: "+2,1%", up: true },
-    { l: "PLD NE", v: "R$ 188,30", d: "-1,2%", up: false },
-    { l: "PLD N", v: "R$ 175,88", d: "+0,4%", up: true },
+    ...pld,
     { l: "Reserv. SE", v: "42,1%", d: "-0,6pp", up: false },
     { l: "Reserv. S", v: "68,9%", d: "+1,1pp", up: true },
     { l: "ONS", v: "Revisão curva garantia física", d: "", up: true },

@@ -16,12 +16,12 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Building2, CreditCard, Bell, Users, Lock, SlidersHorizontal, Trash2, Eye, EyeOff, ShieldCheck, RotateCcw } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useSettings, usePlan, notifiedCount, useSession, useRolePermissions, uid, type SettingsState, type Submarket } from "@/lib/store";
+import { useSettings, usePlan, notifiedCount, useSession, useRolePermissions, type SettingsState, type Submarket } from "@/lib/store";
 import {
   appRoles, roleDescriptions, allPermissions, permissionGroups, permissionMeta, isPermissionLocked,
   type AppRole,
 } from "@/lib/rbac";
-import { PLAN_LIST, getPlan, formatPlanPrice, limitMessages, subscriptionStatusLabel, type PlanId } from "@/lib/billing";
+import { PLAN_LIST, getPlan, formatPlanPrice, limitMessages, subscriptionStatusLabel, startCheckout, type PlanId } from "@/lib/billing";
 import { showPlanLimit } from "@/lib/plan-limit";
 
 export const Route = createFileRoute("/app/configuracoes")({
@@ -44,7 +44,7 @@ const tabs = [
 
 function SettingsPage() {
   const { settings, setSettings } = useSettings();
-  const { user, signIn } = useSession();
+  const { updateUser } = useSession();
   const [tab, setTab] = useState<(typeof tabs)[number]["k"]>("empresa");
   const [draft, setDraft] = useState<SettingsState>(settings);
   const dirty = JSON.stringify(draft) !== JSON.stringify(settings);
@@ -57,14 +57,14 @@ function SettingsPage() {
     if (t && tabs.some((x) => x.k === t)) setTab(t as (typeof tabs)[number]["k"]);
   }, []);
 
-  const changePlan = (id: PlanId) => {
+  // O plano fica no banco e só muda pelo faturamento, que ainda não existe.
+  const changePlan = async (id: PlanId) => {
     const next = getPlan(id);
     if (next.limits.notifiedUsers !== null && notifiedCount(settings.users) > next.limits.notifiedUsers) {
       return toast.error(limitMessages.notified(next.limits.notifiedUsers), { description: "Ajuste os usuários notificados antes de mudar para o Core." });
     }
-    setSettings({ ...settings, plan: next.name, subscription: { ...settings.subscription, planId: id, status: "active" } });
-    if (user) signIn({ ...user, plan: next.name });
-    toast.success(`Plano alterado para ${next.name}`, { description: "Simulação: nenhuma cobrança foi realizada." });
+    const checkout = await startCheckout();
+    toast.info(`Mudança para ${next.name} indisponível`, { description: checkout.reason });
   };
 
   const toggleNotify = (id: string, on: boolean) => {
@@ -74,7 +74,7 @@ function SettingsPage() {
 
   const save = () => {
     setSettings(draft);
-    if (user) signIn({ ...user, company: draft.company.name, email: draft.company.email });
+    updateUser({ company: draft.company.name });
     toast.success("Alterações salvas", { description: "Suas configurações foram atualizadas." });
   };
   const cancel = () => { setDraft(settings); toast("Alterações descartadas"); };
@@ -353,19 +353,16 @@ function SettingsPage() {
                 if (!userForm.name.trim()) return toast.error("Informe o nome.");
                 if (!/^\S+@\S+\.\S+$/.test(userForm.email)) return toast.error("Informe um email válido.");
                 if (userForm.id) {
+                  // Nome e e-mail pertencem à conta de cada pessoa; aqui só muda a função.
                   setSettings({
                     ...settings,
-                    users: settings.users.map((u) =>
-                      u.id === userForm.id ? { ...u, name: userForm.name.trim(), email: userForm.email.trim(), role: userForm.role } : u,
-                    ),
+                    users: settings.users.map((u) => (u.id === userForm.id ? { ...u, role: userForm.role } : u)),
                   });
-                  toast.success("Usuário atualizado");
+                  toast.success("Função do usuário atualizada");
                 } else {
-                  setSettings({
-                    ...settings,
-                    users: [...settings.users, { id: uid(), name: userForm.name.trim(), email: userForm.email.trim(), role: userForm.role }],
+                  toast.info("Convite de usuários ainda não disponível", {
+                    description: "Por enquanto, cada pessoa cria a própria conta pelo cadastro.",
                   });
-                  toast.success("Usuário cadastrado");
                 }
                 setUserForm({ open: false, id: null, name: "", email: "", role: "Analista" });
               }}
@@ -391,9 +388,10 @@ function SettingsPage() {
             <AlertDialogAction
               className="bg-red-600 text-white hover:bg-red-700"
               onClick={() => {
-                setSettings({ ...settings, users: settings.users.filter((u) => u.id !== removeUser) });
                 setRemoveUser(null);
-                toast.success("Usuário removido");
+                toast.info("Remoção de usuários ainda não disponível", {
+                  description: "Fale com o suporte da Ethere para revogar um acesso.",
+                });
               }}
             >
               Remover
