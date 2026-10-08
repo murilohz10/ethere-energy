@@ -29,7 +29,7 @@ import {
   useContracts, brl, fmtDate, downloadFile, toCsv,
   type Contract, type ContractStatus, type ContractType, type Submarket,
 } from "@/lib/store";
-import { useAccessRole } from "@/lib/store";
+import { useAccessRole, usePlan } from "@/lib/store";
 import { can } from "@/lib/rbac";
 import { useCompanyProfile } from "@/lib/profile";
 import { showPlanLimit } from "@/lib/plan-limit";
@@ -93,6 +93,7 @@ function Contracts() {
   const [editing, setEditing] = useState<Contract | null>(null);
   const [form, setForm] = useState(emptyForm());
   const { isFarm, copy } = useCompanyProfile();
+  const planInfo = usePlan();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [toDelete, setToDelete] = useState<string[] | null>(null);
@@ -150,6 +151,7 @@ function Contracts() {
   };
 
   const openNew = () => {
+    if (!planInfo.canAddContract) return showPlanLimit(limitMessages.contracts(100));
     setEditing(null); setForm(emptyForm()); setErrors({}); setFormOpen(true);
   };
   const openEdit = (c: Contract) => {
@@ -220,7 +222,7 @@ function Contracts() {
     <>
       <PageHeader
         title="Contratos"
-        description={copy.contractsDescription}
+        description={planInfo.plan.limits.contracts === null ? copy.contractsDescription : `${copy.contractsDescription} · ${planInfo.usage.contracts}/${planInfo.plan.limits.contracts} contratos no plano Core`}
         actions={
           <>
             <Button variant="outline" size="sm" onClick={() => exportCsv(filtered)}>

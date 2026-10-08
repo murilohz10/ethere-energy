@@ -21,7 +21,7 @@ import {
   Bell, Plus, AlertTriangle, AlertCircle, Info, TrendingDown, Pencil, Trash2, Copy, MoreHorizontal, BellOff, Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useAlerts, fmtDate, type AlertRule, type AlertPriority } from "@/lib/store";
+import { useAlerts, usePlan, fmtDate, type AlertRule, type AlertPriority } from "@/lib/store";
 import { showPlanLimit } from "@/lib/plan-limit";
 import { limitMessages } from "@/lib/billing";
 import { useCompanyProfile, alertTypesByProfile, alertTypeHints } from "@/lib/profile";
@@ -50,7 +50,8 @@ const emptyForm = (): Omit<AlertRule, "id" | "createdAt"> => ({
 function Alerts() {
   const { alerts, add, update, remove, duplicate } = useAlerts();
   const { kind, copy } = useCompanyProfile();
-  const profileDescription = copy.alertsDescription;
+  const planInfo = usePlan();
+  const profileDescription = planInfo.plan.limits.alerts === null ? copy.alertsDescription : `${copy.alertsDescription} · ${planInfo.usage.alerts}/${planInfo.plan.limits.alerts} alertas no plano Core`;
   const alertTypes = alertTypesByProfile[kind] as AlertRule["type"][];
   void alertTypeHints;
   const [query, setQuery] = useState("");
@@ -79,7 +80,7 @@ function Alerts() {
     low: alerts.filter((a) => a.priority === "Baixa" || a.priority === "Info").length,
   }), [alerts]);
 
-  const openNew = () => { setEditing(null); setForm(emptyForm()); setErrors({}); setOpen(true); };
+  const openNew = () => { if (!planInfo.canAddAlert) return showPlanLimit(limitMessages.alerts(5)); setEditing(null); setForm(emptyForm()); setErrors({}); setOpen(true); };
   const openEdit = (a: AlertRule) => {
     setEditing(a);
     const { id: _id, createdAt: _c, ...rest } = a;
