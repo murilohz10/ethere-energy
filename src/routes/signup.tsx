@@ -93,8 +93,8 @@ function SignupPage() {
         toast.success("Empresa e usuário administrador criados. Vamos configurar seu ambiente.");
         navigate({ to: "/onboarding" });
       } else {
-        toast.success("Conta criada. Confirme seu e-mail para entrar.", {
-          description: "Não foi possível iniciar sua sessão agora. Tente entrar em instantes.",
+        toast.success("Conta criada.", {
+          description: "Entre com seu e-mail e senha para continuar.",
         });
         navigate({ to: "/login" });
       }

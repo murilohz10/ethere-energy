@@ -73,12 +73,20 @@ export async function signUp(input: SignUpInput): Promise<SessionUser | null> {
     }
     throw new Error(authErrorMessage(error.message));
   }
-  // Com confirmação de e-mail ativa, o Supabase não acusa e-mail repetido:
-  // devolve um usuário sem identidades.
+  // E-mail repetido pode voltar como usuário sem identidades.
   if (data.user && data.user.identities?.length === 0) {
     throw new Error("Este e-mail já possui uma conta.");
   }
-  if (!data.session || !data.user) return null;
+  if (!data.user) return null;
+  if (!data.session) {
+    // Sem confirmação de e-mail: abre a sessão direto com as credenciais.
+    const { data: signIn, error: signInError } = await supabase.auth.signInWithPassword({
+      email: input.email.trim(),
+      password: input.password,
+    });
+    if (signInError || !signIn.user) return null;
+    return loadSession(signIn.user.id);
+  }
   return loadSession(data.user.id);
 }
 
