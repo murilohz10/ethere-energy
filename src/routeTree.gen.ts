@@ -9,49 +9,29 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as AppRouteImport } from './routes/app'
-import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
-import { Route as LoginRouteImport } from './routes/login'
-import { Route as OnboardingRouteImport } from './routes/onboarding'
-import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
 import { Route as SignupRouteImport } from './routes/signup'
-import { Route as ApiIntelligenceRouteImport } from './routes/api/intelligence'
+import { Route as RedefinirSenhaRouteImport } from './routes/redefinir-senha'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as EsqueciSenhaRouteImport } from './routes/esqueci-senha'
+import { Route as AppRouteImport } from './routes/app'
+import { Route as IndexRouteImport } from './routes/index'
 import { Route as AppIndexRouteImport } from './routes/app.index'
-import { Route as AppAcessoNegadoRouteImport } from './routes/app.acesso-negado'
-import { Route as AppAlertasRouteImport } from './routes/app.alertas'
-import { Route as AppConfiguracoesRouteImport } from './routes/app.configuracoes'
-import { Route as AppContratosRouteImport } from './routes/app.contratos'
-import { Route as AppInsightsRouteImport } from './routes/app.insights'
-import { Route as AppIntelligenceRouteImport } from './routes/app.intelligence'
-import { Route as AppMonitoramentoRouteImport } from './routes/app.monitoramento'
-import { Route as AppPerfilRouteImport } from './routes/app.perfil'
 import { Route as AppRelatoriosRouteImport } from './routes/app.relatorios'
+import { Route as AppPerfilRouteImport } from './routes/app.perfil'
+import { Route as AppMonitoramentoRouteImport } from './routes/app.monitoramento'
+import { Route as AppIntelligenceRouteImport } from './routes/app.intelligence'
+import { Route as AppInsightsRouteImport } from './routes/app.insights'
+import { Route as AppContratosRouteImport } from './routes/app.contratos'
+import { Route as AppConfiguracoesRouteImport } from './routes/app.configuracoes'
+import { Route as AppAlertasRouteImport } from './routes/app.alertas'
+import { Route as AppAcessoNegadoRouteImport } from './routes/app.acesso-negado'
+import { Route as ApiIntelligenceRouteImport } from './routes/api/intelligence'
 import { Route as AppMetricasMetricRouteImport } from './routes/app.metricas.$metric'
 
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AppRoute = AppRouteImport.update({
-  id: '/app',
-  path: '/app',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
-  id: '/esqueci-senha',
-  path: '/esqueci-senha',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LoginRoute = LoginRouteImport.update({
-  id: '/login',
-  path: '/login',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const OnboardingRoute = OnboardingRouteImport.update({
-  id: '/onboarding',
-  path: '/onboarding',
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
   getParentRoute: () => rootRouteImport,
 } as any)
 const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
@@ -59,14 +39,29 @@ const RedefinirSenhaRoute = RedefinirSenhaRouteImport.update({
   path: '/redefinir-senha',
   getParentRoute: () => rootRouteImport,
 } as any)
-const SignupRoute = SignupRouteImport.update({
-  id: '/signup',
-  path: '/signup',
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiIntelligenceRoute = ApiIntelligenceRouteImport.update({
-  id: '/api/intelligence',
-  path: '/api/intelligence',
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EsqueciSenhaRoute = EsqueciSenhaRouteImport.update({
+  id: '/esqueci-senha',
+  path: '/esqueci-senha',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRoute = AppRouteImport.update({
+  id: '/app',
+  path: '/app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AppIndexRoute = AppIndexRouteImport.update({
@@ -74,39 +69,9 @@ const AppIndexRoute = AppIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppRoute,
 } as any)
-const AppAcessoNegadoRoute = AppAcessoNegadoRouteImport.update({
-  id: '/acesso-negado',
-  path: '/acesso-negado',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppAlertasRoute = AppAlertasRouteImport.update({
-  id: '/alertas',
-  path: '/alertas',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
-  id: '/configuracoes',
-  path: '/configuracoes',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppContratosRoute = AppContratosRouteImport.update({
-  id: '/contratos',
-  path: '/contratos',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppInsightsRoute = AppInsightsRouteImport.update({
-  id: '/insights',
-  path: '/insights',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppIntelligenceRoute = AppIntelligenceRouteImport.update({
-  id: '/intelligence',
-  path: '/intelligence',
-  getParentRoute: () => AppRoute,
-} as any)
-const AppMonitoramentoRoute = AppMonitoramentoRouteImport.update({
-  id: '/monitoramento',
-  path: '/monitoramento',
+const AppRelatoriosRoute = AppRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPerfilRoute = AppPerfilRouteImport.update({
@@ -114,10 +79,45 @@ const AppPerfilRoute = AppPerfilRouteImport.update({
   path: '/perfil',
   getParentRoute: () => AppRoute,
 } as any)
-const AppRelatoriosRoute = AppRelatoriosRouteImport.update({
-  id: '/relatorios',
-  path: '/relatorios',
+const AppMonitoramentoRoute = AppMonitoramentoRouteImport.update({
+  id: '/monitoramento',
+  path: '/monitoramento',
   getParentRoute: () => AppRoute,
+} as any)
+const AppIntelligenceRoute = AppIntelligenceRouteImport.update({
+  id: '/intelligence',
+  path: '/intelligence',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppInsightsRoute = AppInsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppContratosRoute = AppContratosRouteImport.update({
+  id: '/contratos',
+  path: '/contratos',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppConfiguracoesRoute = AppConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAlertasRoute = AppAlertasRouteImport.update({
+  id: '/alertas',
+  path: '/alertas',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppAcessoNegadoRoute = AppAcessoNegadoRouteImport.update({
+  id: '/acesso-negado',
+  path: '/acesso-negado',
+  getParentRoute: () => AppRoute,
+} as any)
+const ApiIntelligenceRoute = ApiIntelligenceRouteImport.update({
+  id: '/api/intelligence',
+  path: '/api/intelligence',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppMetricasMetricRoute = AppMetricasMetricRouteImport.update({
   id: '/metricas/$metric',
@@ -266,39 +266,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/app': {
-      id: '/app'
-      path: '/app'
-      fullPath: '/app'
-      preLoaderRoute: typeof AppRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/esqueci-senha': {
-      id: '/esqueci-senha'
-      path: '/esqueci-senha'
-      fullPath: '/esqueci-senha'
-      preLoaderRoute: typeof EsqueciSenhaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/login': {
-      id: '/login'
-      path: '/login'
-      fullPath: '/login'
-      preLoaderRoute: typeof LoginRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/onboarding': {
-      id: '/onboarding'
-      path: '/onboarding'
-      fullPath: '/onboarding'
-      preLoaderRoute: typeof OnboardingRouteImport
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/redefinir-senha': {
@@ -308,18 +280,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RedefinirSenhaRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/intelligence': {
-      id: '/api/intelligence'
-      path: '/api/intelligence'
-      fullPath: '/api/intelligence'
-      preLoaderRoute: typeof ApiIntelligenceRouteImport
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/esqueci-senha': {
+      id: '/esqueci-senha'
+      path: '/esqueci-senha'
+      fullPath: '/esqueci-senha'
+      preLoaderRoute: typeof EsqueciSenhaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/app': {
+      id: '/app'
+      path: '/app'
+      fullPath: '/app'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/app/': {
@@ -329,53 +322,11 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/acesso-negado': {
-      id: '/app/acesso-negado'
-      path: '/acesso-negado'
-      fullPath: '/app/acesso-negado'
-      preLoaderRoute: typeof AppAcessoNegadoRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/alertas': {
-      id: '/app/alertas'
-      path: '/alertas'
-      fullPath: '/app/alertas'
-      preLoaderRoute: typeof AppAlertasRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/configuracoes': {
-      id: '/app/configuracoes'
-      path: '/configuracoes'
-      fullPath: '/app/configuracoes'
-      preLoaderRoute: typeof AppConfiguracoesRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/contratos': {
-      id: '/app/contratos'
-      path: '/contratos'
-      fullPath: '/app/contratos'
-      preLoaderRoute: typeof AppContratosRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/insights': {
-      id: '/app/insights'
-      path: '/insights'
-      fullPath: '/app/insights'
-      preLoaderRoute: typeof AppInsightsRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/intelligence': {
-      id: '/app/intelligence'
-      path: '/intelligence'
-      fullPath: '/app/intelligence'
-      preLoaderRoute: typeof AppIntelligenceRouteImport
-      parentRoute: typeof AppRoute
-    }
-    '/app/monitoramento': {
-      id: '/app/monitoramento'
-      path: '/monitoramento'
-      fullPath: '/app/monitoramento'
-      preLoaderRoute: typeof AppMonitoramentoRouteImport
+    '/app/relatorios': {
+      id: '/app/relatorios'
+      path: '/relatorios'
+      fullPath: '/app/relatorios'
+      preLoaderRoute: typeof AppRelatoriosRouteImport
       parentRoute: typeof AppRoute
     }
     '/app/perfil': {
@@ -385,12 +336,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppPerfilRouteImport
       parentRoute: typeof AppRoute
     }
-    '/app/relatorios': {
-      id: '/app/relatorios'
-      path: '/relatorios'
-      fullPath: '/app/relatorios'
-      preLoaderRoute: typeof AppRelatoriosRouteImport
+    '/app/monitoramento': {
+      id: '/app/monitoramento'
+      path: '/monitoramento'
+      fullPath: '/app/monitoramento'
+      preLoaderRoute: typeof AppMonitoramentoRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/app/intelligence': {
+      id: '/app/intelligence'
+      path: '/intelligence'
+      fullPath: '/app/intelligence'
+      preLoaderRoute: typeof AppIntelligenceRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/insights': {
+      id: '/app/insights'
+      path: '/insights'
+      fullPath: '/app/insights'
+      preLoaderRoute: typeof AppInsightsRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/contratos': {
+      id: '/app/contratos'
+      path: '/contratos'
+      fullPath: '/app/contratos'
+      preLoaderRoute: typeof AppContratosRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/configuracoes': {
+      id: '/app/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/app/configuracoes'
+      preLoaderRoute: typeof AppConfiguracoesRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/alertas': {
+      id: '/app/alertas'
+      path: '/alertas'
+      fullPath: '/app/alertas'
+      preLoaderRoute: typeof AppAlertasRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/acesso-negado': {
+      id: '/app/acesso-negado'
+      path: '/acesso-negado'
+      fullPath: '/app/acesso-negado'
+      preLoaderRoute: typeof AppAcessoNegadoRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/api/intelligence': {
+      id: '/api/intelligence'
+      path: '/api/intelligence'
+      fullPath: '/api/intelligence'
+      preLoaderRoute: typeof ApiIntelligenceRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/app/metricas/$metric': {
       id: '/app/metricas/$metric'
