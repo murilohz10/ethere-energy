@@ -303,16 +303,7 @@ function SettingsPage() {
                 >
                   Atualizar senha
                 </Button>
-                <div className="flex items-center justify-between border-t border-border pt-4">
-                  <div>
-                    <div className="text-sm font-medium">Autenticação em dois fatores</div>
-                    <div className="text-xs text-muted-foreground">Recomendado para contas corporativas.</div>
-                  </div>
-                  <Switch
-                    checked={settings.twoFactor}
-                    onCheckedChange={(v) => { setSettings({ ...settings, twoFactor: v }); toast.success(v ? "2FA ativado" : "2FA desativado"); }}
-                  />
-                </div>
+
               </div>
             </Section>
           )}

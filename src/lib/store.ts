@@ -314,7 +314,6 @@ export type SettingsState = {
   notifications: Record<string, boolean>;
   preferences: { defaultSubmarket: Submarket; period: string; density: "Confortável" | "Compacta" };
   users: TeamUser[];
-  twoFactor: boolean;
 };
 
 const settingsStore = createPersistentStore<SettingsState>("ethere.settings.v3", {
@@ -329,7 +328,6 @@ const settingsStore = createPersistentStore<SettingsState>("ethere.settings.v3",
   },
   preferences: { defaultSubmarket: "SE/CO", period: "30 dias", density: "Confortável" },
   users: [],
-  twoFactor: false,
 });
 
 const companyFields = ["name", "cnpj", "email", "phone"] as const;
