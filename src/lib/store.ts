@@ -334,7 +334,7 @@ const companyFields = ["name", "cnpj", "email", "phone"] as const;
 
 /**
  * Envia ao Supabase o que mudou nas configurações: dados da empresa, papel e
- * notificação de cada usuário. Notificações, preferências e 2FA ainda ficam
+ * notificação de cada usuário. Notificações e preferências ainda ficam
  * apenas neste navegador.
  */
 function pushSettings(prev: SettingsState, next: SettingsState) {
