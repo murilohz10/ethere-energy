@@ -94,7 +94,7 @@ function SignupPage() {
         navigate({ to: "/onboarding" });
       } else {
         toast.success("Conta criada. Confirme seu e-mail para entrar.", {
-          description: `Enviamos um link de confirmação para ${form.email.trim()}.`,
+          description: "Não foi possível iniciar sua sessão agora. Tente entrar em instantes.",
         });
         navigate({ to: "/login" });
       }
