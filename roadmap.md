@@ -1,6 +1,7 @@
 # Roadmap — Reestruturação Ethere
 
 ## Solicitação atual
+- [ ] Revisar páginas após o login e retirar referências restantes à geração térmica.
 - [x] Retirar geração térmica de toda a experiência, incluindo landing, Monitoramento e Intelligence.
 - [x] Remover Clientes e Unidades de toda a experiência, sem alterar o banco.
 - [x] Atualizar a landing com as funcionalidades atuais, mantendo o design.
