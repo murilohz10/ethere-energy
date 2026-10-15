@@ -147,10 +147,11 @@ const statusMeta = {
 
 export function DataSourcesPanel() {
   return (
-    <section className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-soft">
-      <h2 className="text-base font-semibold">Fontes de dados</h2>
-      <p className="mb-4 text-sm text-muted-foreground">Origem e situação de cada dado usado nos painéis e análises.</p>
-      <ul className="divide-y divide-border">
+    <details className="group mt-6 rounded-2xl border border-border bg-card px-6 py-4 shadow-soft">
+      <summary className="cursor-pointer list-none text-sm font-medium text-muted-foreground hover:text-foreground">
+        Transparência · origem e situação dos dados <span className="text-xs group-open:hidden">(mostrar)</span>
+      </summary>
+      <ul className="mt-3 divide-y divide-border">
         {sources.map((s) => {
           const meta = statusMeta[s.status];
           return (
@@ -161,6 +162,6 @@ export function DataSourcesPanel() {
           );
         })}
       </ul>
-    </section>
+    </details>
   );
 }

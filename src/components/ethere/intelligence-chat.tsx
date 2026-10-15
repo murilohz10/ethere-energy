@@ -36,10 +36,10 @@ const toolLabels: Record<string, string> = {
 };
 
 const suggestions = [
-  "O que aconteceu com o PLD hoje?",
-  "Explique o comportamento do mercado nos últimos 30 dias.",
-  "Analise este documento.",
-  "Como esse dado se comportou recentemente?",
+  "O que mudou no PLD nesta semana?",
+  "Como o período atual se compara ao anterior?",
+  "Quais contratos mais pesam na carteira?",
+  "Quais dados estão faltando para aprofundar a análise?",
 ];
 
 type Stored = { messages: UIMessage[]; level: ResponseLevel };

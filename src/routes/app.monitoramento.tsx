@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/ethere/app-shell";
 import { DataSourcesPanel } from "@/components/ethere/product-panels";
+import { PldInterpretationPanel } from "@/components/ethere/interpretation-panels";
 import {
   LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Brush,
   AreaChart, Area, BarChart, Bar,
@@ -98,6 +99,8 @@ function Monitor() {
     [real, days, seed],
   );
   const lastDate = real?.[real.length - 1]?.date;
+  // Série completa para comparar com o período anterior (independe do zoom).
+  const fullRows = useMemo<Row[]>(() => real ?? buildData(180, seed), [real, seed]);
   const hydro = useMemo(() => buildHydro(days, seed), [days, seed]);
   const generation = useMemo(
     () => generationSeries(farm.capacityMwm, days, seed),
@@ -292,6 +295,10 @@ function Monitor() {
           )}
         </div>
       </div>
+
+      {!loading && (
+        <PldInterpretationPanel rows={fullRows} simulated={!real} submarket={submarket === "todos" ? "SE/CO" : submarket} />
+      )}
 
       {isFarm ? (
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
