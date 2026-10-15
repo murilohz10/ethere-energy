@@ -11,7 +11,7 @@ import { useCan, useContracts, useSession, useSettings } from "@/lib/store";
 import {
   isOverdue, taskCategories, taskPriorities, taskStatuses, useTasks, useUnits, type Task,
 } from "@/lib/api/operations";
-import { Field, Pick, RowActions } from "./app.clientes";
+import { Field, Pick, RowActions } from "@/components/ethere/form-bits";
 
 export const Route = createFileRoute("/app/operacional")({
   head: () => ({

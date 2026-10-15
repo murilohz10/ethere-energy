@@ -1,20 +1,19 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Building2, Factory, Loader2, Pencil, Plus, Trash2, Users } from "lucide-react";
+import { Building2, Factory, Loader2, Plus, Users } from "lucide-react";
 import { PageHeader } from "@/components/ethere/app-shell";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useCan, useSession } from "@/lib/store";
 import { useCompanyProfile } from "@/lib/profile";
 import {
   counterpartyKinds, generationSources, unitKinds, useCounterparties, useUnits,
   type Counterparty, type Unit,
 } from "@/lib/api/operations";
+import { Field, Pick, RowActions } from "@/components/ethere/form-bits";
 
 export const Route = createFileRoute("/app/clientes")({
   head: () => ({
@@ -190,24 +189,3 @@ function UnitList({ data, cps, editable, isFarm }: { data: ReturnType<typeof use
   );
 }
 
-export function Field({ label, children }: { label: string; children: React.ReactNode }) {
-  return <div className="grid gap-1.5"><Label>{label}</Label>{children}</div>;
-}
-
-export function Pick({ value, options, onChange, labels }: { value: string; options: readonly string[]; onChange: (v: string) => void; labels?: Record<string, string> }) {
-  return (
-    <Select value={value} onValueChange={onChange}>
-      <SelectTrigger><SelectValue /></SelectTrigger>
-      <SelectContent>{options.map((o) => <SelectItem key={o} value={o}>{labels?.[o] ?? o}</SelectItem>)}</SelectContent>
-    </Select>
-  );
-}
-
-export function RowActions({ onEdit, onDelete }: { onEdit: () => void; onDelete: () => void }) {
-  return (
-    <div className="flex justify-end gap-1">
-      <Button size="icon" variant="ghost" aria-label="Editar" onClick={onEdit}><Pencil className="h-4 w-4" /></Button>
-      <Button size="icon" variant="ghost" aria-label="Excluir" onClick={() => { if (window.confirm("Excluir este registro?")) onDelete(); }}><Trash2 className="h-4 w-4" /></Button>
-    </div>
-  );
-}
