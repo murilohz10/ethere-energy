@@ -8,7 +8,7 @@
 
 ## Etapa B — Gestão essencial
 - [x] Clientes e Unidades (clientes, contrapartes, unidades, usinas)
-- [x] Gestão Operacional (tarefas e pendências)
+- [x] ~~Gestão Operacional~~ removida da interface a pedido
 - [ ] Contratos ligados a cliente/usina
 - [ ] Alertas por pendências
 - [ ] Convite/ativação de usuários
@@ -40,7 +40,8 @@
 ## Interpretação dos dados (doc "Evolução da interpretação")
 - [x] Monitoramento: leitura diária/semanal/mensal do PLD
 - [x] Central: cenários lado a lado (−X / referência / +X) com contratos que mais pesam
-- [x] Contratos: leitura da carteira + preço × PLD médio
+- [x] Contratos: leitura da carteira, comparação interna, análise individual, preço × PLD médio
+- [x] Monitoramento: quadro de fontes removido; leitura do PLD acima do gráfico
 - [x] Intelligence: sugestões de perguntas analíticas
-- [ ] Relatórios: construtor com nível de detalhe e interpretação
+- [x] Relatórios: construtor com nível de detalhe, revisão e interpretação
 - [ ] Geradoras: análise de geração (depende de dados reais de geração)
