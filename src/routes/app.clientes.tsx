@@ -65,10 +65,10 @@ function ClientsPage() {
         }
       />
       <Tabs defaultValue={isFarm ? "unidades" : "clientes"}>
-        <TabsList>
+        <TabsList className="h-auto flex-wrap">
           <TabsTrigger value="clientes">
             <Users className="mr-1.5 h-4 w-4" />
-            Clientes e contrapartes ({cps.items.length})
+            <span className="hidden sm:inline">Clientes e contrapartes</span><span className="sm:hidden">Clientes</span>&nbsp;({cps.items.length})
           </TabsTrigger>
           <TabsTrigger value="unidades">
             <Factory className="mr-1.5 h-4 w-4" />

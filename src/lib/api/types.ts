@@ -35,6 +35,8 @@ export type Contract = {
   endDate: string;
   status: ContractStatus;
   notes: string;
+  counterpartyId?: string | null;
+  unitId?: string | null;
   createdAt: string;
   updatedAt: string;
 };

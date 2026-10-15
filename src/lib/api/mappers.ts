@@ -29,6 +29,8 @@ export function mapContract(row: Row<"contracts">): Contract {
     endDate: row.end_date ?? "",
     status: row.status as ContractStatus,
     notes: row.notes,
+    counterpartyId: row.counterparty_id ?? null,
+    unitId: row.unit_id ?? null,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };

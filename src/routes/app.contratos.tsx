@@ -1,3 +1,5 @@
+import { useCounterparties, useUnits } from "@/lib/api/operations";
+import { Pick } from "@/components/ethere/form-bits";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -29,6 +31,7 @@ import {
   useContracts, brl, fmtDate, downloadFile, toCsv,
   type Contract, type ContractStatus, type ContractType, type Submarket,
 } from "@/lib/store";
+import { useSession as useSessionLink } from "@/lib/store";
 import { useAccessRole, usePlan } from "@/lib/store";
 import { can } from "@/lib/rbac";
 import { useCompanyProfile } from "@/lib/profile";
@@ -71,12 +74,18 @@ const emptyForm = (): Omit<Contract, "id" | "code"> => ({
   endDate: "",
   status: "Ativo",
   notes: "",
+  counterpartyId: null,
+  unitId: null,
 });
 
 const daysTo = (iso: string) => Math.ceil((new Date(`${iso}T00:00:00`).getTime() - Date.now()) / 86400000);
 
 function Contracts() {
   const { contracts, add, update, remove } = useContracts();
+  const { user: linkUser } = useSessionLink();
+  const cps = useCounterparties(linkUser?.companyId);
+  const unitsQ = useUnits(linkUser?.companyId);
+  const isFarmLink = linkUser?.profile === "Fazenda de Energia";
   const role = useAccessRole();
   const canDelete = can(role, "contracts:delete");
 
@@ -502,6 +511,12 @@ function Contracts() {
             </FormField>
             <FormField label="Data de vencimento" error={errors.endDate}>
               <Input type="date" value={form.endDate} onChange={(e) => setForm({ ...form, endDate: e.target.value })} />
+            </FormField>
+            <FormField label="Cliente / contraparte">
+              <Pick value={form.counterpartyId ?? "none"} options={["none", ...cps.items.map((c) => c.id)]} labels={{ none: "Sem vínculo", ...Object.fromEntries(cps.items.map((c) => [c.id, c.name])) }} onChange={(v) => setForm({ ...form, counterpartyId: v === "none" ? null : v })} />
+            </FormField>
+            <FormField label={isFarmLink ? "Usina" : "Unidade / usina"}>
+              <Pick value={form.unitId ?? "none"} options={["none", ...unitsQ.items.map((u) => u.id)]} labels={{ none: "Sem vínculo", ...Object.fromEntries(unitsQ.items.map((u) => [u.id, u.name])) }} onChange={(v) => setForm({ ...form, unitId: v === "none" ? null : v })} />
             </FormField>
             <FormField label="Observações" className="md:col-span-2">
               <Textarea rows={3} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} placeholder="Notas internas sobre o contrato…" />
