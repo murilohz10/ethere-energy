@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 - Retired module URLs redirect to the app overview and are absent from navigation, onboarding and frontend permissions; why: preserve published links without restoring removed product areas.
 - Data interpretation (PLD readings, portfolio, scenarios, configured reports) lives in pure functions in src/lib/interpretation.ts and src/lib/report-builder.ts with vitest coverage; why: numbers and wording stay testable and consistent across pages.
+- Hydrology demonstrations share src/lib/demo-hydro.ts across monitoring and Intelligence; restored chats use src/lib/intelligence/topics.ts to exclude retired market content, so removed features do not resurface from browser history.
