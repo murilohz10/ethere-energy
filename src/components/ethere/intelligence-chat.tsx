@@ -72,6 +72,17 @@ async function prepareFiles(files: FileUIPart[]) {
   return { fileParts, texts };
 }
 
+export const INTELLIGENCE_CORE_LIMIT = 50;
+const monthKey = () => `ethere.intelligence.count.${new Date().toISOString().slice(0, 7)}`;
+function readQuestionCount() {
+  try { return Number(window.localStorage.getItem(monthKey()) ?? 0) || 0; } catch { return 0; }
+}
+function bumpQuestionCount() {
+  const n = readQuestionCount() + 1;
+  try { window.localStorage.setItem(monthKey(), String(n)); } catch { /* ignore */ }
+  return n;
+}
+
 export function IntelligenceChat({ variant = "page" }: { variant?: "page" | "panel" }) {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { user } = useSession();
@@ -118,9 +129,19 @@ export function IntelligenceChat({ variant = "page" }: { variant?: "page" | "pan
 
   const busy = status === "submitted" || status === "streaming";
 
+  const [used, setUsed] = useState(0);
+  useEffect(() => setUsed(readQuestionCount()), []);
+  const limit = plan.id === "ethere-pro" ? null : INTELLIGENCE_CORE_LIMIT;
+  const reached = limit !== null && used >= limit;
+
   const submit = async (msg: PromptInputMessage) => {
     const value = msg.text.trim();
     if (busy || (!value && !msg.files.length)) return;
+    if (reached) {
+      toast.error("Limite do Ethere Intelligence", { description: `O plano Ethere Core inclui ${INTELLIGENCE_CORE_LIMIT} perguntas por mês. Conheça o Ethere Pro para uso ilimitado.` });
+      return;
+    }
+    setUsed(bumpQuestionCount());
     const { fileParts, texts } = await prepareFiles(msg.files);
     const fullText = [value || "Analise o arquivo anexado.", ...texts].join("\n\n");
     setText("");

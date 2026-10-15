@@ -75,7 +75,8 @@ export function ScenarioPanel() {
       return { base: f.projectedRevenue, scenario: contracted + surplus, label: "Receita estimada do mês" };
     }
     const t = traderMetrics(contracts);
-    return { base: t.margin, scenario: t.margin, label: "Margem projetada do mês" };
+    const spread = (pld: number) => (t.avgSalePrice > 0 ? t.avgSalePrice - pld : 0);
+    return { base: spread(t.pld.value), scenario: spread(t.pld.value * (1 + pldShift / 100)), label: "Preço médio de venda − PLD (R$/MWh)" };
   }, [contracts, isFarm, pldShift, genShift]);
 
   const diff = result.scenario - result.base;
@@ -90,7 +91,7 @@ export function ScenarioPanel() {
       <p className="mb-5 text-sm text-muted-foreground">
         {isFarm
           ? "Ajuste o PLD e a geração para ver como a receita estimada reage. O excedente de geração é valorado ao PLD do cenário."
-          : "Contratos com preço fixo não mudam com o PLD. A margem projetada depende só dos preços contratados; o PLD afeta apenas volumes sem contrato, que a plataforma não estima."}
+          : "Compare o preço médio dos seus contratos de venda com o PLD do cenário. A margem dos contratos com preço fixo não muda; a diferença indica a referência de mercado para novas negociações."}
       </p>
       <div className="grid gap-6 md:grid-cols-2">
         <div className="grid gap-5">
