@@ -1,0 +1,271 @@
+/**
+ * Interpretação calculada dos dados exibidos (PLD, carteira, cenários).
+ * Funções puras: recebem os dados que a tela já tem e devolvem números +
+ * frases curtas. Nunca inventam dados — retornam `insufficient` quando a
+ * série não sustenta a comparação.
+ */
+import type { Contract } from "@/lib/store";
+
+export const HOURS_PER_MONTH = 730;
+
+export type PldKey = "seco" | "s" | "ne" | "n";
+export type PldPoint = { d: string; seco: number; s: number; ne: number; n: number };
+export const PLD_LABEL: Record<PldKey, string> = { seco: "SE/CO", s: "S", ne: "NE", n: "N" };
+const KEYS: PldKey[] = ["seco", "s", "ne", "n"];
+
+/** Abaixo deste percentual a variação é tratada como estabilidade. */
+export const STABLE_PCT = 1;
+/** Critério de tendência: |variação| ≥ 3% e ≥ 70% dos dias do mesmo lado da média anterior. */
+export const TREND_PCT = 3;
+export const TREND_SHARE = 0.7;
+
+const avg = (xs: number[]) => (xs.length ? xs.reduce((a, b) => a + b, 0) / xs.length : 0);
+const std = (xs: number[]) => {
+  if (xs.length < 2) return 0;
+  const m = avg(xs);
+  return Math.sqrt(avg(xs.map((x) => (x - m) ** 2)));
+};
+const fmt = (v: number, d = 2) => v.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
+export const brlMwh = (v: number) => `R$ ${fmt(v)}/MWh`;
+export const pct = (v: number) => `${v >= 0 ? "+" : ""}${fmt(v, 1)}%`;
+
+export type Movement = "alta" | "queda" | "estavel";
+export type Pattern = "tendencia" | "pontual" | "estavel" | "indefinido";
+
+export type PldInterpretation =
+  | { ok: false; reason: string }
+  | {
+      ok: true;
+      window: number;
+      key: PldKey;
+      period: { from: string; to: string; prevFrom: string; prevTo: string };
+      current: { avg: number; min: number; max: number; minDay: string; maxDay: string; last: number };
+      previous: { avg: number };
+      deltaAbs: number;
+      deltaPct: number;
+      movement: Movement;
+      pattern: Pattern;
+      volatility: { current: number; previous: number } | null;
+      /** Dia com a maior variação diária dentro da janela. */
+      biggestMove: { day: string; deltaAbs: number } | null;
+      submarkets: { key: PldKey; label: string; avg: number; deltaPct: number }[];
+      spread: { high: PldKey; low: PldKey; diff: number };
+      reference30: { avg: number; diffPct: number } | null;
+      summary: string;
+      observations: { title: string; text: string; metric: string }[];
+    };
+
+/**
+ * Compara a janela atual (últimos `window` pontos) com a janela anterior
+ * de mesmo tamanho. Dados diários: não há leitura horária disponível.
+ */
+export function interpretPld(rows: PldPoint[], window: number, key: PldKey = "seco"): PldInterpretation {
+  if (window < 1) return { ok: false, reason: "Janela inválida." };
+  if (rows.length < window * 2) {
+    return {
+      ok: false,
+      reason: `São necessários ${window * 2} dias de dados para comparar com o período anterior; há ${rows.length}.`,
+    };
+  }
+  const cur = rows.slice(-window);
+  const prev = rows.slice(-window * 2, -window);
+  const cv = cur.map((r) => r[key]);
+  const pv = prev.map((r) => r[key]);
+
+  const cAvg = avg(cv);
+  const pAvg = avg(pv);
+  const deltaAbs = cAvg - pAvg;
+  const deltaPct = pAvg ? (deltaAbs / pAvg) * 100 : 0;
+  const movement: Movement = Math.abs(deltaPct) < STABLE_PCT ? "estavel" : deltaPct > 0 ? "alta" : "queda";
+
+  let pattern: Pattern = "indefinido";
+  if (movement === "estavel") pattern = "estavel";
+  else if (window >= 7) {
+    const sameSide = cv.filter((v) => (deltaPct > 0 ? v > pAvg : v < pAvg)).length / cv.length;
+    pattern = Math.abs(deltaPct) >= TREND_PCT && sameSide >= TREND_SHARE ? "tendencia" : "pontual";
+  }
+
+  const minV = Math.min(...cv);
+  const maxV = Math.max(...cv);
+  const minDay = cur[cv.indexOf(minV)].d;
+  const maxDay = cur[cv.indexOf(maxV)].d;
+
+  const diffs = (xs: number[]) => xs.slice(1).map((v, i) => v - xs[i]);
+  const volatility = window >= 7 ? { current: std(diffs(cv)), previous: std(diffs(pv)) } : null;
+
+  let biggestMove: { day: string; deltaAbs: number } | null = null;
+  if (window >= 7) {
+    const withPrev = [pv[pv.length - 1], ...cv];
+    const d = diffs(withPrev);
+    let idx = 0;
+    d.forEach((x, i) => { if (Math.abs(x) > Math.abs(d[idx])) idx = i; });
+    biggestMove = { day: cur[idx].d, deltaAbs: d[idx] };
+  }
+
+  const submarkets = KEYS.map((k) => {
+    const a = avg(cur.map((r) => r[k]));
+    const b = avg(prev.map((r) => r[k]));
+    return { key: k, label: PLD_LABEL[k], avg: a, deltaPct: b ? ((a - b) / b) * 100 : 0 };
+  });
+  const sorted = [...submarkets].sort((a, b) => b.avg - a.avg);
+  const spread = { high: sorted[0].key, low: sorted[sorted.length - 1].key, diff: sorted[0].avg - sorted[sorted.length - 1].avg };
+
+  let reference30: { avg: number; diffPct: number } | null = null;
+  if (window < 30 && rows.length >= 30) {
+    const r = avg(rows.slice(-30).map((x) => x[key]));
+    reference30 = { avg: r, diffPct: r ? ((cAvg - r) / r) * 100 : 0 };
+  }
+
+  const label = PLD_LABEL[key];
+  const unit = window === 1 ? "dia anterior" : window === 7 ? "semana anterior" : `período anterior de ${window} dias`;
+  const moveWord = movement === "estavel" ? "ficou estável" : movement === "alta" ? "subiu" : "caiu";
+  const parts: string[] = [];
+  parts.push(
+    movement === "estavel"
+      ? `O PLD ${label} ficou estável em relação ao ${unit} (${pct(deltaPct)}), com média de ${brlMwh(cAvg)}.`
+      : `O PLD ${label} ${moveWord} ${fmt(Math.abs(deltaPct), 1)}% em relação ao ${unit}, de ${brlMwh(pAvg)} para ${brlMwh(cAvg)}.`,
+  );
+  if (pattern === "tendencia") parts.push(`O movimento foi persistente: a maior parte dos dias ficou ${deltaPct > 0 ? "acima" : "abaixo"} da média anterior.`);
+  if (pattern === "pontual") parts.push("O movimento não se manteve na maior parte dos dias, o que indica variação pontual, não tendência.");
+  if (spread.diff >= 1) parts.push(`${PLD_LABEL[spread.high]} teve a maior média e ${PLD_LABEL[spread.low]} a menor, diferença de ${brlMwh(spread.diff)}.`);
+  if (reference30 && Math.abs(reference30.diffPct) >= STABLE_PCT) {
+    parts.push(`Frente à média dos últimos 30 dias, o preço está ${fmt(Math.abs(reference30.diffPct), 1)}% ${reference30.diffPct > 0 ? "acima" : "abaixo"}.`);
+  }
+
+  const observations: { title: string; text: string; metric: string }[] = [];
+  if (window > 1) {
+    observations.push({
+      title: "Faixa do período",
+      text: `Mínimo em ${minDay} e máximo em ${maxDay}. Amplitude de ${brlMwh(maxV - minV)}.`,
+      metric: `${brlMwh(minV)} – ${brlMwh(maxV)}`,
+    });
+  }
+  if (biggestMove && Math.abs(biggestMove.deltaAbs) >= 0.5) {
+    observations.push({
+      title: "Maior variação diária",
+      text: `Em ${biggestMove.day} o preço ${biggestMove.deltaAbs > 0 ? "subiu" : "caiu"} ${brlMwh(Math.abs(biggestMove.deltaAbs))} em um dia.`,
+      metric: `${biggestMove.deltaAbs > 0 ? "+" : "−"}${brlMwh(Math.abs(biggestMove.deltaAbs))}`,
+    });
+  }
+  if (volatility && volatility.previous > 0) {
+    const ratio = (volatility.current / volatility.previous - 1) * 100;
+    observations.push({
+      title: "Volatilidade",
+      text: Math.abs(ratio) < 10
+        ? "A oscilação diária ficou parecida com a do período anterior."
+        : `A oscilação diária ficou ${ratio > 0 ? "maior" : "menor"} que no período anterior (${pct(ratio)}).`,
+      metric: `desvio ${brlMwh(volatility.current)}`,
+    });
+  }
+  if (window === 1) {
+    const ups = submarkets.filter((s) => s.deltaPct >= STABLE_PCT).length;
+    const downs = submarkets.filter((s) => s.deltaPct <= -STABLE_PCT).length;
+    observations.push({
+      title: "Submercados",
+      text: ups === 4 ? "Todos os submercados subiram." : downs === 4 ? "Todos os submercados caíram." : `${ups} subiram, ${downs} caíram e ${4 - ups - downs} ficaram estáveis.`,
+      metric: `spread ${brlMwh(spread.diff)}`,
+    });
+  }
+
+  return {
+    ok: true,
+    window,
+    key,
+    period: { from: cur[0].d, to: cur[cur.length - 1].d, prevFrom: prev[0].d, prevTo: prev[prev.length - 1].d },
+    current: { avg: cAvg, min: minV, max: maxV, minDay, maxDay, last: cv[cv.length - 1] },
+    previous: { avg: pAvg },
+    deltaAbs,
+    deltaPct,
+    movement,
+    pattern,
+    volatility,
+    biggestMove,
+    submarkets,
+    spread,
+    reference30,
+    summary: parts.join(" "),
+    observations: observations.slice(0, 3),
+  };
+}
+
+/* ------------------------------ carteira -------------------------------- */
+
+const dayMs = 86_400_000;
+const daysTo = (iso: string, today: Date) => Math.ceil((new Date(`${iso}T00:00:00`).getTime() - today.getTime()) / dayMs);
+
+export function missingFields(c: Contract): string[] {
+  const m: string[] = [];
+  if (!c.counterpartyId) m.push("contraparte vinculada");
+  if (!c.price || c.price <= 0) m.push("preço");
+  if (!c.volume || c.volume <= 0) m.push("volume");
+  if (!c.endDate) m.push("data de término");
+  return m;
+}
+
+export function portfolioAnalysis(contracts: Contract[], today = new Date()) {
+  const active = contracts.filter((c) => c.status === "Ativo");
+  const buckets = [
+    { label: "≤ 30 dias", max: 30, count: 0 },
+    { label: "31–90 dias", max: 90, count: 0 },
+    { label: "91–365 dias", max: 365, count: 0 },
+    { label: "> 1 ano", max: Infinity, count: 0 },
+  ];
+  for (const c of active) {
+    const d = daysTo(c.endDate, today);
+    if (d < 0) continue;
+    const b = buckets.find((x) => d <= x.max);
+    if (b) b.count++;
+  }
+  const byType = (t: Contract["type"]) => active.filter((c) => c.type === t);
+  const weighted = (cs: Contract[]) => {
+    const vol = cs.reduce((s, c) => s + c.volume, 0);
+    return vol > 0 ? cs.reduce((s, c) => s + c.price * c.volume, 0) / vol : null;
+  };
+  const prices = active.map((c) => c.price).filter((p) => p > 0);
+  const byCompany = new Map<string, number>();
+  for (const c of active) byCompany.set(c.company || "Sem nome", (byCompany.get(c.company || "Sem nome") ?? 0) + c.volume);
+  const totalVol = active.reduce((s, c) => s + c.volume, 0);
+  const top = [...byCompany.entries()].sort((a, b) => b[1] - a[1])[0];
+  const incomplete = active.filter((c) => missingFields(c).length > 0);
+
+  return {
+    active: active.length,
+    buckets,
+    sale: { count: byType("Venda").length, mwm: byType("Venda").reduce((s, c) => s + c.volume, 0), avgPrice: weighted(byType("Venda")) },
+    purchase: { count: byType("Compra").length, mwm: byType("Compra").reduce((s, c) => s + c.volume, 0), avgPrice: weighted(byType("Compra")) },
+    price: prices.length ? { min: Math.min(...prices), max: Math.max(...prices) } : null,
+    concentration: top && totalVol > 0 ? { name: top[0], share: (top[1] / totalVol) * 100 } : null,
+    incomplete,
+  };
+}
+
+/**
+ * Preço contratado × PLD médio do mesmo submercado. É só referência de
+ * curto prazo: contrato bilateral e PLD não são o mesmo produto.
+ */
+export function contractVsMarket(c: Contract, pldAvgBySubmarket: Partial<Record<string, number>>) {
+  const ref = pldAvgBySubmarket[c.submarket];
+  if (ref == null || ref <= 0) return { ok: false as const, reason: "Sem PLD do submercado no período." };
+  if (!c.price || c.price <= 0) return { ok: false as const, reason: "Contrato sem preço cadastrado." };
+  const diff = c.price - ref;
+  return { ok: true as const, price: c.price, ref, diff, diffPct: (diff / ref) * 100 };
+}
+
+/* ------------------------------ cenários -------------------------------- */
+
+/**
+ * Diferença mensal estimada entre o preço contratado e o PLD do cenário,
+ * por contrato ativo. Venda: (preço − PLD) × volume × 730. Compra: (PLD − preço).
+ * Positivo = contrato mais favorável que o mercado no cenário. Não é resultado realizado.
+ */
+export function scenarioVsMarket(contracts: Contract[], pldBase: number, shiftPct: number) {
+  const pld = pldBase * (1 + shiftPct / 100);
+  const rows = contracts
+    .filter((c) => c.status === "Ativo" && c.volume > 0 && c.price > 0)
+    .map((c) => {
+      const perMwh = c.type === "Venda" ? c.price - pld : pld - c.price;
+      return { id: c.id, code: c.code, name: c.name, type: c.type, value: perMwh * c.volume * HOURS_PER_MONTH };
+    });
+  const total = rows.reduce((s, r) => s + r.value, 0);
+  return { pld, total, rows: [...rows].sort((a, b) => Math.abs(b.value) - Math.abs(a.value)) };
+}
