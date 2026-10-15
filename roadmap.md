@@ -1,5 +1,9 @@
 # Roadmap — Reestruturação Ethere
 
+## Solicitação atual
+- [ ] Remover Clientes e Unidades de toda a experiência, sem alterar o banco.
+- [ ] Atualizar a landing com as funcionalidades atuais, mantendo o design.
+
 ## Etapa A — Base
 - [x] Login real e dados no banco (já existia)
 - [x] Tema claro/escuro (já existia; azul de ação do claro ajustado)
