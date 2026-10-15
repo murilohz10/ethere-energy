@@ -37,7 +37,7 @@ import {
   CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
 } from "@/components/ui/command";
 import { toast } from "sonner";
-import { MessageSquareText } from "lucide-react";
+import { MessageSquareText, Building2, ListChecks } from "lucide-react";
 import { IntelligenceChat } from "./intelligence-chat";
 import ethereMark from "@/assets/ethere-logo.png.asset.json";
 
