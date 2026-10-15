@@ -7,6 +7,7 @@ import {
   interpretIndicator, seriesForGroup, coMovement, realizedVsScheduled, interpretPld,
   type IndicatorSpec, type PldPoint, type Movement,
 } from "@/lib/interpretation";
+import { DemoHydroSection, DemoThermalSection } from "@/components/ethere/demo-hydro-thermal-panels";
 import { OPERATIONAL_SERIES, useOperationalSeries, type OperationalPoint } from "@/lib/api/market";
 
 const windows = [
@@ -118,19 +119,7 @@ export function HydroSection({ pldRows, pldSimulated }: { pldRows: PldPoint[]; p
 
   if (q.isPending) return <div className="h-64 animate-pulse rounded-2xl bg-muted/40" />;
   if (q.isError) return <EmptyData title="Não foi possível ler os dados hídricos" text="Tente atualizar a página. Os demais indicadores continuam disponíveis." needs={[]} />;
-  if (!points.length) {
-    return (
-      <EmptyData
-        title="Dados hídricos ainda não carregados"
-        text="A seção está pronta para mostrar a energia armazenada por subsistema (ONS) e o nível ou volume dos reservatórios (ANA) assim que esses dados forem importados. Nenhum valor é simulado aqui."
-        needs={[
-          "ONS — energia armazenada (EAR) por subsistema, em MWmês e % da EARmax, diária.",
-          "ANA — nível (m) e volume útil (hm³ e %) por reservatório, com data de observação.",
-          "Pelo menos 14 dias de histórico para a leitura semanal e 60 dias para a mensal.",
-        ]}
-      />
-    );
-  }
+  if (!points.length) return <DemoHydroSection />;
 
   return (
     <div className="space-y-6">
@@ -206,19 +195,7 @@ export function ThermalSection({ pldRows, pldSimulated }: { pldRows: PldPoint[];
 
   if (real.isPending) return <div className="h-64 animate-pulse rounded-2xl bg-muted/40" />;
   if (real.isError) return <EmptyData title="Não foi possível ler os dados térmicos" text="Tente atualizar a página. Os demais indicadores continuam disponíveis." needs={[]} />;
-  if (!points.length) {
-    return (
-      <EmptyData
-        title="Dados térmicos ainda não carregados"
-        text="A seção está pronta para mostrar a geração térmica realizada e, quando houver, a programada pelo ONS. Realizada e programada são tratadas como séries diferentes. Nenhum valor é simulado aqui."
-        needs={[
-          "ONS — geração térmica verificada (MWmed) por subsistema ou usina, diária.",
-          "ONS — geração térmica programada, na mesma unidade e granularidade, para comparar.",
-          "Pelo menos 14 dias de histórico para a leitura semanal.",
-        ]}
-      />
-    );
-  }
+  if (!points.length) return <DemoThermalSection />;
 
   return (
     <div className="space-y-6">

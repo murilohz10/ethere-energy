@@ -11,7 +11,7 @@ import {
 const tooltip = { borderRadius: 12, border: "1px solid var(--border)", background: "var(--card)", fontSize: 12 } as const;
 const f = (v: number, d = 1) => v.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
 const s = (v: number, d = 1) => `${v >= 0 ? "+" : ""}${f(v, d)}`;
-const verb = (c: Change, m: string, fm: string) => (c.trend === "estável" ? `ficou estável${c.trend ? "" : ""}` : c.trend === "alta" ? (fm === "f" ? "subiu" : "subiu") : "caiu") + m;
+const verb = (c: Change) => (c.trend === "estável" ? "ficou estável" : c.trend === "alta" ? "subiu" : "caiu");
 const periods = [{ v: 7, l: "7 dias" }, { v: 3, l: "Últimos 3 dias" }] as const;
 
 export function DemoBadge() {
@@ -75,7 +75,7 @@ export function DemoHydroSection() {
   const station = demoData.station;
 
   const conclusion = c
-    ? `A energia armazenada do ${SUBSYSTEM_NAMES[sub]} ${verb(c, "", "f")} de ${f(c.first)}% para ${f(c.last)}% da EARmax entre ${ddmm(c.from)} e ${ddmm(c.to)}: ${s(c.deltaAbs)} p.p.${c.deltaPct != null ? ` (${s(c.deltaPct)}% relativo)` : ""}.` +
+    ? `A energia armazenada do ${SUBSYSTEM_NAMES[sub]} ${verb(c)} de ${f(c.first)}% para ${f(c.last)}% da EARmax entre ${ddmm(c.from)} e ${ddmm(c.to)}: ${s(c.deltaAbs)} p.p.${c.deltaPct != null ? ` (${s(c.deltaPct)}% relativo)` : ""}.` +
       (e ? ` No mesmo intervalo, a energia natural afluente ${e.trend === "estável" ? "ficou estável" : e.trend === "alta" ? "aumentou" : "diminuiu"} ${s(e.deltaPct ?? 0)}% (${f(e.first, 0)} → ${f(e.last, 0)} MWmed).` : "") +
       " Os dados não indicam a causa do movimento."
     : "Série insuficiente para calcular a variação.";
@@ -163,7 +163,7 @@ export function DemoThermalSection() {
   const [n, setN] = useState(7);
   const { sched, ver } = useMemo(() => {
     const pick = (src: Record<Subsystem, typeof demoData.thermal.scheduled["S"]>) => sub === "Todos" ? sumSeries(SUBSYSTEMS.map((x) => src[x])) : src[sub];
-    return { sched: lastN(pick(demoData.thermal.scheduled), n), ver: lastN(pick(demoData.thermal.verified), n), full: null };
+    return { sched: lastN(pick(demoData.thermal.scheduled), n), ver: lastN(pick(demoData.thermal.verified), n) };
   }, [sub, n]);
   const fullVer = sub === "Todos" ? sumSeries(SUBSYSTEMS.map((x) => demoData.thermal.verified[x])) : demoData.thermal.verified[sub];
   const cmp = scheduledVsVerified(sched, ver);

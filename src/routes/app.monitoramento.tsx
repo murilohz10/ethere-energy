@@ -185,9 +185,9 @@ function Monitor() {
 
       <Tabs defaultValue="precos">
       <TabsList className="mb-5 h-auto flex-wrap">
-        <TabsTrigger value="precos">Preços (PLD)</TabsTrigger>
-        <TabsTrigger value="hidrico">Hídrico</TabsTrigger>
-        <TabsTrigger value="termico">Térmico</TabsTrigger>
+        <TabsTrigger value="precos">PLD</TabsTrigger>
+        <TabsTrigger value="hidrico">Hidrologia e reservatórios</TabsTrigger>
+        <TabsTrigger value="termico">Geração térmica</TabsTrigger>
       </TabsList>
       <TabsContent value="precos" className="mt-0">
       <div className="rounded-2xl border border-border bg-card shadow-soft">
