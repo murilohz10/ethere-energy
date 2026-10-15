@@ -33,3 +33,6 @@
 - [x] Monitoramento: Fontes de dados (BBCE/N5X/clima como pendentes)
 - [x] Intelligence: contador de 50 perguntas/mês no Core (neste navegador)
 - Deixado de lado por exigir backend: conversas no banco, importação de geração, histórico de análises, convites, alertas por pendência
+- [x] Contratos ligados a cliente/unidade/usina
+- [x] Primeiro acesso com etapa de unidade/usina e etapas opcionais puláveis
+- [x] Revisão no celular (abas de Clientes corrigidas)
