@@ -26,3 +26,10 @@
 
 ## Transversal
 - [ ] Visão Geral reorganizada, onboarding, revisão mobile
+
+## Rodada sem backend (feita)
+- [x] Visão Geral: painel "Requer atenção" no topo
+- [x] Central: painel de Cenários (estimativa)
+- [x] Monitoramento: Fontes de dados (BBCE/N5X/clima como pendentes)
+- [x] Intelligence: contador de 50 perguntas/mês no Core (neste navegador)
+- Deixado de lado por exigir backend: conversas no banco, importação de geração, histórico de análises, convites, alertas por pendência
