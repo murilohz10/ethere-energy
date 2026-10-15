@@ -4,10 +4,10 @@
  */
 import { Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { AlertTriangle, CalendarClock, CheckCircle2, Clock, Database, ListChecks, SlidersHorizontal } from "lucide-react";
+import { AlertTriangle, CalendarClock, CheckCircle2, SlidersHorizontal } from "lucide-react";
 import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
-import { useAlerts, useContracts, useSession } from "@/lib/store";
+import { useAlerts, useContracts } from "@/lib/store";
 import { ESTIMATE_NOTE, farmMetrics, traderMetrics, useCompanyProfile } from "@/lib/profile";
 import { scenarioVsMarket } from "@/lib/interpretation";
 
@@ -16,7 +16,6 @@ const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", curren
 /* ------------------------------ atenção ---------------------------------- */
 
 export function AttentionPanel() {
-  const { user } = useSession();
   const { contracts } = useContracts();
   const { alerts } = useAlerts();
   const { isFarm } = useCompanyProfile();
