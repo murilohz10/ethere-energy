@@ -17,6 +17,7 @@ import { Tool, ToolContent, ToolHeader, ToolInput, ToolOutput } from "@/componen
 import { Shimmer } from "@/components/ai-elements/shimmer";
 import logo from "@/assets/ethere-logo.png.asset.json";
 import { cn } from "@/lib/utils";
+import { excludeRetiredMarketMessages } from "@/lib/intelligence/topics";
 import { useAlerts, useContracts, usePlan, useSession, useSettings } from "@/lib/store";
 import { useCompanyProfile } from "@/lib/profile";
 import { pageLabel, responseLevels, type CompanyContext, type ResponseLevel } from "@/lib/intelligence/context";
@@ -39,9 +40,7 @@ const suggestions = [
   "O que mudou no PLD nesta semana?",
   "Como o período atual se compara ao anterior?",
   "Como o armazenamento evoluiu nos últimos sete dias?",
-  "Qual a diferença entre a térmica programada e a verificada?",
-  "Como a geração térmica evoluiu nos últimos dias?",
-  "Que relações existem entre hídrico, térmico e PLD?",
+  "Que relações existem entre hidrologia e PLD?",
   "Quais dados estão faltando para aprofundar a análise?",
 ];
 
@@ -50,7 +49,10 @@ type Stored = { messages: UIMessage[]; level: ResponseLevel };
 function readStored(): Stored {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as Stored;
+    if (raw) {
+      const stored = JSON.parse(raw) as Stored;
+      return { ...stored, messages: excludeRetiredMarketMessages(stored.messages) };
+    }
   } catch { /* ignore */ }
   return { messages: [], level: "Detalhado" };
 }

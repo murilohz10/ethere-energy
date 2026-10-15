@@ -1,5 +1,5 @@
 /**
- * Conjunto SINTÉTICO de dados hídricos e térmicos usado apenas para demonstração.
+ * Conjunto SINTÉTICO de dados hídricos usado apenas para demonstração.
  * Não representa condições reais do SIN, nem usinas/estações reais do ONS ou da ANA.
  * Todas as leituras são calculadas a partir destes valores (funções puras abaixo).
  */
@@ -45,21 +45,6 @@ export const demoData = {
       usefulPct: series([74.0, 74.3, 74.7, 74.9, 74.8, 75.2, 75.4]),
     },
   ],
-  /** Geração térmica, MWmed. */
-  thermal: {
-    scheduled: {
-      "SE/CO": series([6200, 6250, 6300, 6400, 6450, 6500, 6550]),
-      S: series([1500, 1480, 1450, 1450, 1420, 1400, 1400]),
-      NE: series([1800, 1820, 1850, 1850, 1880, 1900, 1900]),
-      N: series([900, 920, 940, 950, 960, 980, 1000]),
-    } as Record<Subsystem, DayValue[]>,
-    verified: {
-      "SE/CO": series([6080, 6190, 6350, 6310, 6420, 6610, 6480]),
-      S: series([1460, 1490, 1410, 1430, 1400, 1390, 1370]),
-      NE: series([1790, 1800, 1870, 1820, 1860, 1930, 1910]),
-      N: series([880, 900, 960, 930, 950, 1010, 990]),
-    } as Record<Subsystem, DayValue[]>,
-  },
   /** Estação hidrológica demonstrativa (fictícia) — um único registro. */
   station: [
     { name: "Estação Demonstrativa 01", river: "Rio Demonstrativo", date: "2026-10-14", levelM: 3.42, flowM3s: 1285 },
@@ -96,38 +81,16 @@ export function periodCompare(s: DayValue[], n: number) {
   const c = clean(s);
   if (c.length < n * 2) return null;
   const cur = c.slice(-n), prev = c.slice(-n * 2, -n);
-  const a = avg(cur.map((p) => p.value))!, b = avg(prev.map((p) => p.value))!;
+  const a = avg(cur.map((p) => p.value)), b = avg(prev.map((p) => p.value));
+  if (a == null || b == null) return null;
   return { current: a, previous: b, deltaAbs: a - b, deltaPct: b !== 0 ? ((a - b) / Math.abs(b)) * 100 : null, curFrom: cur[0].date, curTo: cur[n - 1].date, prevFrom: prev[0].date, prevTo: prev[n - 1].date };
 }
 
 export const lastN = (s: DayValue[], n: number) => [...s].sort((a, b) => a.date.localeCompare(b.date)).slice(-n);
 
-/** Programada × verificada, apenas nos dias com as duas séries. */
-export function scheduledVsVerified(sched: DayValue[], ver: DayValue[]) {
-  const m = new Map(clean(sched).map((p) => [p.date, p.value]));
-  const days = clean(ver).filter((p) => m.has(p.date)).map((p) => ({ date: p.date, scheduled: m.get(p.date)!, verified: p.value, diff: p.value - m.get(p.date)! }));
-  if (!days.length) return null;
-  const sumS = days.reduce((a, d) => a + d.scheduled, 0), sumV = days.reduce((a, d) => a + d.verified, 0);
-  const sorted = [...days].sort((a, b) => Math.abs(b.diff) - Math.abs(a.diff));
-  return {
-    days, avgScheduled: sumS / days.length, avgVerified: sumV / days.length,
-    avgDiff: (sumV - sumS) / days.length, diffPct: sumS !== 0 ? ((sumV - sumS) / sumS) * 100 : null,
-    daysAbove: days.filter((d) => d.diff > 0).length, daysBelow: days.filter((d) => d.diff < 0).length,
-    largest: sorted[0],
-  };
-}
-
-export function sumSeries(list: DayValue[][]): DayValue[] {
-  return DATES.map((date) => {
-    const vals = list.map((s) => s.find((p) => p.date === date)?.value);
-    return { date, value: vals.some((v) => v == null) ? null : (vals as number[]).reduce((a, b) => a + b, 0) };
-  });
-}
-
 export const RULES = {
   storage: { stableAbs: 0.5 }, // p.p.
   ena: { stablePct: 2 },
-  thermal: { stablePct: 2 },
   level: { stableAbs: 0.05 }, // m
 } as const;
 
@@ -149,22 +112,16 @@ export function demoDigest() {
     name: r.name, subsystem: r.subsystem,
     levelMeters: firstLast(r.levelM, RULES.level), usefulStoragePct: firstLast(r.usefulPct, RULES.storage),
   }));
-  const thermal = SUBSYSTEMS.map((s) => ({
-    subsystem: s, unit: "MWmed",
-    scheduled: firstLast(demoData.thermal.scheduled[s], RULES.thermal),
-    verified: firstLast(demoData.thermal.verified[s], RULES.thermal),
-    scheduledVsVerified: (() => { const r = scheduledVsVerified(demoData.thermal.scheduled[s], demoData.thermal.verified[s]); return r && { ...r, days: undefined }; })(),
-  }));
   return {
     dataset: "Série demonstrativa sintética da Ethere — NÃO são dados do ONS nem da ANA; reservatórios e estação são fictícios.",
     period: `${ddmm(DATES[0])} a ${ddmm(DATES[DATES.length - 1])}/2026 (7 dias)`,
-    rules: "Armazenamento estável se |Δ| < 0,5 p.p.; ENA e térmica estáveis se |Δ| < 2%; nível estável se |Δ| < 0,05 m. Δ = último − primeiro registro.",
-    storage, ena, reservoirs, thermal,
+    rules: "Armazenamento estável se |Δ| < 0,5 p.p.; ENA estável se |Δ| < 2%; nível estável se |Δ| < 0,05 m. Δ = último − primeiro registro.",
+    storage, ena, reservoirs,
     station: { records: demoData.station, note: "Apenas um registro: não há série suficiente para tendência." },
     missingForDeeperAnalysis: [
-      "Dados reais do ONS (EAR, ENA, geração térmica) e da ANA (nível, vazão)",
+      "Dados reais do ONS (EAR, ENA) e da ANA (nível, vazão)",
       "Histórico mais longo para comparar com o mesmo período de anos anteriores",
-      "Precipitação/meteorologia e motivo de despacho térmico (não estão nos dados)",
+      "Precipitação/meteorologia (não estão nos dados)",
       "Mais observações da estação para calcular tendência",
     ],
   };

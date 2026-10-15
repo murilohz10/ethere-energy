@@ -10,7 +10,7 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { convertToModelMessages, stepCountIs, streamText, tool, type UIMessage } from "ai";
 import { z } from "zod";
 import type { CompanyContext } from "./context";
-import { demoDigest } from "@/lib/demo-hydro-thermal";
+import { demoDigest } from "@/lib/demo-hydro";
 import {
   createLovableAiGatewayRunIdFetch,
   getLovableAiGatewayRunId,
@@ -94,11 +94,6 @@ function buildTools(ctx: CompanyContext) {
       description: "Condições hídricas: energia armazenada por subsistema (ONS) e nível/volume de reservatórios (ANA).",
       inputSchema: z.object({ days: z.number().describe("Dias, entre 1 e 90.") }),
       execute: async () => ({ available: "demonstrativo", ...demoDigest(), focus: "hidrologia: storage, ena, reservoirs, station" }),
-    }),
-    get_thermal_generation: tool({
-      description: "Geração térmica realizada e programada (ONS) por subsistema ou usina.",
-      inputSchema: z.object({ days: z.number().describe("Dias, entre 1 e 90.") }),
-      execute: async () => ({ available: "demonstrativo", dataset: demoDigest().dataset, period: demoDigest().period, rules: demoDigest().rules, thermal: demoDigest().thermal, missingForDeeperAnalysis: demoDigest().missingForDeeperAnalysis }),
     }),
     get_contracts_summary: tool({
       description: "Resumo da carteira de contratos da empresa do usuário: totais por status, tipo e submercado.",
@@ -198,9 +193,10 @@ Princípios:
 - Ajude a entender o que aconteceu, como, por quê, quais dados sustentam, qual o contexto e o que pode significar.
 - Mercado primeiro, empresa quando necessário: só consulte contratos, alertas, posição ou geração se a pergunta exigir.
 - ${ctx.profile === "Comercializadora" ? "Para comercializadora, considere quando relevante: contratos, posição contratada, margem, PLD, contexto de mercado e impacto na carteira." : "Para fazenda de geração, considere quando relevante: geração prevista/realizada, contratos, PLD, receita e contexto de mercado."}
+- Restrinja as análises de mercado a PLD e hidrologia, além de contratos, alertas e geração estimada da fazenda. Para outros indicadores, informe apenas que não fazem parte da plataforma, sem desenvolver análises.
 - Use as ferramentas para obter dados; nunca invente números, datas ou fontes. Se faltar dado, diga claramente.
 - Diferencie explicitamente dado, cálculo, interpretação e hipótese. Nunca apresente hipótese como fato.
-- Dados hídricos e térmicos (get_hydrology, get_thermal_generation) são uma SÉRIE DEMONSTRATIVA SINTÉTICA: comece a resposta dizendo "Analisando a série demonstrativa…". Nunca diga que consultou o ONS ou a ANA, nem trate reservatórios/estação como reais ou como condição atual do SIN. Use só os valores e cálculos retornados; não invente observações (a estação tem um único registro, sem tendência). Não misture % EARmax, metros e m³/s. Rotule cada item como Observado, Cálculo, Interpretação ou Hipótese (que exige dados adicionais). Nunca afirme causas meteorológicas ou de despacho.
+- Dados hídricos (get_hydrology) são uma SÉRIE DEMONSTRATIVA SINTÉTICA: comece a resposta dizendo "Analisando a série demonstrativa…". Nunca diga que consultou o ONS ou a ANA, nem trate reservatórios/estação como reais ou como condição atual do SIN. Use só os valores e cálculos retornados; não invente observações (a estação tem um único registro, sem tendência). Não misture % EARmax, metros e m³/s. Rotule cada item como Observado, Cálculo, Interpretação ou Hipótese (que exige dados adicionais). Nunca afirme causas meteorológicas.
 - Não calcule nem apresente indicadores de posição líquida entre compra e venda; esse conceito não faz parte da Ethere.
 - Cálculos de margem, receita e geração são estimativas gerenciais, não liquidação oficial da CCEE. Os dados de mercado da base atual são uma série demonstrativa: informe isso quando apresentar valores.
 - Indique data/período e fonte dos dados factuais (ex.: "**Fonte:** Base Ethere — histórico de PLD (CCEE), 01/09 a 08/10").

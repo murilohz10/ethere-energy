@@ -147,8 +147,6 @@ export function pldSummary(rows: PldRow[]) {
  */
 export const OPERATIONAL_SERIES = {
   reservoir: "reservoir_ear",
-  thermalRealized: "thermal_realized",
-  thermalScheduled: "thermal_scheduled",
 } as const;
 
 export type OperationalPoint = { date: string; group: string; value: number; source: string };

@@ -1,13 +1,13 @@
-/** Seções hídrica e térmica do Monitoramento. Só exibem dados carregados — nunca simulam. */
+/** Seção hídrica do Monitoramento. Só exibem dados carregados — nunca simulam. */
 import { useMemo, useState } from "react";
 import { ChevronDown, Info } from "lucide-react";
-import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
+import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { cn } from "@/lib/utils";
 import {
-  interpretIndicator, seriesForGroup, coMovement, realizedVsScheduled, interpretPld,
+  interpretIndicator, seriesForGroup, coMovement, interpretPld,
   type IndicatorSpec, type PldPoint, type Movement,
 } from "@/lib/interpretation";
-import { DemoHydroSection, DemoThermalSection } from "@/components/ethere/demo-hydro-thermal-panels";
+import { DemoHydroSection } from "@/components/ethere/demo-hydro-panels";
 import { OPERATIONAL_SERIES, useOperationalSeries, type OperationalPoint } from "@/lib/api/market";
 
 const windows = [
@@ -165,77 +165,6 @@ export function HydroSection({ pldRows, pldSimulated }: { pldRows: PldPoint[]; p
             <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} unit="%" width={44} />
             <Tooltip formatter={(v: number) => [`${fmt(v)}% EARmax`, "Energia armazenada"]} contentStyle={tooltip} />
             <Line type="monotone" dataKey="v" stroke="var(--brand)" strokeWidth={2} dot={false} />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
-    </div>
-  );
-}
-
-/* --------------------------------- térmico --------------------------------- */
-
-const THERMAL: IndicatorSpec = { label: "A geração térmica realizada", unit: "MWmed", decimals: 0 };
-
-export function ThermalSection({ pldRows, pldSimulated }: { pldRows: PldPoint[]; pldSimulated: boolean }) {
-  const real = useOperationalSeries(OPERATIONAL_SERIES.thermalRealized);
-  const sched = useOperationalSeries(OPERATIONAL_SERIES.thermalScheduled);
-  const points = real.data ?? [];
-  const [win, setWin] = useState<number>(7);
-  const groups = useMemo(() => ["Todos", ...new Set(points.map((p) => p.group))], [points]);
-  const [group, setGroup] = useState("Todos");
-  const r = useMemo(() => interpretIndicator(points, win, group, THERMAL), [points, win, group]);
-  const rs = useMemo(() => seriesForGroup(points, group, THERMAL).slice(-win), [points, group, win]);
-  const ss = useMemo(() => seriesForGroup(sched.data ?? [], group, THERMAL).slice(-win), [sched.data, group, win]);
-  const cmp = useMemo(() => realizedVsScheduled(rs, ss), [rs, ss]);
-  const chart = useMemo(() => {
-    const s = new Map(ss.map((p) => [p.date, p.value]));
-    return rs.map((p) => ({ d: ddmm(p.date), realizada: p.value, programada: s.get(p.date) }));
-  }, [rs, ss]);
-  const pm = pldMovement(pldRows, win);
-
-  if (real.isPending) return <div className="h-64 animate-pulse rounded-2xl bg-muted/40" />;
-  if (real.isError) return <EmptyData title="Não foi possível ler os dados térmicos" text="Tente atualizar a página. Os demais indicadores continuam disponíveis." needs={[]} />;
-  if (!points.length) return <DemoThermalSection />;
-
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <select value={group} onChange={(e) => setGroup(e.target.value)} className="h-8 rounded-md border border-border bg-card px-2 text-xs">
-          {groups.map((g) => <option key={g} value={g}>{g === "Todos" ? "Todos (soma)" : g}</option>)}
-        </select>
-        <Segmented value={win} options={windows} onChange={setWin} />
-      </div>
-      {!r.ok ? (
-        <p className="flex items-start gap-2 text-sm text-muted-foreground"><Info className="mt-0.5 h-4 w-4" />{r.reason}</p>
-      ) : (
-        <InsightSummary
-          title="Leitura térmica"
-          conclusion={r.summary}
-          aside={<span className="text-[11px] text-muted-foreground">{sourceLine(points)}</span>}
-          metrics={[
-            { label: "Média realizada", value: `${fmt(r.current.avg, 0)} MWmed` },
-            ...(cmp ? [{ label: "Realizada × programada", value: `${cmp.diff >= 0 ? "+" : ""}${fmt(cmp.diff / cmp.days, 0)} MWmed/dia` }] : []),
-          ]}
-          comparison={`Período ${r.period.from}–${r.period.to} comparado a ${r.period.prevFrom}–${r.period.prevTo}.${cmp ? ` Comparação com a programada em ${cmp.days} dia(s) com as duas séries.` : " Sem geração programada carregada para comparar."}`}
-        >
-          <div className="space-y-3 text-xs text-muted-foreground">
-            {pm && <p><span className="font-medium text-foreground">Observação: </span>{coMovement("a geração térmica", r.movement, `o PLD SE/CO${pldSimulated ? " (série demonstrativa)" : ""}`, pm)}</p>}
-            <p>Mínimo {fmt(r.current.min, 0)} MWmed em {r.current.minDay}; máximo {fmt(r.current.max, 0)} MWmed em {r.current.maxDay}.</p>
-            {r.ranking.length > 1 && <p>Maiores variações: {r.ranking.slice(0, 3).map((x) => `${x.group} (${x.deltaAbs >= 0 ? "+" : ""}${fmt(x.deltaAbs, 0)} MWmed)`).join(", ")}.</p>}
-            <p>Limitação: a leitura descreve o que ocorreu; despacho por ordem de mérito, segurança ou restrições não está nos dados.</p>
-          </div>
-        </InsightSummary>
-      )}
-      <div className="h-64">
-        <ResponsiveContainer>
-          <LineChart data={chart}>
-            <CartesianGrid stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
-            <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} width={56} />
-            <Tooltip formatter={(v: number, n: string) => [`${fmt(v, 0)} MWmed`, n]} contentStyle={tooltip} />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
-            <Line type="monotone" dataKey="realizada" name="Realizada" stroke="var(--brand)" strokeWidth={2} dot={false} />
-            {ss.length > 0 && <Line type="monotone" dataKey="programada" name="Programada" stroke="var(--muted-foreground)" strokeDasharray="4 3" strokeWidth={1.5} dot={false} />}
           </LineChart>
         </ResponsiveContainer>
       </div>

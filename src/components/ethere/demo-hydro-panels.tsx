@@ -1,12 +1,12 @@
-/** Demonstração hídrica e térmica do Monitoramento — usada só enquanto não há dados reais carregados. */
+/** Demonstração hídrica do Monitoramento — usada só enquanto não há dados reais carregados. */
 import { useMemo, useState } from "react";
-import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend, BarChart, Bar, ReferenceLine } from "recharts";
+import { LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { cn } from "@/lib/utils";
 import { InsightSummary } from "@/components/ethere/operational-panels";
 import {
-  DEMO_LABEL, SUBSYSTEMS, SUBSYSTEM_NAMES, demoData, ddmm, firstLast, periodCompare, lastN, scheduledVsVerified,
-  missingDays, RULES, sumSeries, type Subsystem, type Change,
-} from "@/lib/demo-hydro-thermal";
+  DEMO_LABEL, SUBSYSTEMS, SUBSYSTEM_NAMES, demoData, ddmm, firstLast, periodCompare, lastN,
+  missingDays, RULES, type Subsystem, type Change,
+} from "@/lib/demo-hydro";
 
 const tooltip = { borderRadius: 12, border: "1px solid var(--border)", background: "var(--card)", fontSize: 12 } as const;
 const f = (v: number, d = 1) => v.toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
@@ -149,77 +149,6 @@ export function DemoHydroSection() {
           </div>
         ))}
         {station.length < 2 && <p className="mt-2 text-[11px] text-muted-foreground">Há apenas uma observação: ainda não existe série suficiente para calcular tendência.</p>}
-      </div>
-    </div>
-  );
-}
-
-/* --------------------------------- térmica --------------------------------- */
-
-type ThermalSub = Subsystem | "Todos";
-
-export function DemoThermalSection() {
-  const [sub, setSub] = useState<ThermalSub>("Todos");
-  const [n, setN] = useState(7);
-  const { sched, ver } = useMemo(() => {
-    const pick = (src: Record<Subsystem, typeof demoData.thermal.scheduled["S"]>) => sub === "Todos" ? sumSeries(SUBSYSTEMS.map((x) => src[x])) : src[sub];
-    return { sched: lastN(pick(demoData.thermal.scheduled), n), ver: lastN(pick(demoData.thermal.verified), n) };
-  }, [sub, n]);
-  const fullVer = sub === "Todos" ? sumSeries(SUBSYSTEMS.map((x) => demoData.thermal.verified[x])) : demoData.thermal.verified[sub];
-  const cmp = scheduledVsVerified(sched, ver);
-  const cv = firstLast(ver, RULES.thermal);
-  const cs = firstLast(sched, RULES.thermal);
-  const pc = n < 7 ? periodCompare(fullVer, n) : null;
-  const chart = ver.map((p, i) => ({ d: ddmm(p.date), verificada: p.value, programada: sched[i]?.value ?? null, diff: p.value != null && sched[i]?.value != null ? p.value - sched[i].value! : null }));
-  const label = sub === "Todos" ? "do SIN (soma dos subsistemas)" : `do ${SUBSYSTEM_NAMES[sub]}`;
-
-  const conclusion = cv && cmp
-    ? `A geração térmica verificada ${label} ${cv.trend === "estável" ? "ficou estável" : cv.trend === "alta" ? "subiu" : "caiu"} ${s(cv.deltaPct ?? 0)}% entre ${ddmm(cv.from)} e ${ddmm(cv.to)} (${f(cv.first, 0)} → ${f(cv.last, 0)} MWmed)` +
-      `${cs ? `; a programada variou ${s(cs.deltaPct ?? 0)}%` : ""}. Em média, a verificada ficou ${f(Math.abs(cmp.avgDiff), 0)} MWmed ${cmp.avgDiff >= 0 ? "acima" : "abaixo"} da programada${cmp.diffPct != null ? ` (${s(cmp.diffPct)}%)` : ""}, ` +
-      `com ${cmp.daysAbove} dia(s) acima e ${cmp.daysBelow} abaixo. A maior diferença foi em ${ddmm(cmp.largest.date)} (${s(cmp.largest.diff, 0)} MWmed). Os dados não informam o motivo do despacho.`
-    : "Série insuficiente para comparar.";
-
-  return (
-    <div className="space-y-6">
-      <Controls sub={sub} setSub={setSub} n={n} setN={setN} subOptions={[{ v: "Todos" as ThermalSub, l: "Todos (soma)" }, ...SUBSYSTEMS.map((x) => ({ v: x as ThermalSub, l: SUBSYSTEM_NAMES[x] }))]} />
-      <InsightSummary
-        title="Leitura térmica"
-        conclusion={conclusion}
-        metrics={cmp ? [
-          { label: "Média verificada", value: `${f(cmp.avgVerified, 0)} MWmed` },
-          { label: "Média programada", value: `${f(cmp.avgScheduled, 0)} MWmed` },
-          { label: "Verificada − programada", value: `${s(cmp.avgDiff, 0)} MWmed${cmp.diffPct != null ? ` (${s(cmp.diffPct)}%)` : ""}` },
-        ] : []}
-        comparison={cmpText(pc, "MWmed (verificada)", 0)}
-      >
-        <div className="space-y-3 text-xs text-muted-foreground">
-          <p><b className="text-foreground">Programada</b> é o despacho previsto; <b className="text-foreground">verificada</b> é o que foi gerado. Diferença = verificada − programada, só nos dias com as duas séries. Estável se a variação for menor que 2%.</p>
-          <div className="h-36">
-            <ResponsiveContainer>
-              <BarChart data={chart}>
-                <CartesianGrid stroke="var(--border)" vertical={false} />
-                <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
-                <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} width={48} />
-                <ReferenceLine y={0} stroke="var(--border)" />
-                <Tooltip formatter={(v: number) => [`${s(v, 0)} MWmed`, "Verificada − programada"]} contentStyle={tooltip} />
-                <Bar dataKey="diff" fill="var(--brand)" radius={[3, 3, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </InsightSummary>
-      <div className="h-64">
-        <ResponsiveContainer>
-          <LineChart data={chart}>
-            <CartesianGrid stroke="var(--border)" vertical={false} />
-            <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
-            <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} width={56} domain={["auto", "auto"]} />
-            <Tooltip formatter={(v: number, nm: string) => [`${f(v, 0)} MWmed`, nm]} contentStyle={tooltip} />
-            <Legend wrapperStyle={{ fontSize: 11 }} />
-            <Line type="monotone" dataKey="verificada" name="Verificada (MWmed)" stroke="var(--brand)" strokeWidth={2} dot={{ r: 2 }} />
-            <Line type="monotone" dataKey="programada" name="Programada (MWmed)" stroke="var(--muted-foreground)" strokeDasharray="4 3" strokeWidth={1.5} dot={false} />
-          </LineChart>
-        </ResponsiveContainer>
       </div>
     </div>
   );

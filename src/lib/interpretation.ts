@@ -351,7 +351,7 @@ export function demoPldRows(days: number, seed = 0): PldPoint[] {
   }));
 }
 
-/* ------------------- indicadores operativos (hídrico/térmico) ------------------- */
+/* ------------------- indicadores operativos hídricos ------------------- */
 
 /** Ponto de uma série operativa: data ISO, grupo (subsistema/reservatório) e valor. */
 export type IndicatorPoint = { date: string; group: string; value: number };

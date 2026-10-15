@@ -35,7 +35,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "A Ethere conecta PLD, hidrologia, geração térmica e contratos para interpretar movimentos do mercado e mostrar impactos estimados no seu negócio.",
+          "A Ethere conecta PLD, hidrologia e contratos para interpretar movimentos do mercado e mostrar impactos estimados no seu negócio.",
       },
       { property: "og:title", content: "Ethere Energy — Dados são o começo. Inteligência transforma decisões." },
       {
@@ -155,7 +155,7 @@ const layers = [
   {
     label: "Interpretação da Ethere",
     q: "Por que isso importa?",
-    text: "A alta foi persistente (5 de 7 dias no mesmo sentido) e ocorreu junto a uma queda de 2,3 p.p. na energia armazenada e geração térmica acima do programado. Movimentos simultâneos, que a plataforma relaciona — sem afirmar causa.",
+    text: "A alta foi persistente (5 de 7 dias no mesmo sentido) e ocorreu junto a uma queda de 2,3 p.p. na energia armazenada. Movimentos simultâneos, que a plataforma relaciona — sem afirmar causa.",
   },
   {
     label: "Impacto para o negócio",
@@ -252,7 +252,7 @@ function Contrast() {
 
 const steps = [
   { icon: Activity, title: "Entender o mercado", desc: "Acompanhe indicadores relevantes e compreenda as principais mudanças observadas." },
-  { icon: LineIcon, title: "Interpretar os movimentos", desc: "Relacione PLD, condições hidrológicas, geração térmica e outras variáveis disponíveis para contextualizar os acontecimentos." },
+  { icon: LineIcon, title: "Interpretar os movimentos", desc: "Relacione PLD, condições hidrológicas e outras variáveis disponíveis para contextualizar os acontecimentos." },
   { icon: Target, title: "Avaliar os impactos", desc: "Explore cenários e analise possíveis efeitos sobre contratos e resultados, de acordo com os dados disponíveis." },
   { icon: Compass, title: "Decidir com contexto", desc: "Utilize as análises para apoiar o planejamento e as decisões comerciais e operacionais." },
 ];
@@ -289,7 +289,7 @@ function HowItWorks() {
 /* --------------------------- Funcionalidades ------------------------- */
 
 const features = [
-  { icon: Activity, title: "PLD, Hidrologia e Térmica", desc: "Três visões do mercado, com indicadores, gráficos e comparações por período. Séries demonstrativas sempre identificadas." },
+  { icon: Activity, title: "PLD e Hidrologia", desc: "Duas visões do mercado, com indicadores, gráficos e comparações por período. Séries demonstrativas sempre identificadas." },
   { icon: FileText, title: "Leitura dos Contratos", desc: "Preços, volumes, vencimentos e concentração da carteira. Compare contratos semelhantes e abra a análise individual." },
   { icon: Bell, title: "Alertas Personalizados", desc: "Configure regras de PLD e contratos, prioridades e canais. Acompanhe os alertas que exigem atenção." },
   { icon: Sparkles, title: "Central de Inteligência", desc: "Insights por prioridade e categoria, com cenários de queda, referência e alta rotulados como impacto estimado." },
@@ -336,7 +336,7 @@ const intelligencePoints = [
   {
     icon: LineIcon,
     title: "Consulta os dados disponíveis",
-    desc: "PLD, hidrologia, térmica, contratos e vencimentos. O assistente distingue dados disponíveis, exemplos e informações ainda não carregadas.",
+    desc: "PLD, hidrologia, contratos e vencimentos. O assistente distingue dados disponíveis, exemplos e informações ainda não carregadas.",
   },
   {
     icon: Sparkles,
@@ -361,7 +361,7 @@ const chatPreview = [
     from: "ai",
     text: "Neste exemplo demonstrativo, o PLD médio passou de R$ 100 para R$ 110/MWh: alta de 10% frente à semana anterior. Isso descreve a variação do preço, sem atribuir uma causa nem concluir ganho ou perda nos contratos.",
   },
-  { from: "user", text: "O aumento da geração térmica explica essa alta?" },
+  { from: "user", text: "A queda no armazenamento explica essa alta?" },
   {
     from: "ai",
     text: "Movimentos simultâneos não comprovam causalidade. É preciso comparar as séries do mesmo período e suas fontes. Dados demonstrativos servem para explorar a análise, não para concluir o comportamento real do sistema.",
@@ -436,7 +436,7 @@ function Intelligence() {
                 ))}
               </div>
               <div className="mt-5 flex items-center gap-2 rounded-xl border border-border/60 bg-surface/60 px-4 py-3">
-                <span className="flex-1 text-[13px] text-muted-foreground/70">Pergunte sobre PLD, hidrologia, térmica...</span>
+                <span className="flex-1 text-[13px] text-muted-foreground/70">Pergunte sobre PLD, hidrologia, contratos...</span>
                 <ArrowRight className="h-4 w-4 text-primary" />
               </div>
             </div>
@@ -450,7 +450,7 @@ function Intelligence() {
 /* ---------------------------- Diferenciais --------------------------- */
 
 const differentials = [
-  { icon: LineIcon, title: "Contexto integrado", desc: "Relaciona informações relevantes do mercado e da operação — PLD, hidrologia, geração térmica e contratos — respeitando a disponibilidade e a compatibilidade dos dados." },
+  { icon: LineIcon, title: "Contexto integrado", desc: "Relaciona informações relevantes do mercado e da operação — PLD, hidrologia e contratos — respeitando a disponibilidade e a compatibilidade dos dados." },
   { icon: Sparkles, title: "Interpretação aplicada", desc: "Transforma variações em leituras que dizem o que mudou, em qual período e o que merece atenção. Ex.: “PLD +10% na semana, movimento persistente em 5 de 7 dias”." },
   { icon: Target, title: "Inteligência para decisões", desc: "Permite explorar cenários de queda, referência e alta e ver o impacto estimado sobre a carteira antes de definir uma estratégia." },
 ];
@@ -502,7 +502,7 @@ function Audience() {
       title: "Para geradoras",
       headline: "Conecte o cenário energético à sua estratégia.",
       desc: "Interprete informações de mercado, geração e condições hidrológicas para compreender o contexto operacional e avaliar possíveis implicações comerciais.",
-      items: ["PLD, hidrologia e geração térmica em conjunto", "Contratos de venda e vencimentos", "Cenários com premissas explícitas"],
+      items: ["PLD e hidrologia em conjunto", "Contratos de venda e vencimentos", "Cenários com premissas explícitas"],
     },
   ];
   return (
@@ -570,7 +570,7 @@ function Pricing() {
                 </div>
                 <p className="relative mt-4 text-sm leading-relaxed text-muted-foreground">{pro ? "Análises aprofundadas e limites ampliados para sua operação." : "Contratos, alertas e relatórios informativos para o dia a dia."}</p>
                 <ul className="relative mt-8 space-y-3">
-                  {p.features.map((i) => i === "Dados CCEE, ONS e ANA" ? "PLD, hidrologia e térmica" : i).map((i) => (
+                  {p.features.map((i) => i === "Dados CCEE, ONS e ANA" ? "PLD e hidrologia" : i).map((i) => (
                     <li key={i} className="flex items-center gap-2.5 text-sm">
                       <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-primary">
                         <Check className="h-3 w-3" />
@@ -661,7 +661,7 @@ function Institutional() {
 const faq = [
   {
     q: "De onde vêm os dados do PLD?",
-    a: "O PLD oficial vem da CCEE e é apresentado em médias diárias quando carregado. Hidrologia e térmica usam dados do setor quando disponíveis. Sem séries oficiais carregadas, a plataforma identifica os exemplos demonstrativos; eles não são dados oficiais nem leituras em tempo real.",
+    a: "O PLD oficial vem da CCEE e é apresentado em médias diárias quando carregado. A hidrologia usa dados do setor quando disponíveis. Sem séries oficiais carregadas, a plataforma identifica os exemplos demonstrativos; eles não são dados oficiais nem leituras em tempo real.",
   },
   {
     q: "Os gráficos aparecem nos arquivos exportados?",
@@ -689,7 +689,7 @@ const faq = [
   },
   {
     q: "O que a análise por IA entrega?",
-    a: "Leituras por período sobre variações do PLD, hidrologia, térmica e contratos, separando dado, cálculo e hipótese. Cenários mostram impacto estimado, com premissas, sem representar liquidação oficial.",
+    a: "Leituras por período sobre variações do PLD, hidrologia e contratos, separando dado, cálculo e hipótese. Cenários mostram impacto estimado, com premissas, sem representar liquidação oficial.",
   },
 ];
 

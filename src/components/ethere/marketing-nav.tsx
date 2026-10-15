@@ -122,7 +122,7 @@ export function MarketingFooter() {
           <span>© {new Date().getFullYear()} Ethere Energy. Todos os direitos reservados.</span>
           <span className="inline-flex items-center gap-2">
             <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-primary" />
-            PLD · Hidrologia · Térmica
+            PLD · Hidrologia
           </span>
         </div>
       </div>
