@@ -1,3 +1,4 @@
+import type { ReportConfig } from "./report-builder";
 import { useCallback, useSyncExternalStore } from "react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
@@ -237,6 +238,8 @@ export type Report = {
   summary: string;
   /** "basic" = relatório informativo (Core); "pro" = análise aprofundada. */
   tier?: "basic" | "pro";
+  /** Configuração escolhida no construtor (relatórios novos). */
+  config?: ReportConfig;
 };
 
 const reportsStore = createPersistentStore<{ items: Report[] }>("ethere.reports.v2", { items: [] });
@@ -253,7 +256,7 @@ export function useReports() {
       const id = newId();
       set((s) => ({ items: [{ ...r, tier, id, createdAt: new Date().toISOString().slice(0, 10) }, ...s.items] }));
       push(({ companyId, userId }) =>
-        reportsRepository.create(companyId, { ...r, payload: { tier } }, userId, id),
+        reportsRepository.create(companyId, { ...r, payload: { tier, ...(r.config ? { config: r.config } : {}) } }, userId, id),
       );
       return true;
     },
@@ -653,6 +656,7 @@ async function loadBackend(userId: string): Promise<SessionUser> {
       createdAt: r.createdAt,
       summary: r.summary,
       tier: r.payload.tier === "pro" ? "pro" : "basic",
+      config: (r.payload.config as ReportConfig | undefined) ?? undefined,
     })),
   });
   settingsStore.set((s) => ({

@@ -63,7 +63,7 @@ export function periodDays(r: Pick<Report, "periodStart" | "periodEnd">) {
 }
 
 /** Pontos do PLD que caem no período; para série demonstrativa, os últimos N dias. */
-export function pldInPeriod(r: Pick<Report, "periodStart" | "periodEnd">, rows: PldPoint[] & { date?: string }[], real: boolean) {
+export function pldInPeriod(r: Pick<Report, "periodStart" | "periodEnd">, rows: (PldPoint & { date?: string })[], real: boolean): PldPoint[] {
   if (real) {
     const rr = rows as (PldPoint & { date: string })[];
     return rr.filter((x) => x.date >= r.periodStart && x.date <= r.periodEnd);

@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/ethere/app-shell";
 import { PldInterpretationPanel } from "@/components/ethere/interpretation-panels";
+import { demoPldRows } from "@/lib/interpretation";
 import {
   LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Brush,
   AreaChart, Area, BarChart, Bar,
@@ -50,14 +51,7 @@ const chartTooltip = {
   boxShadow: "var(--shadow-elegant)",
 } as const;
 
-const buildData = (days: number, seed: number): Row[] =>
-  Array.from({ length: days }).map((_, i) => ({
-    d: `D${i + 1}`,
-    seco: +(150 + Math.sin((i + seed) / 4) * 40 + i * 1.1).toFixed(2),
-    s: +(140 + Math.cos((i + seed) / 3) * 30 + i * 0.9).toFixed(2),
-    ne: +(130 + Math.sin((i + seed) / 5) * 25 + i * 0.8).toFixed(2),
-    n: +(120 + Math.cos((i + seed) / 6) * 20 + i * 0.7).toFixed(2),
-  }));
+const buildData = (days: number, seed: number): Row[] => demoPldRows(days, seed);
 
 /** Indicador hidrológico disponível (nível dos reservatórios, % da capacidade). */
 const buildHydro = (days: number, seed: number) =>

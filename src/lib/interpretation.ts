@@ -339,3 +339,14 @@ export function contractAnalysis(c: Contract, contracts: Contract[], today = new
   }
   return { termMonths, remainingDays, peers: peers.length, peerAvg, missing, lines, conditions: c.notes?.trim() || null };
 }
+
+/** Série demonstrativa de PLD (mesma usada no Monitoramento quando não há leitura da CCEE). */
+export function demoPldRows(days: number, seed = 0): PldPoint[] {
+  return Array.from({ length: days }).map((_, i) => ({
+    d: `D${i + 1}`,
+    seco: +(150 + Math.sin((i + seed) / 4) * 40 + i * 1.1).toFixed(2),
+    s: +(140 + Math.cos((i + seed) / 3) * 30 + i * 0.9).toFixed(2),
+    ne: +(130 + Math.sin((i + seed) / 5) * 25 + i * 0.8).toFixed(2),
+    n: +(120 + Math.cos((i + seed) / 6) * 20 + i * 0.7).toFixed(2),
+  }));
+}
