@@ -19,4 +19,21 @@ describe("removed market topics", () => {
     const messages = [message("1", "user", "Qual a geração da fazenda?"), message("2", "assistant", "Consulte hidrologia e PLD.")];
     expect(excludeRetiredMarketMessages(messages)).toEqual(messages);
   });
+  it.each(["geração termelétrica", "geração termoelétrica", "geracao termeletrica", "geracao termoeletrica", "thermoelectric generation"])(
+    "removes the retired topic %s and its reply from restored conversations",
+    (topic) => {
+      expect(excludeRetiredMarketMessages([
+        message("1", "user", `Como evoluiu a ${topic}?`),
+        message("2", "assistant", "A média foi 100 MWmed."),
+        message("3", "user", "Como evoluiu o armazenamento?"),
+      ]).map((item) => item.id)).toEqual(["3"]);
+    },
+  );
+  it("removes a legacy tool call for the retired topic", () => {
+    const legacyTool: UIMessage = {
+      id: "1", role: "assistant",
+      parts: [{ type: "tool-get_thermal_generation", toolCallId: "old-call", state: "input-available", input: {} }],
+    };
+    expect(excludeRetiredMarketMessages([legacyTool, message("2", "user", "Qual o PLD?")]).map((item) => item.id)).toEqual(["2"]);
+  });
 });
