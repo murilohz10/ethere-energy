@@ -37,7 +37,7 @@ import {
   CommandDialog, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList,
 } from "@/components/ui/command";
 import { toast } from "sonner";
-import { MessageSquareText } from "lucide-react";
+import { MessageSquareText, Building2, ListChecks } from "lucide-react";
 import { IntelligenceChat } from "./intelligence-chat";
 import ethereMark from "@/assets/ethere-logo.png.asset.json";
 
@@ -48,6 +48,8 @@ const nav: NavItem[] = [
   { to: "/app/intelligence", label: "Ethere Intelligence", icon: MessageSquareText },
   { to: "/app/monitoramento", label: "Monitoramento", icon: Activity },
   { to: "/app/contratos", label: "Contratos", icon: FileText },
+  { to: "/app/clientes", label: "Clientes e Unidades", icon: Building2 },
+  { to: "/app/operacional", label: "Gestão Operacional", icon: ListChecks },
   { to: "/app/alertas", label: "Alertas", icon: Bell },
   { to: "/app/relatorios", label: "Relatórios", icon: BarChart3 },
   { to: "/app/configuracoes", label: "Configurações", icon: Settings },

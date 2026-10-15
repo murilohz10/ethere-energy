@@ -6,14 +6,16 @@
  * protegida, adicione uma entrada em `routePermissions`.
  */
 
-export type AppRole = "Administrador" | "Gestor" | "Analista";
+export type AppRole = "Administrador" | "Gestor" | "Analista" | "Operacional" | "Leitura";
 
-export const appRoles: AppRole[] = ["Administrador", "Gestor", "Analista"];
+export const appRoles: AppRole[] = ["Administrador", "Gestor", "Analista", "Operacional", "Leitura"];
 
 export const roleDescriptions: Record<AppRole, string> = {
   Administrador: "Acesso completo: usuários, assinatura e dados da empresa.",
   Gestor: "Acesso operacional: contratos, monitoramento, relatórios e alertas.",
-  Analista: "Somente leitura de dashboards, monitoramento, relatórios e alertas.",
+  Analista: "Análise: dashboards, inteligência, monitoramento, relatórios e exportações.",
+  Operacional: "Rotina operacional: tarefas e pendências, consulta de contratos e cadastros.",
+  Leitura: "Somente visualização dos painéis, sem criar, editar ou exportar.",
 };
 
 export type Permission =
@@ -32,7 +34,11 @@ export type Permission =
   | "settings:view"
   | "company:edit"
   | "users:manage"
-  | "billing:manage";
+  | "billing:manage"
+  | "registry:view"
+  | "registry:manage"
+  | "operations:view"
+  | "operations:manage";
 
 const analystPermissions: Permission[] = [
   "dashboard:view",
@@ -40,6 +46,18 @@ const analystPermissions: Permission[] = [
   "monitoring:view",
   "alerts:view",
   "reports:view",
+  "registry:view",
+  "operations:view",
+];
+
+const readerPermissions: Permission[] = ["dashboard:view", "insights:view", "monitoring:view", "alerts:view", "reports:view"];
+
+const operationalPermissions: Permission[] = [
+  ...readerPermissions,
+  "contracts:view",
+  "registry:view",
+  "operations:view",
+  "operations:manage",
 ];
 
 
@@ -51,6 +69,8 @@ const managerPermissions: Permission[] = [
   "alerts:manage",
   "reports:create",
   "reports:export",
+  "registry:manage",
+  "operations:manage",
 ];
 
 const adminPermissions: Permission[] = [
@@ -66,7 +86,9 @@ const adminPermissions: Permission[] = [
 export const defaultRolePermissions: Record<AppRole, Permission[]> = {
   Administrador: adminPermissions,
   Gestor: managerPermissions,
-  Analista: analystPermissions,
+  Analista: [...analystPermissions, "reports:export"],
+  Operacional: operationalPermissions,
+  Leitura: readerPermissions,
 };
 
 /** @deprecated use `getRoleMatrix()` — mantido para compatibilidade. */
@@ -78,6 +100,7 @@ export const permissionGroups = [
   "Contratos",
   "Alertas",
   "Relatórios",
+  "Cadastros e operação",
   "Administração",
 ] as const;
 
@@ -100,6 +123,10 @@ export const permissionMeta: Record<Permission, { label: string; description: st
   "company:edit": { label: "Editar empresa", description: "Altera dados cadastrais da empresa.", group: "Administração" },
   "users:manage": { label: "Gerenciar usuários", description: "Cadastra membros e define funções.", group: "Administração" },
   "billing:manage": { label: "Gerenciar assinatura", description: "Plano, pagamento e cancelamento.", group: "Administração" },
+  "registry:view": { label: "Ver clientes e unidades", description: "Consulta clientes, contrapartes, unidades e usinas.", group: "Cadastros e operação" },
+  "registry:manage": { label: "Gerenciar clientes e unidades", description: "Cria, edita e remove cadastros.", group: "Cadastros e operação" },
+  "operations:view": { label: "Ver gestão operacional", description: "Consulta tarefas e pendências.", group: "Cadastros e operação" },
+  "operations:manage": { label: "Gerenciar tarefas", description: "Cria, conclui e remove tarefas e pendências.", group: "Cadastros e operação" },
 };
 
 export const allPermissions = Object.keys(permissionMeta) as Permission[];
@@ -140,7 +167,7 @@ export function isPermissionLocked(role: AppRole, permission: Permission): boole
 }
 
 export function normalizeRole(role?: string | null): AppRole {
-  if (role === "Gestor" || role === "Analista" || role === "Administrador") return role;
+  if (role === "Gestor" || role === "Analista" || role === "Administrador" || role === "Operacional" || role === "Leitura") return role;
   return "Administrador";
 }
 
@@ -162,6 +189,8 @@ export const routePermissions: { path: string; exact?: boolean; permission: Perm
   { path: "/app/contratos", permission: "contracts:view" },
   { path: "/app/alertas", permission: "alerts:view" },
   { path: "/app/relatorios", permission: "reports:view" },
+  { path: "/app/clientes", permission: "registry:view" },
+  { path: "/app/operacional", permission: "operations:view" },
   { path: "/app/configuracoes", permission: "settings:view" },
   { path: "/app/metricas", permission: "dashboard:view" },
   { path: "/app/perfil", permission: null },
