@@ -12,7 +12,14 @@ import {
 } from "@/lib/profile";
 
 export const Route = createFileRoute("/app/metricas/$metric")({
-  head: ({ params }) => ({ meta: [{ title: `${titles[params.metric] ?? "Métrica"} · Ethere` }] }),
+  head: ({ params }) => ({ meta: [
+    { title: `${titles[params.metric] ?? "Métrica"} · Ethere` },
+    { name: "description", content: "Indicadores e séries da operação de energia." },
+    { property: "og:title", content: `${titles[params.metric] ?? "Métrica"} · Ethere` },
+    { property: "og:description", content: "Detalhamento de indicadores da Ethere Energy." },
+        { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+] }),
   component: MetricDetail,
   notFoundComponent: () => (
     <>

@@ -24,7 +24,9 @@ export const Route = createFileRoute("/onboarding")({
       { name: "description", content: "Configure seu ambiente na Ethere Energy em poucos passos." },
       { property: "og:title", content: "Onboarding · Ethere" },
       { property: "og:description", content: "Empresa, contratos e alertas configurados em minutos." },
-    ],
+          { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+],
   }),
   component: Onboarding,
 });

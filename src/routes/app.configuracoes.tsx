@@ -25,7 +25,14 @@ import { PLAN_LIST, getPlan, formatPlanPrice, limitMessages, subscriptionStatusL
 import { showPlanLimit } from "@/lib/plan-limit";
 
 export const Route = createFileRoute("/app/configuracoes")({
-  head: () => ({ meta: [{ title: "Configurações · Ethere" }] }),
+  head: () => ({ meta: [
+    { title: "Configurações · Ethere" },
+    { name: "description", content: "Gerencie empresa, usuários, permissões e plano da Ethere Energy." },
+    { property: "og:title", content: "Configurações · Ethere" },
+    { property: "og:description", content: "Gerencie empresa, usuários, permissões e plano da Ethere Energy." },
+        { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+] }),
   component: SettingsPage,
 });
 

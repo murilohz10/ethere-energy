@@ -16,7 +16,9 @@ export const Route = createFileRoute("/esqueci-senha")({
       { name: "description", content: "Recupere o acesso à sua conta Ethere Energy." },
       { property: "og:title", content: "Recuperar senha · Ethere" },
       { property: "og:description", content: "Enviaremos um link de redefinição de senha." },
-    ],
+          { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+],
   }),
   component: ForgotPassword,
 });

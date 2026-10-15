@@ -17,7 +17,9 @@ export const Route = createFileRoute("/login")({
       { name: "description", content: "Acesse a plataforma Ethere Energy." },
       { property: "og:title", content: "Entrar · Ethere" },
       { property: "og:description", content: "Acesse sua conta Ethere." },
-    ],
+          { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+],
   }),
   component: LoginPage,
 });

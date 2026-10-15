@@ -20,7 +20,9 @@ export const Route = createFileRoute("/signup")({
       { name: "description", content: "Comece seu trial na Ethere Energy." },
       { property: "og:title", content: "Criar conta · Ethere" },
       { property: "og:description", content: "Crie sua conta Ethere em minutos." },
-    ],
+          { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+],
   }),
   component: SignupPage,
 });

@@ -6,6 +6,14 @@ import { roleDescriptions } from "@/lib/rbac";
 
 export const Route = createFileRoute("/app/acesso-negado")({
   ssr: false,
+  head: () => ({ meta: [
+    { title: "Acesso negado · Ethere Energy" },
+    { name: "description", content: "Esta área requer uma permissão de acesso na Ethere Energy." },
+    { property: "og:title", content: "Acesso negado · Ethere Energy" },
+    { property: "og:description", content: "Consulte seu nível de acesso à plataforma." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary_large_image" },
+  ] }),
   component: AccessDeniedPage,
 });
 

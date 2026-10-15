@@ -27,7 +27,14 @@ import { limitMessages } from "@/lib/billing";
 import { useCompanyProfile, alertTypesByProfile, alertTypeHints } from "@/lib/profile";
 
 export const Route = createFileRoute("/app/alertas")({
-  head: () => ({ meta: [{ title: "Alertas · Ethere" }] }),
+  head: () => ({ meta: [
+    { title: "Alertas · Ethere" },
+    { name: "description", content: "Configure e acompanhe alertas de PLD e contratos por prioridade." },
+    { property: "og:title", content: "Alertas · Ethere" },
+    { property: "og:description", content: "Configure e acompanhe alertas de PLD e contratos por prioridade." },
+        { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+] }),
   component: Alerts,
 });
 
