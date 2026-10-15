@@ -51,19 +51,6 @@ export type Unit = {
   counterparty_id: string | null;
   created_at: string;
 };
-export type Task = {
-  id: string;
-  title: string;
-  description: string;
-  category: string;
-  priority: string;
-  status: string;
-  due_date: string | null;
-  assignee_id: string | null;
-  contract_id: string | null;
-  unit_id: string | null;
-  created_at: string;
-};
 
 type TableName = "counterparties" | "units" | "operational_tasks";
 
@@ -112,12 +99,3 @@ function useTable<T extends { id: string }>(table: TableName, companyId?: string
 export const useCounterparties = (companyId?: string) =>
   useTable<Counterparty>("counterparties", companyId);
 export const useUnits = (companyId?: string) => useTable<Unit>("units", companyId);
-export const useTasks = (companyId?: string) => useTable<Task>("operational_tasks", companyId);
-
-/** Tarefa vencida: não concluída e com prazo anterior a hoje. */
-export function isOverdue(
-  task: Pick<Task, "status" | "due_date">,
-  today = new Date().toISOString().slice(0, 10),
-) {
-  return task.status !== "Concluída" && !!task.due_date && task.due_date < today;
-}

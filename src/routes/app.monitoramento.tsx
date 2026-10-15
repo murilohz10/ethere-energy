@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/ethere/app-shell";
-import { DataSourcesPanel } from "@/components/ethere/product-panels";
 import { PldInterpretationPanel } from "@/components/ethere/interpretation-panels";
 import {
   LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Brush,
@@ -377,7 +376,6 @@ function Monitor() {
           </p>
         </div>
       )}
-      <DataSourcesPanel />
     </>
   );
 }

@@ -9,7 +9,6 @@ import { Slider } from "@/components/ui/slider";
 import { cn } from "@/lib/utils";
 import { useAlerts, useContracts, useSession } from "@/lib/store";
 import { ESTIMATE_NOTE, farmMetrics, traderMetrics, useCompanyProfile } from "@/lib/profile";
-import { isOverdue, useTasks } from "@/lib/api/operations";
 import { scenarioVsMarket } from "@/lib/interpretation";
 
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
@@ -20,15 +19,12 @@ export function AttentionPanel() {
   const { user } = useSession();
   const { contracts } = useContracts();
   const { alerts } = useAlerts();
-  const tasks = useTasks(user?.companyId);
   const { isFarm } = useCompanyProfile();
   const m = isFarm ? farmMetrics(contracts) : traderMetrics(contracts);
-  const overdue = tasks.items.filter((t) => isOverdue(t));
   const highAlerts = alerts.filter((a) => a.enabled && a.priority === "Alta");
 
   const items = [
     ...m.expiring30.slice(0, 3).map((c) => ({ key: c.id, icon: CalendarClock, text: `Contrato ${c.code} vence em ${new Date(`${c.endDate}T00:00:00`).toLocaleDateString("pt-BR")}`, to: "/app/contratos" as const })),
-    ...overdue.slice(0, 3).map((t) => ({ key: t.id, icon: ListChecks, text: `Tarefa atrasada: ${t.title}`, to: "/app/operacional" as const })),
     ...highAlerts.slice(0, 2).map((a) => ({ key: a.id, icon: AlertTriangle, text: `Alerta de alta prioridade ativo: ${a.name}`, to: "/app/alertas" as const })),
   ];
 
@@ -51,7 +47,7 @@ export function AttentionPanel() {
         </ul>
       ) : (
         <p className="flex items-center gap-2 text-sm text-muted-foreground">
-          <CheckCircle2 className="h-4 w-4 text-success" /> Nenhum vencimento em 30 dias, tarefa atrasada ou alerta crítico.
+          <CheckCircle2 className="h-4 w-4 text-success" /> Nenhum vencimento em 30 dias ou alerta de alta prioridade.
         </p>
       )}
     </section>
@@ -178,44 +174,5 @@ export function Box({ label, value, hint, negative }: { label: string; value: st
       <p className="mt-1 text-lg font-semibold tabular-nums">{value}</p>
       {hint && <p className={cn("text-xs tabular-nums", negative ? "text-destructive" : "text-success")}>{hint}</p>}
     </div>
-  );
-}
-
-/* --------------------------- fontes de dados ----------------------------- */
-
-const sources = [
-  { name: "PLD (CCEE)", status: "demo", note: "Série demonstrativa enquanto a importação oficial não está ativa." },
-  { name: "Reservatórios e carga (ONS)", status: "demo", note: "Série demonstrativa." },
-  { name: "Hidrologia (ANA)", status: "pending", note: "Integração preparada; depende de configuração." },
-  { name: "Meteorologia", status: "pending", note: "Integração preparada; depende de fornecedor." },
-  { name: "BBCE", status: "pending", note: "Exige acesso licenciado aos dados de negociação." },
-  { name: "N5X", status: "pending", note: "Exige acesso licenciado aos dados de negociação." },
-  { name: "Contratos e cadastros", status: "live", note: "Dados da sua empresa salvos na plataforma." },
-] as const;
-
-const statusMeta = {
-  live: { label: "Ativo", icon: CheckCircle2, cls: "text-success" },
-  demo: { label: "Demonstração", icon: Database, cls: "text-brand" },
-  pending: { label: "Integração pendente", icon: Clock, cls: "text-muted-foreground" },
-};
-
-export function DataSourcesPanel() {
-  return (
-    <details className="group mt-6 rounded-2xl border border-border bg-card px-6 py-4 shadow-soft">
-      <summary className="cursor-pointer list-none text-sm font-medium text-muted-foreground hover:text-foreground">
-        Transparência · origem e situação dos dados <span className="text-xs group-open:hidden">(mostrar)</span>
-      </summary>
-      <ul className="mt-3 divide-y divide-border">
-        {sources.map((s) => {
-          const meta = statusMeta[s.status];
-          return (
-            <li key={s.name} className="flex flex-wrap items-center justify-between gap-2 py-3 text-sm">
-              <div><p className="font-medium">{s.name}</p><p className="text-xs text-muted-foreground">{s.note}</p></div>
-              <span className={cn("inline-flex items-center gap-1.5 text-xs font-medium", meta.cls)}><meta.icon className="h-3.5 w-3.5" />{meta.label}</span>
-            </li>
-          );
-        })}
-      </ul>
-    </details>
   );
 }
