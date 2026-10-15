@@ -117,7 +117,7 @@ export function ScenarioPanel() {
                   <p className="text-xs font-semibold">{s.label}</p>
                   <p className="text-[11px] tabular-nums text-muted-foreground">PLD R$ {s.pld.toFixed(2).replace(".", ",")}/MWh</p>
                   <p className="mt-2 text-lg font-semibold tabular-nums">{brl(s.value)}</p>
-                  <p className="text-[11px] text-muted-foreground">{isFarm ? "receita estimada no mês" : "diferença contrato × mercado no mês"}</p>
+                  <p className="text-[11px] text-muted-foreground">{isFarm ? "receita · impacto estimado no cenário" : "contrato × mercado · impacto estimado no cenário"}</p>
                   {s.key !== "base" && (
                     <p className={cn("mt-1 text-xs tabular-nums", diff < 0 ? "text-destructive" : "text-success")}>
                       {diff >= 0 ? "+" : ""}{brl(diff)} vs. referência
@@ -128,8 +128,15 @@ export function ScenarioPanel() {
             })}
           </div>
 
+          <p className="mt-4 text-sm leading-relaxed text-foreground/90">
+            Variável alterada: PLD em ±{pldShift}% sobre a referência{isFarm && genShift ? ` e geração em ${genShift > 0 ? "+" : ""}${genShift}%` : ""}.
+            Entre o cenário de queda e o de alta, o impacto estimado no cenário varia {brl(scenarios[2].value - scenarios[0].value)}
+            ({brl(scenarios[0].value)} → {brl(scenarios[2].value)}). {isFarm
+              ? "A diferença vem só da energia não contratada, valorada ao PLD."
+              : "A diferença cresce com o volume líquido: vendas perdem vantagem com PLD maior e compras ganham."}
+          </p>
           <div className="mt-4 rounded-xl border border-border p-4">
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-brand">O que mais influencia o resultado</p>
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-brand">O que mais influencia o resultado (cenário de alta)</p>
             {isFarm ? (
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
                 No cenário de alta, {brl(up.farm!.contracted)} vêm da energia contratada (não muda com o PLD) e {brl(up.farm!.surplus)} do excedente de {Math.round(up.farm!.surplusMwh).toLocaleString("pt-BR")} MWh valorado ao PLD.
@@ -150,7 +157,7 @@ export function ScenarioPanel() {
         </>
       )}
       <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
-        Premissas: PLD de referência SE/CO da plataforma ({brl(pldBase)}/MWh), 730 h/mês, preços fixos dos contratos.
+        Limitações e premissas: PLD de referência SE/CO da plataforma ({brl(pldBase)}/MWh), 730 h/mês, preços fixos dos contratos, sem sazonalização, flexibilidade ou encargos.
         Impacto estimado no cenário — não é lucro ou prejuízo realizado nem previsão. {ESTIMATE_NOTE}
       </p>
     </section>

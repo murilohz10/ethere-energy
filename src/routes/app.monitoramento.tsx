@@ -226,6 +226,11 @@ function Monitor() {
       </div>
       <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{ESTIMATE_NOTE}</p>
 
+      {!loading && (
+        <PldInterpretationPanel rows={fullRows} simulated={!real} submarket={submarket === "todos" ? "SE/CO" : submarket} />
+      )}
+
+
       <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-soft">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm font-semibold">Histórico do PLD por submercado</div>
@@ -288,10 +293,6 @@ function Monitor() {
           )}
         </div>
       </div>
-
-      {!loading && (
-        <PldInterpretationPanel rows={fullRows} simulated={!real} submarket={submarket === "todos" ? "SE/CO" : submarket} />
-      )}
 
       {isFarm ? (
         <div className="mt-6 grid gap-6 lg:grid-cols-2">

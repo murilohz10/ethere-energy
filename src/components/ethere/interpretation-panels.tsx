@@ -51,8 +51,7 @@ export function PldInterpretationPanel({ rows, simulated, submarket }: { rows: P
             <div>
               <p className="text-sm leading-relaxed text-foreground/90">{r.summary}</p>
               <p className="mt-2 text-[11px] text-muted-foreground">
-                Período: {r.period.from} a {r.period.to} · referência: {r.period.prevFrom} a {r.period.prevTo} · médias diárias em R$/MWh.
-                Dados horários não estão disponíveis, por isso não há leitura por horário.
+                Período: {r.period.from} a {r.period.to} · referência: {r.period.prevFrom} a {r.period.prevTo} · médias diárias em R$/MWh{simulated ? " · série demonstrativa, não são dados da CCEE" : ""}.
               </p>
             </div>
             <div className="rounded-xl border border-border bg-surface/60 p-4">
@@ -100,7 +99,7 @@ export function PldInterpretationPanel({ rows, simulated, submarket }: { rows: P
               </table>
               <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
                 Critérios: variações abaixo de 1% são tratadas como estabilidade. "Movimento persistente" exige variação de ao menos 3% e 70% dos dias do período do mesmo lado da média anterior.
-                A leitura descreve o comportamento observado; não indica causas nem previsões.
+                A leitura descreve o comportamento observado; não indica causas nem previsões. O PLD disponível é diário, por isso não há leitura por horário.
               </p>
             </div>
           )}
