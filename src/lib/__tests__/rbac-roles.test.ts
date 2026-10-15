@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { can } from "@/lib/rbac";
+import { can, allPermissions, normalizeMatrix } from "@/lib/rbac";
 
 describe("níveis de acesso", () => {
+  it("removes registry permissions from persisted matrices", () => {
+    const matrix = normalizeMatrix(JSON.parse('{"Gestor":["registry:view","registry:manage","contracts:view"]}'));
+    expect(matrix.Gestor).toEqual(["contracts:view"]);
+    expect(allPermissions.some((p) => p.startsWith("registry:"))).toBe(false);
+  });
   it("Leitura não cria contratos nem exporta", () => {
     expect(can("Leitura", "contracts:create")).toBe(false);
     expect(can("Leitura", "reports:export")).toBe(false);

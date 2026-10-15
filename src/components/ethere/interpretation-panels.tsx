@@ -314,8 +314,7 @@ export function ContractAnalysis({ contract, contracts, pldAvg, pldPeriod }: {
         <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
           {a.missing.map((f) => <li key={f}>• {f}</li>)}
           {!a.conditions && <li>• condições contratuais (flexibilidade, sazonalização, reajuste) nas observações</li>}
-          {!contract.unitId && <li>• unidade ou usina vinculada</li>}
-          {a.missing.length === 0 && a.conditions && contract.unitId && <li>Os campos principais estão preenchidos.</li>}
+          {a.missing.length === 0 && a.conditions && <li>Os campos principais estão preenchidos.</li>}
         </ul>
       </div>
     </div>

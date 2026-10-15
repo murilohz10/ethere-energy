@@ -213,7 +213,7 @@ const daysTo = (iso: string, today: Date) => Math.ceil((new Date(`${iso}T00:00:0
 
 export function missingFields(c: Contract): string[] {
   const m: string[] = [];
-  if (!c.counterpartyId) m.push("contraparte vinculada");
+  if (!c.company?.trim()) m.push("contraparte");
   if (!c.price || c.price <= 0) m.push("preço");
   if (!c.volume || c.volume <= 0) m.push("volume");
   if (!c.endDate) m.push("data de término");

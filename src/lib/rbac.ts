@@ -14,7 +14,7 @@ export const roleDescriptions: Record<AppRole, string> = {
   Administrador: "Acesso completo: usuários, assinatura e dados da empresa.",
   Gestor: "Acesso operacional: contratos, monitoramento, relatórios e alertas.",
   Analista: "Análise: dashboards, inteligência, monitoramento, relatórios e exportações.",
-  Operacional: "Rotina operacional: consulta de contratos, clientes e unidades.",
+  Operacional: "Rotina operacional: consulta de contratos e painéis.",
   Leitura: "Somente visualização dos painéis, sem criar, editar ou exportar.",
 };
 
@@ -34,9 +34,7 @@ export type Permission =
   | "settings:view"
   | "company:edit"
   | "users:manage"
-  | "billing:manage"
-  | "registry:view"
-  | "registry:manage";
+  | "billing:manage";
 
 const analystPermissions: Permission[] = [
   "dashboard:view",
@@ -44,7 +42,6 @@ const analystPermissions: Permission[] = [
   "monitoring:view",
   "alerts:view",
   "reports:view",
-  "registry:view",
 ];
 
 const readerPermissions: Permission[] = ["dashboard:view", "insights:view", "monitoring:view", "alerts:view", "reports:view"];
@@ -52,7 +49,6 @@ const readerPermissions: Permission[] = ["dashboard:view", "insights:view", "mon
 const operationalPermissions: Permission[] = [
   ...readerPermissions,
   "contracts:view",
-  "registry:view",
 ];
 
 
@@ -64,7 +60,6 @@ const managerPermissions: Permission[] = [
   "alerts:manage",
   "reports:create",
   "reports:export",
-  "registry:manage",
 ];
 
 const adminPermissions: Permission[] = [
@@ -94,7 +89,6 @@ export const permissionGroups = [
   "Contratos",
   "Alertas",
   "Relatórios",
-  "Cadastros",
   "Administração",
 ] as const;
 
@@ -117,8 +111,6 @@ export const permissionMeta: Record<Permission, { label: string; description: st
   "company:edit": { label: "Editar empresa", description: "Altera dados cadastrais da empresa.", group: "Administração" },
   "users:manage": { label: "Gerenciar usuários", description: "Cadastra membros e define funções.", group: "Administração" },
   "billing:manage": { label: "Gerenciar assinatura", description: "Plano, pagamento e cancelamento.", group: "Administração" },
-  "registry:view": { label: "Ver clientes e unidades", description: "Consulta clientes, contrapartes, unidades e usinas.", group: "Cadastros" },
-  "registry:manage": { label: "Gerenciar clientes e unidades", description: "Cria, edita e remove cadastros.", group: "Cadastros" },
 };
 
 export const allPermissions = Object.keys(permissionMeta) as Permission[];
@@ -181,7 +173,6 @@ export const routePermissions: { path: string; exact?: boolean; permission: Perm
   { path: "/app/contratos", permission: "contracts:view" },
   { path: "/app/alertas", permission: "alerts:view" },
   { path: "/app/relatorios", permission: "reports:view" },
-  { path: "/app/clientes", permission: "registry:view" },
   { path: "/app/configuracoes", permission: "settings:view" },
   { path: "/app/metricas", permission: "dashboard:view" },
   { path: "/app/perfil", permission: null },

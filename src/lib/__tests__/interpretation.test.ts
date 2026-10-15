@@ -41,7 +41,10 @@ describe("scenarios and portfolio", () => {
     expect(r.rows.find((x) => x.id === "2")!.value).toBe(20 * 730);
   });
   it("flags contracts without counterparty as incomplete", () => {
-    expect(portfolioAnalysis([c({ counterpartyId: null })]).incomplete).toHaveLength(1);
+    expect(portfolioAnalysis([c({ company: "" })]).incomplete).toHaveLength(1);
+  });
+  it("accepts a complete contract without a registry link", () => {
+    expect(portfolioAnalysis([c({})]).incomplete).toHaveLength(0);
   });
   it("contract vs market needs a reference", () => {
     expect(contractVsMarket(c({}), {}).ok).toBe(false);
