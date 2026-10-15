@@ -2,8 +2,8 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/ethere/app-shell";
-import { DataSourcesPanel } from "@/components/ethere/product-panels";
 import { PldInterpretationPanel } from "@/components/ethere/interpretation-panels";
+import { demoPldRows } from "@/lib/interpretation";
 import {
   LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Brush,
   AreaChart, Area, BarChart, Bar,
@@ -51,14 +51,7 @@ const chartTooltip = {
   boxShadow: "var(--shadow-elegant)",
 } as const;
 
-const buildData = (days: number, seed: number): Row[] =>
-  Array.from({ length: days }).map((_, i) => ({
-    d: `D${i + 1}`,
-    seco: +(150 + Math.sin((i + seed) / 4) * 40 + i * 1.1).toFixed(2),
-    s: +(140 + Math.cos((i + seed) / 3) * 30 + i * 0.9).toFixed(2),
-    ne: +(130 + Math.sin((i + seed) / 5) * 25 + i * 0.8).toFixed(2),
-    n: +(120 + Math.cos((i + seed) / 6) * 20 + i * 0.7).toFixed(2),
-  }));
+const buildData = (days: number, seed: number): Row[] => demoPldRows(days, seed);
 
 /** Indicador hidrológico disponível (nível dos reservatórios, % da capacidade). */
 const buildHydro = (days: number, seed: number) =>
@@ -233,6 +226,11 @@ function Monitor() {
       </div>
       <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{ESTIMATE_NOTE}</p>
 
+      {!loading && (
+        <PldInterpretationPanel rows={fullRows} simulated={!real} submarket={submarket === "todos" ? "SE/CO" : submarket} />
+      )}
+
+
       <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-soft">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm font-semibold">Histórico do PLD por submercado</div>
@@ -295,10 +293,6 @@ function Monitor() {
           )}
         </div>
       </div>
-
-      {!loading && (
-        <PldInterpretationPanel rows={fullRows} simulated={!real} submarket={submarket === "todos" ? "SE/CO" : submarket} />
-      )}
 
       {isFarm ? (
         <div className="mt-6 grid gap-6 lg:grid-cols-2">
@@ -377,7 +371,6 @@ function Monitor() {
           </p>
         </div>
       )}
-      <DataSourcesPanel />
     </>
   );
 }

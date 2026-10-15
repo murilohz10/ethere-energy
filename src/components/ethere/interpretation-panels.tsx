@@ -5,7 +5,7 @@ import { ArrowRight, Info, Lightbulb, TrendingDown, TrendingUp, Minus } from "lu
 import { cn } from "@/lib/utils";
 import type { Contract } from "@/lib/store";
 import {
-  interpretPld, portfolioAnalysis, contractVsMarket, brlMwh, pct, missingFields,
+  interpretPld, portfolioAnalysis, contractVsMarket, brlMwh, pct, missingFields, comparableGroups, contractAnalysis,
   PLD_LABEL, type PldKey, type PldPoint,
 } from "@/lib/interpretation";
 
@@ -51,8 +51,7 @@ export function PldInterpretationPanel({ rows, simulated, submarket }: { rows: P
             <div>
               <p className="text-sm leading-relaxed text-foreground/90">{r.summary}</p>
               <p className="mt-2 text-[11px] text-muted-foreground">
-                Período: {r.period.from} a {r.period.to} · referência: {r.period.prevFrom} a {r.period.prevTo} · médias diárias em R$/MWh.
-                Dados horários não estão disponíveis, por isso não há leitura por horário.
+                Período: {r.period.from} a {r.period.to} · referência: {r.period.prevFrom} a {r.period.prevTo} · médias diárias em R$/MWh{simulated ? " · série demonstrativa, não são dados da CCEE" : ""}.
               </p>
             </div>
             <div className="rounded-xl border border-border bg-surface/60 p-4">
@@ -100,7 +99,7 @@ export function PldInterpretationPanel({ rows, simulated, submarket }: { rows: P
               </table>
               <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
                 Critérios: variações abaixo de 1% são tratadas como estabilidade. "Movimento persistente" exige variação de ao menos 3% e 70% dos dias do período do mesmo lado da média anterior.
-                A leitura descreve o comportamento observado; não indica causas nem previsões.
+                A leitura descreve o comportamento observado; não indica causas nem previsões. O PLD disponível é diário, por isso não há leitura por horário.
               </p>
             </div>
           )}
@@ -134,12 +133,25 @@ export function PortfolioAnalysisPanel({ contracts, pldAvg, pldPeriod, simulated
   }
   const totalB = a.buckets.reduce((s, b) => s + b.count, 0) || 1;
   const near = a.buckets[0].count + a.buckets[1].count;
+  const long = a.buckets[3].count;
   const sentences = [
     `${a.active} contrato(s) ativo(s): ${a.sale.count} de venda (${a.sale.mwm.toFixed(1)} MWm) e ${a.purchase.count} de compra (${a.purchase.mwm.toFixed(1)} MWm).`,
-    near ? `${near} vence(m) nos próximos 90 dias.` : "Nenhum contrato ativo vence nos próximos 90 dias.",
-    a.concentration && a.active > 1 ? `${a.concentration.name} concentra ${a.concentration.share.toFixed(0)}% do volume ativo.` : "",
-    a.incomplete.length ? `${a.incomplete.length} contrato(s) têm campos incompletos que limitam a análise.` : "",
-  ].filter(Boolean);
+    near
+      ? `${near} de ${a.active} (${Math.round((near / a.active) * 100)}%) vence(m) em até 90 dias; ${long} vão além de um ano.`
+      : `Nenhum contrato ativo vence em 90 dias; ${long} de ${a.active} vão além de um ano.`,
+  ];
+  const attention: string[] = [];
+  if (a.concentration && a.active > 1) {
+    attention.push(a.concentration.share >= 50
+      ? `Concentração relevante: ${a.concentration.name} responde por ${a.concentration.share.toFixed(0)}% do volume ativo. Mudanças nessa relação afetam a maior parte da carteira.`
+      : `Volume distribuído: a maior contraparte (${a.concentration.name}) tem ${a.concentration.share.toFixed(0)}% do volume ativo.`);
+  }
+  if (a.sale.avgPrice != null && a.purchase.avgPrice != null) {
+    attention.push(`Venda média a ${brlMwh(a.sale.avgPrice)} e compra média a ${brlMwh(a.purchase.avgPrice)}: diferença de ${brlMwh(a.sale.avgPrice - a.purchase.avgPrice)}, sem considerar prazos e submercados distintos.`);
+  }
+  if (near) attention.push(`${near} vencimento(s) em 90 dias concentram decisões de renovação ou recontratação no curto prazo.`);
+  if (a.incomplete.length) attention.push(`${a.incomplete.length} contrato(s) com dados ausentes ficam fora de parte das comparações.`);
+  const groups = comparableGroups(contracts);
 
   const comparisons = contracts
     .filter((c) => c.status === "Ativo")
@@ -152,6 +164,11 @@ export function PortfolioAnalysisPanel({ contracts, pldAvg, pldPeriod, simulated
         <h2 className="text-sm font-semibold">Leitura da carteira</h2>
       </div>
       <p className="mt-3 text-sm leading-relaxed text-foreground/90">{sentences.join(" ")}</p>
+      {attention.length > 0 && (
+        <ul className="mt-3 space-y-1.5 text-xs leading-relaxed text-muted-foreground">
+          {attention.map((t) => <li key={t} className="flex gap-2"><span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-brand" />{t}</li>)}
+        </ul>
+      )}
 
       <div className="mt-4 grid gap-4 md:grid-cols-3">
         <div className="rounded-xl border border-border p-3">
@@ -187,6 +204,26 @@ export function PortfolioAnalysisPanel({ contracts, pldAvg, pldPeriod, simulated
         </div>
       </div>
 
+      {groups.length > 0 && (
+        <div className="mt-4 overflow-x-auto rounded-xl border border-border p-3">
+          <div className="text-[10px] font-semibold uppercase tracking-wide text-brand">Comparação dentro da carteira · grupos de mesmo tipo e submercado</div>
+          <table className="mt-2 w-full min-w-[480px] text-xs">
+            <thead className="text-muted-foreground"><tr><th className="py-1 text-left font-medium">Grupo</th><th className="text-right font-medium">Contratos</th><th className="text-right font-medium">Volume</th><th className="text-right font-medium">Preço médio</th><th className="text-right font-medium">Faixa</th><th className="text-right font-medium">Preço semelhante (±5%)</th></tr></thead>
+            <tbody>
+              {groups.map((g) => (
+                <tr key={g.key} className="border-t border-border">
+                  <td className="py-1.5">{g.key}</td><td className="text-right tabular-nums">{g.count}</td><td className="text-right tabular-nums">{g.mwm.toFixed(1)} MWm</td>
+                  <td className="text-right tabular-nums">{brlMwh(g.avgPrice)}</td>
+                  <td className="text-right tabular-nums">{g.count > 1 ? `${brlMwh(g.min)} – ${brlMwh(g.max)}` : "—"}</td>
+                  <td className="text-right tabular-nums">{g.count > 1 ? `${g.similar} de ${g.count}` : "sem par"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <p className="mt-2 text-[11px] text-muted-foreground">Só contratos do mesmo tipo e submercado são comparados entre si. Prazos e condições diferentes podem justificar diferenças de preço.</p>
+        </div>
+      )}
+
       <div className="mt-4 border-t border-border pt-3">
         <button onClick={() => setOpen((o) => !o)} className="text-xs font-medium text-brand hover:underline">
           {open ? "Ocultar comparação" : "Comparar preço contratado × PLD médio"}
@@ -206,14 +243,15 @@ export function PortfolioAnalysisPanel({ contracts, pldAvg, pldPeriod, simulated
                     {r.ok ? (<>
                       <td className="text-right tabular-nums">{brlMwh(r.price)}</td>
                       <td className="text-right tabular-nums">{brlMwh(r.ref)}</td>
-                      <td className="text-right tabular-nums">{r.diff >= 0 ? "+" : "−"}{brlMwh(Math.abs(r.diff))} ({pct(r.diffPct)})</td>
+                      <td className="text-right tabular-nums" title={`Preço contratado ${r.diff >= 0 ? "acima" : "abaixo"} do PLD médio do período. Indica posição relativa ao mercado de curto prazo, não resultado.`}>{r.diff >= 0 ? "+" : "−"}{brlMwh(Math.abs(r.diff))} ({pct(r.diffPct)})</td>
                     </>) : <td colSpan={3} className="text-right text-muted-foreground">{r.reason}</td>}
                   </tr>
                 ))}
               </tbody>
             </table>
             <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
-              Referência: média diária do PLD de {pldPeriod}{simulated ? " (série demonstrativa)" : " (CCEE)"}, no mesmo submercado do contrato.
+              O que a diferença representa: quanto o preço contratado está acima (+) ou abaixo (−) da média do PLD no mesmo submercado. Não indica se o contrato é bom ou ruim.
+              <br />Referência: média diária do PLD de {pldPeriod}{simulated ? " (série demonstrativa)" : " (CCEE)"}, no mesmo submercado do contrato.
               Limitação: o PLD é preço de curto prazo; contratos bilaterais têm prazo, sazonalização e flexibilidade próprios. A diferença é só um indicativo, não ganho ou perda realizada.
             </p>
           </div>
@@ -225,4 +263,61 @@ export function PortfolioAnalysisPanel({ contracts, pldAvg, pldPeriod, simulated
 
 function Row({ l, v }: { l: string; v: string }) {
   return <div className="flex justify-between gap-2"><span className="text-muted-foreground">{l}</span><span className="tabular-nums">{v}</span></div>;
+}
+
+/* --------------------------- contrato individual ------------------------- */
+
+export function ContractAnalysis({ contract, contracts, pldAvg, pldPeriod }: {
+  contract: Contract; contracts: Contract[]; pldAvg: Partial<Record<string, number>>; pldPeriod: string;
+}) {
+  const a = contractAnalysis(contract, contracts);
+  const m = contractVsMarket(contract, pldAvg);
+  const fmtD = (iso: string) => (iso ? iso.split("-").reverse().join("/") : "—");
+  return (
+    <div className="grid gap-4 text-sm">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        {[
+          ["Tipo", contract.type],
+          ["Preço", brlMwh(contract.price)],
+          ["Volume", `${contract.volume} MWm`],
+          ["Submercado", contract.submarket],
+          ["Início", fmtD(contract.startDate)],
+          ["Término", fmtD(contract.endDate)],
+          ["Prazo", `${a.termMonths} meses`],
+          ["Contraparte", contract.company || "—"],
+        ].map(([l, v]) => (
+          <div key={l} className="rounded-lg border border-border p-2.5">
+            <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{l}</div>
+            <div className="mt-0.5 truncate font-medium tabular-nums">{v}</div>
+          </div>
+        ))}
+      </div>
+      <div className="rounded-xl border border-brand-soft bg-brand-softer/40 p-4">
+        <div className="text-[10px] font-semibold uppercase tracking-wide text-brand">Leitura do contrato</div>
+        <ul className="mt-2 space-y-1.5 text-xs leading-relaxed text-foreground/90">{a.lines.map((l) => <li key={l}>{l}</li>)}</ul>
+      </div>
+      <div className="rounded-xl border border-border p-4">
+        <div className="text-[10px] font-semibold uppercase tracking-wide text-brand">Contrato × PLD médio</div>
+        {m.ok ? (
+          <p className="mt-2 text-xs leading-relaxed">
+            Preço {brlMwh(m.price)} frente a PLD médio de {brlMwh(m.ref)} em {contract.submarket} ({pldPeriod}): {m.diff >= 0 ? "+" : "−"}{brlMwh(Math.abs(m.diff))} ({pct(m.diffPct)}).
+            <span className="block pt-1 text-muted-foreground">PLD é preço de curto prazo e não é o mesmo produto de um contrato bilateral; a diferença é só uma referência, não ganho ou perda.</span>
+          </p>
+        ) : <p className="mt-2 text-xs text-muted-foreground">Comparação indisponível: {m.reason}</p>}
+      </div>
+      <div className="rounded-xl border border-border p-4">
+        <div className="text-[10px] font-semibold uppercase tracking-wide text-brand">Condições registradas</div>
+        <p className="mt-2 whitespace-pre-line text-xs text-muted-foreground">{a.conditions ?? "Nenhuma condição registrada nas observações do contrato."}</p>
+      </div>
+      <div className="rounded-xl border border-border p-4">
+        <div className="text-[10px] font-semibold uppercase tracking-wide text-brand">O que falta para uma avaliação mais completa</div>
+        <ul className="mt-2 space-y-1 text-xs text-muted-foreground">
+          {a.missing.map((f) => <li key={f}>• {f}</li>)}
+          {!a.conditions && <li>• condições contratuais (flexibilidade, sazonalização, reajuste) nas observações</li>}
+          {!contract.unitId && <li>• unidade ou usina vinculada</li>}
+          {a.missing.length === 0 && a.conditions && contract.unitId && <li>Os campos principais estão preenchidos.</li>}
+        </ul>
+      </div>
+    </div>
+  );
 }

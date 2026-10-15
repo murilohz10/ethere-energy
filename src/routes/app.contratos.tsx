@@ -2,7 +2,7 @@ import { useCounterparties, useUnits } from "@/lib/api/operations";
 import { Pick } from "@/components/ethere/form-bits";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { PortfolioAnalysisPanel } from "@/components/ethere/interpretation-panels";
+import { PortfolioAnalysisPanel, ContractAnalysis } from "@/components/ethere/interpretation-panels";
 import { usePldRows } from "@/lib/api/market";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/ethere/app-shell";
@@ -27,6 +27,7 @@ import {
 import {
   Plus, Search, Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, MoreHorizontal,
   Download, FileX2, X,
+  LineChart as LineChartIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -227,6 +228,7 @@ function Contracts() {
   const toggleSort = (key: SortKey) =>
     setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
 
+  const [analyzing, setAnalyzing] = useState<Contract | null>(null);
   const pldRows = usePldRows(30);
   const pldAvg = useMemo(() => {
     const rows = pldRows.data ?? [];
@@ -389,6 +391,14 @@ function Contracts() {
                   <td className="px-4 py-4 text-right">
                     <div className="flex items-center justify-end gap-1">
                       <button
+                        onClick={() => setAnalyzing(r)}
+                        aria-label={`Ver análise de ${r.code}`}
+                        title="Ver análise do contrato"
+                        className="rounded-md p-1.5 text-muted-foreground transition hover:bg-brand-softer hover:text-brand-dark"
+                      >
+                        <LineChartIcon className="h-4 w-4" />
+                      </button>
+                      <button
                         onClick={() => openEdit(r)}
                         aria-label={`Editar ${r.code}`}
                         className="rounded-md p-1.5 text-muted-foreground transition hover:bg-brand-softer hover:text-brand-dark"
@@ -411,6 +421,7 @@ function Contracts() {
                           </button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => setAnalyzing(r)}>Ver análise do contrato</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => { if (!add({ ...r, name: `${r.name} (cópia)` })) return showPlanLimit(limitMessages.contracts(100)); toast.success("Contrato duplicado"); }}>
                             Duplicar
                           </DropdownMenuItem>
@@ -542,6 +553,16 @@ function Contracts() {
               {saving ? "Salvando…" : "Salvar contrato"}
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!analyzing} onOpenChange={(o) => !o && setAnalyzing(null)}>
+        <DialogContent className="max-h-[90vh] overflow-y-auto sm:max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{analyzing?.code} · {analyzing?.name}</DialogTitle>
+            <DialogDescription>Análise com base nos campos cadastrados. Nada aqui é inferido de fora do contrato.</DialogDescription>
+          </DialogHeader>
+          {analyzing && <ContractAnalysis contract={analyzing} contracts={contracts} pldAvg={pldAvg} pldPeriod={pldPeriod} />}
         </DialogContent>
       </Dialog>
 

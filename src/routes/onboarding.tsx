@@ -1,4 +1,4 @@
-import { Building2, ListChecks } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { generationSources, useUnits } from "@/lib/api/operations";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -268,7 +268,6 @@ function Onboarding() {
                   { i: Bell, t: "Alertas", d: "Regras personalizadas por prioridade e canal." },
                   { i: BarChart3, t: "Relatórios", d: "Geração e exportação em PDF e Excel." },
                   { i: Building2, t: "Clientes e Unidades", d: isFarm ? "Usinas, compradores e contrapartes." : "Clientes, contrapartes e unidades." },
-                  { i: ListChecks, t: "Gestão Operacional", d: "Tarefas, pendências e prazos da operação." },
                 ].map((a) => (
                   <div key={a.t} className="rounded-xl border border-border bg-surface p-4 transition hover:border-brand-soft">
                     <div className="flex items-center gap-2 text-sm font-semibold">
