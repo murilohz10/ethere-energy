@@ -117,13 +117,13 @@ export function interpretPld(rows: PldPoint[], window: number, key: PldKey = "se
   }
 
   const label = PLD_LABEL[key];
-  const unit = window === 1 ? "dia anterior" : window === 7 ? "semana anterior" : `período anterior de ${window} dias`;
+  const unit = window === 1 ? "ao dia anterior" : window === 7 ? "à semana anterior" : `ao período anterior de ${window} dias`;
   const moveWord = movement === "estavel" ? "ficou estável" : movement === "alta" ? "subiu" : "caiu";
   const parts: string[] = [];
   parts.push(
     movement === "estavel"
-      ? `O PLD ${label} ficou estável em relação ao ${unit} (${pct(deltaPct)}), com média de ${brlMwh(cAvg)}.`
-      : `O PLD ${label} ${moveWord} ${fmt(Math.abs(deltaPct), 1)}% em relação ao ${unit}, de ${brlMwh(pAvg)} para ${brlMwh(cAvg)}.`,
+      ? `O PLD ${label} ficou estável em relação ${unit} (${pct(deltaPct)}), com média de ${brlMwh(cAvg)}.`
+      : `O PLD ${label} ${moveWord} ${fmt(Math.abs(deltaPct), 1)}% em relação ${unit}, de ${brlMwh(pAvg)} para ${brlMwh(cAvg)}.`,
   );
   if (pattern === "tendencia") parts.push(`O movimento foi persistente: a maior parte dos dias ficou ${deltaPct > 0 ? "acima" : "abaixo"} da média anterior.`);
   if (pattern === "pontual") parts.push("O movimento não se manteve na maior parte dos dias, o que indica variação pontual, não tendência.");
