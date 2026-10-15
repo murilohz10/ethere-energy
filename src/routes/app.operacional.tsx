@@ -33,8 +33,8 @@ function OperationsPage() {
   const editable = can("operations:manage");
   const tasks = useTasks(user?.companyId);
   const units = useUnits(user?.companyId);
-  const { items: contracts } = useContracts();
-  const { users } = useSettings();
+  const { contracts } = useContracts();
+  const { settings: { users } } = useSettings();
   const [filter, setFilter] = useState("Abertas");
   const [form, setForm] = useState<Partial<Task> | null>(null);
 
