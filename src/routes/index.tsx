@@ -302,8 +302,8 @@ function Features() {
     <Section
       id="funcionalidades"
       eyebrow="Funcionalidades"
-      title="Uma plataforma completa para o mercado livre"
-      subtitle="Cada módulo foi desenhado para quem opera energia todos os dias e precisa de precisão, contexto e velocidade."
+      title="Recursos que transformam dados em análise"
+      subtitle="Na Central de Inteligência, simule variações do PLD, veja o impacto estimado sobre a carteira, as premissas usadas e os contratos que mais contribuem para o resultado."
     >
       <div className="mt-14 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {features.map((f, i) => (
