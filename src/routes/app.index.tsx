@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { PageHeader } from "@/components/ethere/app-shell";
+import { AttentionPanel } from "@/components/ethere/product-panels";
 import {
   Sparkles, TrendingUp, TrendingDown, FileText, AlertTriangle, DollarSign, Activity,
   ArrowUpRight, Gauge, Scale, Zap, CalendarClock,
@@ -125,6 +126,8 @@ function Overview() {
           </div>
         }
       />
+
+      <AttentionPanel />
 
       <section className="mb-6 rounded-2xl border border-brand-soft bg-card p-6 shadow-soft">
         <div className="flex flex-wrap items-center justify-between gap-3">

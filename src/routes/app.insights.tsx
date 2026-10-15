@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { PageHeader } from "@/components/ethere/app-shell";
+import { ScenarioPanel } from "@/components/ethere/product-panels";
 import { useAlerts, useContracts } from "@/lib/store";
 import { useCompanyProfile } from "@/lib/profile";
 import {
@@ -192,6 +193,7 @@ function InsightsPage() {
           </ol>
         </aside>
       </div>
+      <ScenarioPanel />
     </>
   );
 }
