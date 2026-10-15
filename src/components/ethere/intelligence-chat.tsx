@@ -164,11 +164,18 @@ export function IntelligenceChat({ variant = "page" }: { variant?: "page" | "pan
           <Database className="h-3.5 w-3.5 shrink-0" />
           {kind === "Fazenda de Energia" ? "Fazenda de geração" : "Comercializadora"} · {pageLabel(pathname)}
         </span>
-        {messages.length > 0 && (
-          <button onClick={reset} className="flex items-center gap-1 transition-colors hover:text-foreground">
-            <RotateCcw className="h-3.5 w-3.5" /> Nova conversa
-          </button>
-        )}
+        <span className="flex items-center gap-3">
+          {limit !== null && (
+            <span className={cn("tabular-nums", reached && "text-destructive")} title="Perguntas usadas neste mês">
+              {used}/{limit} perguntas
+            </span>
+          )}
+          {messages.length > 0 && (
+            <button onClick={reset} className="flex items-center gap-1 transition-colors hover:text-foreground">
+              <RotateCcw className="h-3.5 w-3.5" /> Nova conversa
+            </button>
+          )}
+        </span>
       </div>
 
       <Conversation className="min-h-0 flex-1">
