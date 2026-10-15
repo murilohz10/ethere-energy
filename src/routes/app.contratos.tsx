@@ -27,6 +27,7 @@ import {
 import {
   Plus, Search, Pencil, Trash2, ArrowUpDown, ArrowUp, ArrowDown, MoreHorizontal,
   Download, FileX2, X,
+  LineChart as LineChartIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
@@ -389,6 +390,14 @@ function Contracts() {
                   </td>
                   <td className="px-4 py-4 text-right">
                     <div className="flex items-center justify-end gap-1">
+                      <button
+                        onClick={() => setAnalyzing(r)}
+                        aria-label={`Ver análise de ${r.code}`}
+                        title="Ver análise do contrato"
+                        className="rounded-md p-1.5 text-muted-foreground transition hover:bg-brand-softer hover:text-brand-dark"
+                      >
+                        <LineChartIcon className="h-4 w-4" />
+                      </button>
                       <button
                         onClick={() => openEdit(r)}
                         aria-label={`Editar ${r.code}`}
