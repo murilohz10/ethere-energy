@@ -1,6 +1,8 @@
 # Roadmap — Reestruturação Ethere
 
 ## Solicitação atual
+- [x] Revisar textos e dados das páginas internas; ampliar a exclusão de referências antigas no histórico do Intelligence (12 testes passaram).
+- [ ] Conferir páginas com login e dados salvos reais — bloqueado: sessão indisponível; requer login do usuário na prévia.
 - [x] Retirar geração térmica de toda a experiência, incluindo landing, Monitoramento e Intelligence.
 - [x] Remover Clientes e Unidades de toda a experiência, sem alterar o banco.
 - [x] Atualizar a landing com as funcionalidades atuais, mantendo o design.
