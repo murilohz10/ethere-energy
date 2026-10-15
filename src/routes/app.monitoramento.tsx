@@ -3,7 +3,7 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/ethere/app-shell";
 import { PldInterpretationPanel } from "@/components/ethere/interpretation-panels";
-import { HydroSection, ThermalSection } from "@/components/ethere/operational-panels";
+import { HydroSection } from "@/components/ethere/operational-panels";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { demoPldRows } from "@/lib/interpretation";
 import {
@@ -28,9 +28,9 @@ export const Route = createFileRoute("/app/monitoramento")({
   head: () => ({
     meta: [
       { title: "Monitoramento · Ethere" },
-      { name: "description", content: "Acompanhe PLD, hidrologia e geração térmica com leituras por período." },
+      { name: "description", content: "Acompanhe PLD e hidrologia com leituras por período." },
       { property: "og:title", content: "Monitoramento · Ethere" },
-      { property: "og:description", content: "Indicadores, comparações e séries de PLD, hidrologia e térmica." },
+      { property: "og:description", content: "Indicadores, comparações e séries de PLD e hidrologia." },
           { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
 ],
@@ -189,7 +189,6 @@ function Monitor() {
       <TabsList className="mb-5 h-auto flex-wrap">
         <TabsTrigger value="precos">PLD</TabsTrigger>
         <TabsTrigger value="hidrico">Hidrologia e reservatórios</TabsTrigger>
-        <TabsTrigger value="termico">Geração térmica</TabsTrigger>
       </TabsList>
       <TabsContent value="precos" className="mt-0">
       <div className="rounded-2xl border border-border bg-card shadow-soft">
@@ -340,9 +339,6 @@ function Monitor() {
       </TabsContent>
       <TabsContent value="hidrico" className="mt-0 rounded-2xl border border-border bg-card p-6 shadow-soft">
         <HydroSection pldRows={fullRows} pldSimulated={!real} />
-      </TabsContent>
-      <TabsContent value="termico" className="mt-0 rounded-2xl border border-border bg-card p-6 shadow-soft">
-        <ThermalSection pldRows={fullRows} pldSimulated={!real} />
       </TabsContent>
       </Tabs>
     </>

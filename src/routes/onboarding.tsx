@@ -224,7 +224,7 @@ function Onboarding() {
                 {[
                   { i: LayoutGrid, t: "Visão Geral", d: "KPIs, insights por IA e resumo do portfólio." },
                   { i: Sparkles, t: "Central de Inteligência", d: "Análises do período, cenários e fontes de cada dado." },
-                  { i: Activity, t: "Monitoramento", d: "PLD, hidrologia e térmica, com comparações por período." },
+                  { i: Activity, t: "Monitoramento", d: "PLD e hidrologia, com comparações por período." },
                   { i: FileText, t: "Contratos", d: "Cadastro, filtros, exportação e vencimentos." },
                   { i: Bell, t: "Alertas", d: "Regras personalizadas por prioridade e canal." },
                   { i: BarChart3, t: "Relatórios", d: "Geração e exportação em PDF e Excel." },
