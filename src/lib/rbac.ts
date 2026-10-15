@@ -94,7 +94,7 @@ export const permissionGroups = [
   "Contratos",
   "Alertas",
   "Relatórios",
-  "Cadastros e operação",
+  "Cadastros",
   "Administração",
 ] as const;
 
