@@ -31,17 +31,17 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Ethere Energy — Inteligência para o Mercado Livre de Energia" },
+      { title: "Ethere Energy — Inteligência aplicada ao mercado de energia" },
       {
         name: "description",
         content:
-          "PLD, hidrologia e geração térmica, leitura de contratos, cenários estimados e relatórios configuráveis para comercializadoras e fazendas de energia.",
+          "A Ethere conecta PLD, hidrologia, geração térmica e contratos para interpretar movimentos do mercado e mostrar impactos estimados no seu negócio.",
       },
-      { property: "og:title", content: "Ethere Energy — Inteligência para o Mercado Livre de Energia" },
+      { property: "og:title", content: "Ethere Energy — Dados são o começo. Inteligência transforma decisões." },
       {
         property: "og:description",
         content:
-          "Acompanhe o mercado de energia, interprete sua carteira e converse com o Ethere Intelligence. Dados demonstrativos identificados e estimativas com premissas.",
+          "Contexto, interpretação e cenários para comercializadoras e geradoras do mercado livre de energia.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -56,6 +56,7 @@ function Landing() {
       <MarketingNav />
       <Hero />
       <Metrics />
+      <Contrast />
       <HowItWorks />
       <Features />
       <Intelligence />
@@ -81,21 +82,21 @@ function Hero() {
           <Reveal variant="up">
             <span className="inline-flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-3 py-1 text-xs font-medium text-brand-dark">
               <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-primary" />
-              Inteligência para o Mercado Livre de Energia
+              Inteligência aplicada ao mercado de energia
             </span>
           </Reveal>
 
           <Reveal variant="up" delay={80}>
             <h1 className="mt-6 text-balance text-4xl font-semibold leading-[1.06] tracking-tight sm:text-5xl lg:text-[3.4rem]">
-              Ethere Energy.{" "}
-              <span className="text-gradient-cyan">Inteligência de mercado.</span>
+              Dados de energia são o começo.{" "}
+              <span className="text-gradient-cyan">Inteligência é o que transforma decisões.</span>
             </h1>
           </Reveal>
 
           <Reveal variant="up" delay={160}>
             <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              PLD, hidrologia e térmica com leitura por período. Contratos, cenários estimados e relatórios
-              sob medida — com inteligência para comercializadoras e fazendas de energia.
+              A Ethere conecta informações do mercado elétrico, interpreta seus movimentos e traduz dados complexos
+              em análises, cenários e impactos relevantes para o seu negócio.
             </p>
           </Reveal>
 
@@ -107,17 +108,17 @@ function Hero() {
                   className="group w-full text-primary-foreground shadow-blue hover:opacity-95 sm:w-auto"
                   style={{ background: "var(--gradient-brand)" }}
                 >
-                  Começar teste gratuito
+                  Conhecer a plataforma
                   <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </Button>
               </Link>
-              <a href="#plano" className="sm:w-auto">
+              <a href="#solucao" className="sm:w-auto">
                 <Button
                   size="lg"
                   variant="outline"
                   className="w-full border-primary/25 bg-surface/60 backdrop-blur hover:border-primary/50 hover:bg-surface sm:w-auto"
                 >
-                  Conhecer os planos
+                  Como funciona
                 </Button>
               </a>
             </div>
@@ -143,49 +144,128 @@ function Hero() {
   );
 }
 
-/* ------------------------------ Metrics ----------------------------- */
+/* --------------------- Indicador × Interpretação --------------------- */
 
-const metrics = [
-  { v: "3", l: "Visões: PLD, hidrologia e térmica" },
-  { v: "4", l: "Submercados acompanhados" },
-  { v: "3", l: "Cenários: queda, referência e alta" },
-  { v: "2", l: "Perfis: comercializadora e fazenda" },
+const layers = [
+  {
+    label: "Indicador isolado",
+    q: "O que está acontecendo?",
+    text: "PLD médio do Sudeste: alta de 10% na semana (R$ 100 → R$ 110/MWh).",
+  },
+  {
+    label: "Interpretação da Ethere",
+    q: "Por que isso importa?",
+    text: "A alta foi persistente (5 de 7 dias no mesmo sentido) e ocorreu junto a uma queda de 2,3 p.p. na energia armazenada e geração térmica acima do programado. Movimentos simultâneos, que a plataforma relaciona — sem afirmar causa.",
+  },
+  {
+    label: "Impacto para o negócio",
+    q: "Como isso pode afetar meu negócio?",
+    text: "Nos cenários da Central de Inteligência, você vê o impacto estimado de PLD −10% / +10% sobre a carteira cadastrada e quais contratos mais contribuem para o resultado.",
+  },
 ];
 
 function Metrics() {
   return (
-    <section className="relative border-y border-border/60 bg-surface/40">
-      <div className="mx-auto grid max-w-7xl grid-cols-2 gap-px px-6 py-10 sm:gap-8 lg:grid-cols-4">
-        {metrics.map((m, i) => (
-          <Reveal key={m.l} delay={i * 90} className="px-1 py-3 sm:px-2">
-            <div className="text-2xl font-semibold tabular-nums text-gradient-cyan sm:text-3xl">{m.v}</div>
-            <p className="mt-1 text-xs text-muted-foreground sm:text-sm">{m.l}</p>
-          </Reveal>
-        ))}
+    <section id="demonstracao" className="relative border-y border-border/60 bg-surface/40 py-20">
+      <div className="mx-auto max-w-7xl px-6">
+        <Reveal>
+          <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">A lógica do produto</p>
+          <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl">
+            Consultar um número é diferente de entender o que ele significa
+          </h2>
+          <p className="mt-3 text-xs text-muted-foreground">Exemplo com dados demonstrativos — não são valores oficiais da CCEE, ONS ou ANA.</p>
+        </Reveal>
+        <div className="relative mt-12 grid gap-4 lg:grid-cols-3">
+          {layers.map((l, i) => (
+            <Reveal key={l.label} delay={i * 110}>
+              <div className={"relative h-full rounded-2xl border p-6 " + (i === 0 ? "border-border/60 bg-card/40" : "glass-panel border-primary/25")}>
+                <span className="text-[11px] font-semibold uppercase tracking-widest text-primary/80">{l.label}</span>
+                <p className="mt-3 text-base font-semibold">{l.q}</p>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{l.text}</p>
+                {i < 2 && (
+                  <ArrowRight className="absolute -right-3 top-1/2 hidden h-5 w-5 -translate-y-1/2 text-primary lg:block" aria-hidden />
+                )}
+              </div>
+            </Reveal>
+          ))}
+        </div>
       </div>
     </section>
+  );
+}
+
+/* ---------------------- Informação não é inteligência ---------------- */
+
+function Contrast() {
+  const conv = [
+    "Indicadores apresentados separadamente.",
+    "Informações que exigem interpretação manual.",
+    "Dificuldade para relacionar mercado, operação e impacto financeiro.",
+    "Necessidade de consultar múltiplas telas para construir uma análise.",
+  ];
+  const ethere = [
+    "Indicadores analisados em conjunto, quando houver dados compatíveis.",
+    "Interpretações que contextualizam as variações observadas.",
+    "Cenários para avaliar possíveis impactos no negócio.",
+    "Informações organizadas para apoiar decisões com mais clareza.",
+  ];
+  return (
+    <Section
+      id="contexto"
+      eyebrow="Diferença"
+      title="Informação não falta. Contexto, sim."
+      subtitle="O setor elétrico produz uma grande quantidade de informações. O desafio é relacionar esses dados, compreender seus movimentos e identificar o que realmente importa para cada decisão. A Ethere vai além da visualização: conecta variáveis, contextualiza mudanças e transforma análises complexas em informação útil para a estratégia comercial e operacional."
+    >
+      <div className="mt-14 grid gap-5 lg:grid-cols-2">
+        <Reveal>
+          <div className="h-full rounded-2xl border border-border/60 bg-card/40 p-7">
+            <h3 className="text-sm font-semibold text-muted-foreground">Abordagem convencional</h3>
+            <ul className="mt-5 space-y-3">
+              {conv.map((t) => (
+                <li key={t} className="flex gap-3 text-sm text-muted-foreground">
+                  <span className="mt-2 h-1 w-3 shrink-0 rounded-full bg-muted-foreground/40" />
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+        <Reveal delay={120}>
+          <div className="h-full rounded-2xl glass-panel border-primary/30 p-7">
+            <h3 className="text-sm font-semibold text-primary">Com a proposta da Ethere</h3>
+            <ul className="mt-5 space-y-3">
+              {ethere.map((t) => (
+                <li key={t} className="flex gap-3 text-sm">
+                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                  {t}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </Reveal>
+      </div>
+    </Section>
   );
 }
 
 /* ---------------------------- Como funciona -------------------------- */
 
 const steps = [
-  { icon: Building2, title: "Cadastre sua empresa", desc: "Onboarding guiado em poucos minutos." },
-  { icon: FileText, title: "Configure contratos e alertas", desc: "Centralize sua carteira e defina gatilhos." },
-  { icon: Activity, title: "Leia o mercado por período", desc: "PLD, hidrologia e térmica em visões comparáveis." },
-  { icon: Sparkles, title: "Receba análises inteligentes", desc: "Leituras calculadas e respostas com contexto." },
-  { icon: ShieldCheck, title: "Revise premissas e limitações", desc: "Estimativas identificadas, sem decidir por você." },
+  { icon: Activity, title: "Entender o mercado", desc: "Acompanhe indicadores relevantes e compreenda as principais mudanças observadas." },
+  { icon: LineIcon, title: "Interpretar os movimentos", desc: "Relacione PLD, condições hidrológicas, geração térmica e outras variáveis disponíveis para contextualizar os acontecimentos." },
+  { icon: Target, title: "Avaliar os impactos", desc: "Explore cenários e analise possíveis efeitos sobre contratos e resultados, de acordo com os dados disponíveis." },
+  { icon: Compass, title: "Decidir com contexto", desc: "Utilize as análises para apoiar o planejamento e as decisões comerciais e operacionais." },
 ];
 
 function HowItWorks() {
   return (
-    <Section id="solucao" eyebrow="Como funciona" title="Do dado bruto à decisão, em cinco passos">
+    <Section id="solucao" eyebrow="Como funciona" title="Do dado à decisão, em uma única linha de raciocínio.">
       <div className="relative mt-14">
         <div
-          className="absolute left-0 right-0 top-6 hidden h-px bg-gradient-to-r from-transparent via-primary/40 to-transparent lg:block"
+          className="absolute left-0 right-0 top-6 hidden h-px bg-gradient-to-r from-primary/10 via-primary/60 to-primary lg:block"
           aria-hidden
         />
-        <ol className="grid gap-8 lg:grid-cols-5">
+        <ol className="grid gap-8 lg:grid-cols-4">
           {steps.map((s, i) => (
             <Reveal as="li" key={s.title} delay={i * 110} className="relative">
               <div className="flex items-center gap-3 lg:block">
@@ -193,7 +273,7 @@ function HowItWorks() {
                   <s.icon className="h-5 w-5" />
                 </div>
                 <span className="mt-4 hidden text-[11px] font-semibold uppercase tracking-widest text-primary/70 lg:block">
-                  Etapa {i + 1}
+                  {String(i + 1).padStart(2, "0")}
                 </span>
                 <h3 className="text-sm font-semibold lg:mt-2">{s.title}</h3>
               </div>
@@ -301,12 +381,12 @@ function Intelligence() {
                 Ethere Intelligence
               </span>
               <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Seu assistente de energia, <span className="text-gradient-cyan">com contexto e evidências</span>
+                Explore os dados <span className="text-gradient-cyan">fazendo perguntas</span>
               </h2>
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Converse em linguagem natural com um assistente contextualizado no Mercado Livre de Energia.
-                Ele consulta seus contratos, alertas e os dados do mercado antes de responder — e adapta a análise
-                ao perfil da sua empresa, seja comercializadora ou fazenda de geração.
+                O Ethere Intelligence ajuda a compreender variações, investigar relações entre indicadores e obter
+                explicações contextualizadas a partir dos dados disponíveis na plataforma. Ele não prevê o mercado:
+                torna as informações mais compreensíveis e úteis para a sua análise.
               </p>
             </Reveal>
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
@@ -370,12 +450,9 @@ function Intelligence() {
 /* ---------------------------- Diferenciais --------------------------- */
 
 const differentials = [
-  { icon: Zap, title: "Especializada no Mercado Livre de Energia", desc: "Nada de ferramentas genéricas: cada tela nasceu do ACL." },
-  { icon: Wind, title: "Feita para comercializadoras e fazendas", desc: "Fluxos pensados para quem compra, vende e gera energia." },
-  { icon: Gauge, title: "Interface intuitiva", desc: "Clareza operacional: menos cliques, mais decisão." },
-  { icon: LineIcon, title: "Dados públicos em inteligência", desc: "Período, origem e limitações junto às leituras." },
-  { icon: Bell, title: "Alertas personalizados", desc: "Regras de PLD e contratos organizadas por prioridade." },
-  { icon: Sparkles, title: "IA aplicada ao setor energético", desc: "Dados, cálculos e hipóteses separados na resposta." },
+  { icon: LineIcon, title: "Contexto integrado", desc: "Relaciona informações relevantes do mercado e da operação — PLD, hidrologia, geração térmica e contratos — respeitando a disponibilidade e a compatibilidade dos dados." },
+  { icon: Sparkles, title: "Interpretação aplicada", desc: "Transforma variações em leituras que dizem o que mudou, em qual período e o que merece atenção. Ex.: “PLD +10% na semana, movimento persistente em 5 de 7 dias”." },
+  { icon: Target, title: "Inteligência para decisões", desc: "Permite explorar cenários de queda, referência e alta e ver o impacto estimado sobre a carteira antes de definir uma estratégia." },
 ];
 
 function Differentials() {
@@ -385,11 +462,11 @@ function Differentials() {
       <div className="relative mx-auto max-w-7xl px-6">
         <Reveal>
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary/80">Diferenciais</p>
-          <h2 className="mt-4 max-w-2xl text-3xl font-semibold tracking-tight sm:text-4xl">
-            Por que as equipes escolhem a Ethere
+          <h2 className="mt-4 max-w-3xl text-3xl font-semibold tracking-tight sm:text-4xl">
+            Mais do que acompanhar indicadores. <span className="text-gradient-cyan">Entender o que eles significam.</span>
           </h2>
         </Reveal>
-        <div className="mt-14 grid gap-4 md:grid-cols-2">
+        <div className="mt-14 grid gap-4 md:grid-cols-3">
           {differentials.map((d, i) => (
             <Reveal key={d.title} variant={i % 2 === 0 ? "left" : "right"} delay={i * 70}>
               <div className="group flex h-full items-start gap-4 rounded-2xl border border-border/60 bg-card/60 p-5 backdrop-blur transition-all duration-300 hover:border-primary/35 hover:bg-card">
@@ -415,19 +492,21 @@ function Audience() {
   const cards = [
     {
       icon: Building2,
-      title: "Comercializadoras",
-      desc: "Carteira de contratos e margem sob controle, com leitura diária do mercado.",
-      items: ["Curva de PLD por submercado", "Volume contratado consolidado", "Alertas de risco de preço"],
+      title: "Para comercializadoras",
+      headline: "Entenda o mercado. Avalie sua carteira.",
+      desc: "Relacione os movimentos do mercado à sua carteira, analise cenários de PLD e identifique os contratos relevantes para suas decisões comerciais.",
+      items: ["Leitura do PLD por período e submercado", "Leitura da carteira: preços, vencimentos e concentração", "Cenários de PLD com contratos que mais contribuem"],
     },
     {
       icon: Wind,
-      title: "Fazendas de energia",
-      desc: "Acompanhe contratos de venda e estimativas gerenciais, com leitura do mercado adequada ao seu perfil.",
-      items: ["Receita estimada e contratos de venda", "PLD, hidrologia e térmica", "Cenários com premissas explícitas"],
+      title: "Para geradoras",
+      headline: "Conecte o cenário energético à sua estratégia.",
+      desc: "Interprete informações de mercado, geração e condições hidrológicas para compreender o contexto operacional e avaliar possíveis implicações comerciais.",
+      items: ["PLD, hidrologia e geração térmica em conjunto", "Contratos de venda e vencimentos", "Cenários com premissas explícitas"],
     },
   ];
   return (
-    <Section id="publico" eyebrow="Para quem" title="Construída para quem vive o mercado de energia">
+    <Section id="publico" eyebrow="Inteligência por perfil" title="A mesma inteligência, aplicada ao seu negócio">
       <div className="mt-14 grid gap-5 lg:grid-cols-2">
         {cards.map((c, i) => (
           <Reveal key={c.title} delay={i * 120}>
@@ -438,7 +517,8 @@ function Audience() {
                 </div>
                 <h3 className="text-lg font-semibold">{c.title}</h3>
               </div>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{c.desc}</p>
+              <p className="mt-5 text-xl font-semibold tracking-tight">{c.headline}</p>
+              <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{c.desc}</p>
               <ul className="mt-5 space-y-2.5">
                 {c.items.map((it) => (
                   <li key={it} className="flex items-center gap-2 text-sm text-muted-foreground">
