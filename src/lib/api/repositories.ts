@@ -91,8 +91,6 @@ export const contractsRepository = {
           end_date: input.endDate || null,
           status: input.status,
           notes: input.notes,
-          counterparty_id: input.counterpartyId ?? null,
-          unit_id: input.unitId ?? null,
           created_by: userId,
         })
         .select("*")
@@ -119,8 +117,6 @@ export const contractsRepository = {
           ...(patch.endDate !== undefined ? { end_date: patch.endDate || null } : {}),
           ...(patch.status !== undefined ? { status: patch.status } : {}),
           ...(patch.notes !== undefined ? { notes: patch.notes } : {}),
-          ...(patch.counterpartyId !== undefined ? { counterparty_id: patch.counterpartyId } : {}),
-          ...(patch.unitId !== undefined ? { unit_id: patch.unitId } : {}),
         })
         .eq("id", id)
         .select("*")

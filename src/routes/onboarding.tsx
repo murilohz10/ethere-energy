@@ -1,5 +1,3 @@
-import { Building2 } from "lucide-react";
-import { generationSources, useUnits } from "@/lib/api/operations";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -26,12 +24,14 @@ export const Route = createFileRoute("/onboarding")({
       { name: "description", content: "Configure seu ambiente na Ethere Energy em poucos passos." },
       { property: "og:title", content: "Onboarding · Ethere" },
       { property: "og:description", content: "Empresa, contratos e alertas configurados em minutos." },
-    ],
+          { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+],
   }),
   component: Onboarding,
 });
 
-const titles = ["Boas-vindas", "Empresa", "Unidade", "Primeiro contrato", "Primeiro alerta", "Tour"];
+const titles = ["Boas-vindas", "Empresa", "Primeiro contrato", "Primeiro alerta", "Tour"];
 
 function Onboarding() {
   const navigate = useNavigate();
@@ -41,9 +41,6 @@ function Onboarding() {
   const contracts = useContracts();
   const alerts = useAlerts();
   const [step, setStep] = useState(0);
-  const isFarm = user?.profile === "Fazenda de Energia";
-  const units = useUnits(user?.companyId);
-  const [unit, setUnit] = useState({ name: "", source: "Solar", capacity: "", submarket: "SE/CO", city: "", state: "" });
   const [finishing, setFinishing] = useState(false);
 
   const [company, setCompany] = useState({ name: "", cnpj: "", email: "", phone: "" });
@@ -80,14 +77,6 @@ function Onboarding() {
     setStep(2);
   }
 
-  function saveUnit() {
-    if (!unit.name.trim()) return setStep(3);
-    units.save.mutate(
-      { name: unit.name.trim(), kind: isFarm ? "Usina" : "Unidade consumidora", source: isFarm ? unit.source : "", capacity_mw: unit.capacity ? Number(unit.capacity.replace(",", ".")) || null : null, submarket: unit.submarket, city: unit.city.trim(), state: unit.state.trim().toUpperCase().slice(0, 2) },
-      { onSuccess: () => { toast.success(isFarm ? "Usina cadastrada." : "Unidade cadastrada."); setStep(3); } },
-    );
-  }
-
   function saveContract() {
     if (!contract.name.trim() || !contract.company.trim()) return toast.error("Preencha nome e contraparte do contrato.");
     const okC = contracts.add({
@@ -104,7 +93,7 @@ function Onboarding() {
     });
     if (!okC) return showPlanLimit(limitMessages.contracts(100));
     toast.success("Contrato criado.");
-    setStep(4);
+    setStep(3);
   }
 
   function saveAlert() {
@@ -120,7 +109,7 @@ function Onboarding() {
     });
     if (!okA) return showPlanLimit(limitMessages.alerts(5));
     toast.success("Alerta criado.");
-    setStep(5);
+    setStep(4);
   }
 
   return (
@@ -168,7 +157,7 @@ function Onboarding() {
                 </p>
               </div>
               <ul className="mt-5 space-y-2.5 text-sm text-muted-foreground">
-                {["Cadastrar sua empresa", isFarm ? "Cadastrar sua usina (opcional)" : "Cadastrar uma unidade (opcional)", "Registrar o primeiro contrato (opcional)", "Criar o primeiro alerta (opcional)", "Conhecer as áreas da plataforma"].map((i) => (
+                {["Cadastrar sua empresa", "Registrar o primeiro contrato (opcional)", "Criar o primeiro alerta (opcional)", "Conhecer as áreas da plataforma"].map((i) => (
                   <li key={i} className="flex items-center gap-2">
                     <Check className="h-3.5 w-3.5 text-brand" strokeWidth={3} /> {i}
                   </li>
@@ -189,34 +178,6 @@ function Onboarding() {
           )}
 
           {step === 2 && (
-            <Shell
-              title={isFarm ? "Cadastre sua usina" : "Cadastre uma unidade"}
-              subtitle={isFarm ? "Usada para acompanhar geração e contratos de venda. Etapa opcional." : "Unidade consumidora ou usina ligada aos seus contratos. Etapa opcional."}
-            >
-              <div className="mt-6 grid gap-4 md:grid-cols-2">
-                <F label={isFarm ? "Nome da usina" : "Nome da unidade"} value={unit.name} onChange={(v) => setUnit({ ...unit, name: v })} placeholder={isFarm ? "UFV Sol Nascente" : "Planta Campinas"} />
-                {isFarm && (
-                  <div className="space-y-2">
-                    <Label>Fonte</Label>
-                    <select value={unit.source} onChange={(e) => setUnit({ ...unit, source: e.target.value })} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm transition-colors focus:border-brand focus:outline-none">
-                      {generationSources.map((g) => <option key={g} value={g}>{g}</option>)}
-                    </select>
-                  </div>
-                )}
-                <F label="Capacidade (MW)" value={unit.capacity} onChange={(v) => setUnit({ ...unit, capacity: v })} placeholder="30" />
-                <div className="space-y-2">
-                  <Label>Submercado</Label>
-                  <select value={unit.submarket} onChange={(e) => setUnit({ ...unit, submarket: e.target.value })} className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm transition-colors focus:border-brand focus:outline-none">
-                    {["SE/CO", "S", "NE", "N"].map((x) => <option key={x} value={x}>{x}</option>)}
-                  </select>
-                </div>
-                <F label="Cidade" value={unit.city} onChange={(v) => setUnit({ ...unit, city: v })} />
-                <F label="UF" value={unit.state} onChange={(v) => setUnit({ ...unit, state: v })} placeholder="SP" />
-              </div>
-            </Shell>
-          )}
-
-          {step === 3 && (
             <Shell title="Cadastre seu primeiro contrato" subtitle="Você poderá editar ou adicionar novos contratos depois.">
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 <F label="Nome do contrato" value={contract.name} onChange={(v) => setContract({ ...contract, name: v })} placeholder="Suprimento anual Alfa" />
@@ -238,7 +199,7 @@ function Onboarding() {
             </Shell>
           )}
 
-          {step === 4 && (
+          {step === 3 && (
             <Shell title="Crie seu primeiro alerta" subtitle="Avisamos você assim que o mercado se mover.">
               <div className="mt-6 grid gap-4 md:grid-cols-2">
                 <F label="Nome do alerta" value={alert.name} onChange={(v) => setAlert({ ...alert, name: v })} />
@@ -257,17 +218,16 @@ function Onboarding() {
             </Shell>
           )}
 
-          {step === 5 && (
+          {step === 4 && (
             <Shell title="Conheça a plataforma" subtitle="As áreas que você usará no dia a dia.">
               <div className="mt-6 grid gap-3 sm:grid-cols-2">
                 {[
                   { i: LayoutGrid, t: "Visão Geral", d: "KPIs, insights por IA e resumo do portfólio." },
                   { i: Sparkles, t: "Central de Inteligência", d: "Análises do período, cenários e fontes de cada dado." },
-                  { i: Activity, t: "Monitoramento", d: "PLD por submercado, séries e comparações." },
+                  { i: Activity, t: "Monitoramento", d: "PLD, hidrologia e térmica, com comparações por período." },
                   { i: FileText, t: "Contratos", d: "Cadastro, filtros, exportação e vencimentos." },
                   { i: Bell, t: "Alertas", d: "Regras personalizadas por prioridade e canal." },
                   { i: BarChart3, t: "Relatórios", d: "Geração e exportação em PDF e Excel." },
-                  { i: Building2, t: "Clientes e Unidades", d: isFarm ? "Usinas, compradores e contrapartes." : "Clientes, contrapartes e unidades." },
                 ].map((a) => (
                   <div key={a.t} className="rounded-xl border border-border bg-surface p-4 transition hover:border-brand-soft">
                     <div className="flex items-center gap-2 text-sm font-semibold">
@@ -287,7 +247,7 @@ function Onboarding() {
             <Button variant="ghost" disabled={step === 0} onClick={() => setStep((s) => Math.max(0, s - 1))}>
               <ArrowLeft className="mr-1 h-4 w-4" /> Voltar
             </Button>
-            {step >= 2 && step <= 4 && (
+            {step >= 2 && step <= 3 && (
               <Button variant="ghost" className="ml-auto mr-2 text-muted-foreground" onClick={() => setStep((s) => s + 1)}>
                 Pular etapa
               </Button>
@@ -297,16 +257,15 @@ function Onboarding() {
               onClick={() => {
                 if (step === 0) return setStep(1);
                 if (step === 1) return saveCompany();
-                if (step === 2) return saveUnit();
-                if (step === 3) return saveContract();
-                if (step === 4) return saveAlert();
+                if (step === 2) return saveContract();
+                if (step === 3) return saveAlert();
                 finish();
               }}
               className="text-white shadow-blue hover:opacity-95"
               style={{ background: "var(--gradient-brand)" }}
             >
               {finishing ? <><Loader2 className="mr-1 h-4 w-4 animate-spin" /> Finalizando…</> : (
-                <>{step === 5 ? "Ir para a dashboard" : "Continuar"} <ArrowRight className="ml-1 h-4 w-4" /></>
+                <>{step === 4 ? "Ir para a Visão Geral" : "Continuar"} <ArrowRight className="ml-1 h-4 w-4" /></>
               )}
             </Button>
           </div>

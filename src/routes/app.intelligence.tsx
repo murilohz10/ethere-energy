@@ -9,7 +9,9 @@ export const Route = createFileRoute("/app/intelligence")({
       { name: "description", content: "Pergunte sobre o mercado de energia e os dados da sua empresa, com fontes." },
       { property: "og:title", content: "Ethere Intelligence · Ethere" },
       { property: "og:description", content: "Assistente de interpretação de dados do Mercado Livre de Energia." },
-    ],
+          { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+],
   }),
   component: IntelligencePage,
 });

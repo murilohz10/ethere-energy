@@ -56,8 +56,8 @@ export function MarketingFooter() {
           <div>
             <EthereLogo />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-muted-foreground">
-              Inteligência de mercado para o setor elétrico brasileiro. Dados energéticos transformados em decisões
-              financeiras.
+              Inteligência para o Mercado Livre de Energia. Leituras de mercado, contratos e estimativas
+              com contexto e limitações.
             </p>
             <div className="mt-5 flex items-center gap-2">
               <SocialLink href="https://www.linkedin.com" label="LinkedIn">
@@ -122,7 +122,7 @@ export function MarketingFooter() {
           <span>© {new Date().getFullYear()} Ethere Energy. Todos os direitos reservados.</span>
           <span className="inline-flex items-center gap-2">
             <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-primary" />
-            Dados oficiais CCEE &amp; ONS
+            PLD · Hidrologia · Térmica
           </span>
         </div>
       </div>

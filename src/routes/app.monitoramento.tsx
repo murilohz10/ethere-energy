@@ -28,10 +28,12 @@ export const Route = createFileRoute("/app/monitoramento")({
   head: () => ({
     meta: [
       { title: "Monitoramento · Ethere" },
-      { name: "description", content: "Acompanhe o PLD por submercado, a posição contratada e a geração da sua operação de energia." },
+      { name: "description", content: "Acompanhe PLD, hidrologia e geração térmica com leituras por período." },
       { property: "og:title", content: "Monitoramento · Ethere" },
-      { property: "og:description", content: "PLD, posição contratada e geração prevista × realizada em um só lugar." },
-    ],
+      { property: "og:description", content: "Indicadores, comparações e séries de PLD, hidrologia e térmica." },
+          { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+],
   }),
   component: Monitor,
 });

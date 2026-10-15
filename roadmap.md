@@ -1,5 +1,9 @@
 # Roadmap — Reestruturação Ethere
 
+## Solicitação atual
+- [x] Remover Clientes e Unidades de toda a experiência, sem alterar o banco.
+- [x] Atualizar a landing com as funcionalidades atuais, mantendo o design.
+
 ## Etapa A — Base
 - [x] Login real e dados no banco (já existia)
 - [x] Tema claro/escuro (já existia; azul de ação do claro ajustado)
@@ -7,9 +11,8 @@
 - [ ] Conversas do Intelligence no banco
 
 ## Etapa B — Gestão essencial
-- [x] Clientes e Unidades (clientes, contrapartes, unidades, usinas)
+- [x] Módulo de cadastros retirado da experiência a pedido
 - [x] ~~Gestão Operacional~~ removida da interface a pedido
-- [ ] Contratos ligados a cliente/usina
 - [ ] Alertas por pendências
 - [ ] Convite/ativação de usuários
 
@@ -30,11 +33,11 @@
 ## Rodada sem backend (feita)
 - [x] Visão Geral: painel "Requer atenção" no topo
 - [x] Central: painel de Cenários (estimativa)
-- [x] Monitoramento: Fontes de dados (BBCE/N5X/clima como pendentes)
+- [x] Monitoramento: bloco de fontes removido a pedido
 - [x] Intelligence: contador de 50 perguntas/mês no Core (neste navegador)
 - Deixado de lado por exigir backend: conversas no banco, importação de geração, histórico de análises, convites, alertas por pendência
-- [x] Contratos ligados a cliente/unidade/usina
-- [x] Primeiro acesso com etapa de unidade/usina e etapas opcionais puláveis
+- [x] Vínculos de cadastros retirados dos contratos; contraparte mantida como texto
+- [x] Primeiro acesso sem etapa de unidade/usina; contrato e alerta opcionais
 - [x] Revisão no celular (abas de Clientes corrigidas)
 
 ## Interpretação dos dados (doc "Evolução da interpretação")

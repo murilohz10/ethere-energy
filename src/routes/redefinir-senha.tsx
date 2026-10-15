@@ -17,7 +17,9 @@ export const Route = createFileRoute("/redefinir-senha")({
       { name: "description", content: "Defina uma nova senha para sua conta Ethere Energy." },
       { property: "og:title", content: "Redefinir senha · Ethere" },
       { property: "og:description", content: "Escolha uma nova senha de acesso." },
-    ],
+          { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+],
   }),
   component: ResetPassword,
 });

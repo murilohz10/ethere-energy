@@ -30,7 +30,14 @@ import { limitMessages } from "@/lib/billing";
 import { useContracts, useReports, usePlan, brl, fmtDate, downloadFile, toCsv, type Report } from "@/lib/store";
 
 export const Route = createFileRoute("/app/relatorios")({
-  head: () => ({ meta: [{ title: "Relatórios · Ethere" }] }),
+  head: () => ({ meta: [
+    { title: "Relatórios · Ethere" },
+    { name: "description", content: "Configure, revise e exporte relatórios sobre sua carteira e o mercado de energia." },
+    { property: "og:title", content: "Relatórios · Ethere" },
+    { property: "og:description", content: "Configure, revise e exporte relatórios sobre sua carteira e o mercado de energia." },
+        { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+] }),
   component: Reports,
 });
 

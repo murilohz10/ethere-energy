@@ -12,7 +12,7 @@ import { Activity, ArrowUpRight, Bell, FileText, Sparkles, TrendingUp } from "lu
 import { cn } from "@/lib/utils";
 
 const BASE = [148, 152, 161, 176, 188, 204, 219, 197, 206, 214, 228, 221];
-const HOURS = ["00h", "02h", "04h", "06h", "08h", "10h", "12h", "14h", "16h", "18h", "20h", "22h"];
+const DAYS = ["03/10", "04/10", "05/10", "06/10", "07/10", "08/10", "09/10", "10/10", "11/10", "12/10", "13/10", "14/10"];
 
 function useLiveSeries() {
   const [tick, setTick] = useState(0);
@@ -22,7 +22,7 @@ function useLiveSeries() {
     return () => window.clearInterval(id);
   }, []);
   const data = BASE.map((v, i) => ({
-    t: HOURS[i],
+    t: DAYS[i],
     v: Math.round(v + Math.sin((i + tick) / 1.7) * 7 + (i === BASE.length - 1 ? tick % 5 : 0)),
   }));
   return { data, last: data[data.length - 1].v, tick };
@@ -47,11 +47,11 @@ export function HeroDashboard() {
             <span className="h-2.5 w-2.5 rounded-full bg-danger/70" />
             <span className="h-2.5 w-2.5 rounded-full bg-warning/70" />
             <span className="h-2.5 w-2.5 rounded-full bg-success/70" />
-            <span className="ml-3 text-xs font-medium text-muted-foreground">ethere.app / visão geral</span>
+            <span className="ml-3 text-xs font-medium text-muted-foreground">Ethere / monitoramento</span>
           </div>
           <span className="flex items-center gap-2 rounded-full border border-primary/25 bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-brand-dark">
             <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-primary" />
-            ao vivo
+            demonstrativo
           </span>
         </div>
 
@@ -69,10 +69,10 @@ export function HeroDashboard() {
             <div className="mb-3 flex items-center justify-between">
               <div className="flex items-center gap-2 text-sm font-medium">
                 <Activity className="h-4 w-4 text-primary" />
-                PLD horário — hoje
+                PLD médio diário
               </div>
               <div className="flex gap-1 text-[11px] text-muted-foreground">
-                {["24h", "7d", "30d"].map((r, i) => (
+                {["Diário", "Semanal", "Mensal"].map((r, i) => (
                   <span
                     key={r}
                     className={cn(
@@ -115,16 +115,16 @@ export function HeroDashboard() {
             <div className="rounded-xl border border-primary/20 bg-brand-softer/70 p-4">
               <div className="flex items-center gap-2 text-sm font-medium text-brand-dark">
                 <Sparkles className="h-4 w-4" />
-                Análise por IA
+                Leitura do PLD
               </div>
               <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                Alta de <span className="text-foreground">{delta}%</span> no PLD SE/CO puxada pela carga da tarde.
-                Cenário favorável para venda de excedente no curto prazo.
+                Variação de <span className="text-foreground">{delta}%</span> no PLD SE/CO neste exemplo.
+                A leitura compara períodos; não atribui uma causa nem avalia a qualidade dos contratos.
               </p>
               <div className="mt-3 h-1 overflow-hidden rounded-full bg-border">
                 <div className="h-full w-2/3 rounded-full bg-gradient-to-r from-primary to-cyan" />
               </div>
-              <span className="mt-2 block text-[11px] text-muted-foreground">confiança do modelo · 67%</span>
+              <span className="mt-2 block text-[11px] text-muted-foreground">série demonstrativa · não é previsão</span>
             </div>
 
             {/* contracts + alerts */}
@@ -166,7 +166,7 @@ export function HeroDashboard() {
       <div className="float-slow absolute -bottom-5 -left-3 hidden items-center gap-2 rounded-xl glass-soft px-3 py-2 text-xs shadow-elegant sm:flex">
         <TrendingUp className="h-4 w-4 text-success" />
         <span className="text-muted-foreground">
-          Economia projetada <span className="text-foreground">R$ 184k</span>
+          Cenários <span className="text-foreground">queda · referência · alta</span>
         </span>
         <ArrowUpRight className="h-3.5 w-3.5 text-success" />
       </div>

@@ -11,7 +11,6 @@ import {
   Eye,
   FileText,
   Gauge,
-  History,
   LineChart as LineIcon,
   MessageSquareText,
   Rocket,
@@ -32,17 +31,17 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Ethere Energy — Dados energéticos em decisões financeiras" },
+      { title: "Ethere Energy — Inteligência para o Mercado Livre de Energia" },
       {
         name: "description",
         content:
-          "Monitoramento do PLD, gestão de contratos, alertas inteligentes e análises por IA em uma única plataforma para comercializadoras e fazendas de energia.",
+          "PLD, hidrologia e geração térmica, leitura de contratos, cenários estimados e relatórios configuráveis para comercializadoras e fazendas de energia.",
       },
-      { property: "og:title", content: "Ethere Energy — Dados energéticos em decisões financeiras" },
+      { property: "og:title", content: "Ethere Energy — Inteligência para o Mercado Livre de Energia" },
       {
         property: "og:description",
         content:
-          "Plataforma premium para o Mercado Livre de Energia: PLD em tempo real, contratos, alertas e inteligência artificial.",
+          "Acompanhe o mercado de energia, interprete sua carteira e converse com o Ethere Intelligence. Dados demonstrativos identificados e estimativas com premissas.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
@@ -88,15 +87,15 @@ function Hero() {
 
           <Reveal variant="up" delay={80}>
             <h1 className="mt-6 text-balance text-4xl font-semibold leading-[1.06] tracking-tight sm:text-5xl lg:text-[3.4rem]">
-              Transformando dados energéticos em{" "}
-              <span className="text-gradient-cyan">decisões financeiras</span>.
+              Ethere Energy.{" "}
+              <span className="text-gradient-cyan">Inteligência de mercado.</span>
             </h1>
           </Reveal>
 
           <Reveal variant="up" delay={160}>
             <p className="mt-6 max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-              A Ethere reúne monitoramento do PLD, gestão simplificada de contratos, alertas inteligentes e análises
-              por IA em uma única plataforma para comercializadoras e fazendas de energia.
+              PLD, hidrologia e térmica com leitura por período. Contratos, cenários estimados e relatórios
+              sob medida — com inteligência para comercializadoras e fazendas de energia.
             </p>
           </Reveal>
 
@@ -118,7 +117,7 @@ function Hero() {
                   variant="outline"
                   className="w-full border-primary/25 bg-surface/60 backdrop-blur hover:border-primary/50 hover:bg-surface sm:w-auto"
                 >
-                  Solicitar demonstração
+                  Conhecer os planos
                 </Button>
               </a>
             </div>
@@ -126,7 +125,7 @@ function Hero() {
 
           <Reveal variant="up" delay={320}>
             <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-muted-foreground">
-              {["Dados oficiais CCEE & ONS", "Setup em minutos", "Sem cartão de crédito"].map((i) => (
+              {["Demonstrações identificadas", "Setup em minutos", "Sem cartão de crédito"].map((i) => (
                 <span key={i} className="inline-flex items-center gap-2">
                   <Check className="h-3.5 w-3.5 text-primary" />
                   {i}
@@ -147,10 +146,10 @@ function Hero() {
 /* ------------------------------ Metrics ----------------------------- */
 
 const metrics = [
-  { v: "24/7", l: "Monitoramento contínuo do PLD" },
+  { v: "3", l: "Visões: PLD, hidrologia e térmica" },
   { v: "4", l: "Submercados acompanhados" },
-  { v: "< 2min", l: "Do dado ao alerta" },
-  { v: "100%", l: "Dados públicos auditáveis" },
+  { v: "3", l: "Cenários: queda, referência e alta" },
+  { v: "2", l: "Perfis: comercializadora e fazenda" },
 ];
 
 function Metrics() {
@@ -173,9 +172,9 @@ function Metrics() {
 const steps = [
   { icon: Building2, title: "Cadastre sua empresa", desc: "Onboarding guiado em poucos minutos." },
   { icon: FileText, title: "Configure contratos e alertas", desc: "Centralize sua carteira e defina gatilhos." },
-  { icon: Activity, title: "Acompanhe o PLD em tempo real", desc: "Preços por submercado, sempre atualizados." },
-  { icon: Sparkles, title: "Receba análises inteligentes", desc: "A IA interpreta o comportamento do mercado." },
-  { icon: ShieldCheck, title: "Decida com mais segurança", desc: "Impacto financeiro do portfólio em um só lugar." },
+  { icon: Activity, title: "Leia o mercado por período", desc: "PLD, hidrologia e térmica em visões comparáveis." },
+  { icon: Sparkles, title: "Receba análises inteligentes", desc: "Leituras calculadas e respostas com contexto." },
+  { icon: ShieldCheck, title: "Revise premissas e limitações", desc: "Estimativas identificadas, sem decidir por você." },
 ];
 
 function HowItWorks() {
@@ -210,17 +209,12 @@ function HowItWorks() {
 /* --------------------------- Funcionalidades ------------------------- */
 
 const features = [
-  {
-    icon: Activity,
-    title: "Monitoramento do PLD",
-    desc: "Acompanhe o preço da energia em tempo real por submercado.",
-  },
-  { icon: FileText, title: "Gestão de Contratos", desc: "Organize contratos em um único ambiente." },
-  { icon: Bell, title: "Alertas Inteligentes", desc: "Receba notificações quando o mercado exigir atenção." },
-  { icon: Sparkles, title: "Análise por IA", desc: "Interpreta automaticamente o comportamento do mercado." },
-  { icon: MessageSquareText, title: "Ethere Intelligence", desc: "Converse com um assistente que consulta seus dados e o mercado em tempo real." },
-  { icon: BarChart3, title: "Indicadores Financeiros", desc: "Visualize margens e impactos financeiros." },
-  { icon: History, title: "Histórico do Mercado", desc: "Consulte tendências e evolução do PLD." },
+  { icon: Activity, title: "PLD, Hidrologia e Térmica", desc: "Três visões do mercado, com indicadores, gráficos e comparações por período. Séries demonstrativas sempre identificadas." },
+  { icon: FileText, title: "Leitura dos Contratos", desc: "Preços, volumes, vencimentos e concentração da carteira. Compare contratos semelhantes e abra a análise individual." },
+  { icon: Bell, title: "Alertas Personalizados", desc: "Configure regras de PLD e contratos, prioridades e canais. Acompanhe os alertas que exigem atenção." },
+  { icon: Sparkles, title: "Central de Inteligência", desc: "Insights por prioridade e categoria, com cenários de queda, referência e alta rotulados como impacto estimado." },
+  { icon: MessageSquareText, title: "Ethere Intelligence", desc: "Pergunte sobre mercado e carteira. Receba respostas com período, evidências e limitações, sem decisões automáticas." },
+  { icon: BarChart3, title: "Relatórios Configuráveis", desc: "Escolha finalidade, período, indicadores, tabelas e nível de detalhe. Revise antes de gerar e exportar em PDF ou planilha." },
 ];
 
 function Features() {
@@ -261,8 +255,8 @@ function Features() {
 const intelligencePoints = [
   {
     icon: LineIcon,
-    title: "Consulta seus dados em tempo real",
-    desc: "PLD por submercado, contratos, vencimentos, posição da carteira e geração — o assistente busca os números antes de responder.",
+    title: "Consulta os dados disponíveis",
+    desc: "PLD, hidrologia, térmica, contratos e vencimentos. O assistente distingue dados disponíveis, exemplos e informações ainda não carregadas.",
   },
   {
     icon: Sparkles,
@@ -276,21 +270,21 @@ const intelligencePoints = [
   },
   {
     icon: FileText,
-    title: "Entende seus documentos",
-    desc: "Anexe PDFs de contratos e faturas para cruzar cláusulas com o comportamento do mercado.",
+    title: "Respostas na profundidade certa",
+    desc: "Escolha entre quatro níveis de resposta. Consulte período, valores, fontes e limitações sem pesquisa na internet.",
   },
 ];
 
 const chatPreview = [
-  { from: "user", text: "Como está o PLD do Sudeste esta semana e o que isso significa para minha carteira?" },
+  { from: "user", text: "O que mudou no PLD do Sudeste nesta semana?" },
   {
     from: "ai",
-    text: "O PLD do submercado SE/CO subiu 12% nos últimos 7 dias, para R$ 148,20/MWh. Com seus contratos atuais, o impacto estimado na margem projetada é de +2,1 p.p. no mês. Fonte: CCEE · estimativa gerencial, não é liquidação oficial.",
+    text: "Neste exemplo demonstrativo, o PLD médio passou de R$ 100 para R$ 110/MWh: alta de 10% frente à semana anterior. Isso descreve a variação do preço, sem atribuir uma causa nem concluir ganho ou perda nos contratos.",
   },
-  { from: "user", text: "Quais contratos vencem nos próximos 90 dias?" },
+  { from: "user", text: "O aumento da geração térmica explica essa alta?" },
   {
     from: "ai",
-    text: "Você tem 3 contratos vencendo em até 90 dias, totalizando 4,6 MWm. O mais próximo vence em 18 dias (Fornecedor Alfa, 1,8 MWm a R$ 189,00/MWh).",
+    text: "Movimentos simultâneos não comprovam causalidade. É preciso comparar as séries do mesmo período e suas fontes. Dados demonstrativos servem para explorar a análise, não para concluir o comportamento real do sistema.",
   },
 ];
 
@@ -307,10 +301,10 @@ function Intelligence() {
                 Ethere Intelligence
               </span>
               <h2 className="mt-5 text-3xl font-semibold tracking-tight sm:text-4xl">
-                Um especialista em energia, <span className="text-gradient-cyan">disponível 24/7</span>
+                Seu assistente de energia, <span className="text-gradient-cyan">com contexto e evidências</span>
               </h2>
               <p className="mt-4 max-w-xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-                Converse em linguagem natural com um assistente treinado no contexto do Mercado Livre de Energia.
+                Converse em linguagem natural com um assistente contextualizado no Mercado Livre de Energia.
                 Ele consulta seus contratos, alertas e os dados do mercado antes de responder — e adapta a análise
                 ao perfil da sua empresa, seja comercializadora ou fazenda de geração.
               </p>
@@ -338,11 +332,11 @@ function Intelligence() {
                 </span>
                 <div>
                   <p className="text-sm font-semibold">Ethere Intelligence</p>
-                  <p className="text-[11px] text-muted-foreground">Contexto: Comercializadora · Visão Geral</p>
+                  <p className="text-[11px] text-muted-foreground">Exemplo ilustrativo · valores demonstrativos</p>
                 </div>
                 <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 text-[10px] font-medium text-brand-dark">
                   <span className="pulse-dot h-1.5 w-1.5 rounded-full bg-primary" />
-                  Online
+                  Demonstração
                 </span>
               </div>
               <div className="mt-5 space-y-4">
@@ -362,7 +356,7 @@ function Intelligence() {
                 ))}
               </div>
               <div className="mt-5 flex items-center gap-2 rounded-xl border border-border/60 bg-surface/60 px-4 py-3">
-                <span className="flex-1 text-[13px] text-muted-foreground/70">Pergunte sobre PLD, contratos, geração...</span>
+                <span className="flex-1 text-[13px] text-muted-foreground/70">Pergunte sobre PLD, hidrologia, térmica...</span>
                 <ArrowRight className="h-4 w-4 text-primary" />
               </div>
             </div>
@@ -379,9 +373,9 @@ const differentials = [
   { icon: Zap, title: "Especializada no Mercado Livre de Energia", desc: "Nada de ferramentas genéricas: cada tela nasceu do ACL." },
   { icon: Wind, title: "Feita para comercializadoras e fazendas", desc: "Fluxos pensados para quem compra, vende e gera energia." },
   { icon: Gauge, title: "Interface intuitiva", desc: "Clareza operacional: menos cliques, mais decisão." },
-  { icon: LineIcon, title: "Dados públicos em inteligência", desc: "CCEE e ONS traduzidos em leitura acionável." },
-  { icon: Bell, title: "Alertas personalizados", desc: "Você define o gatilho, a Ethere vigia o mercado." },
-  { icon: Sparkles, title: "IA aplicada ao setor energético", desc: "Modelos treinados no contexto do mercado brasileiro." },
+  { icon: LineIcon, title: "Dados públicos em inteligência", desc: "Período, origem e limitações junto às leituras." },
+  { icon: Bell, title: "Alertas personalizados", desc: "Regras de PLD e contratos organizadas por prioridade." },
+  { icon: Sparkles, title: "IA aplicada ao setor energético", desc: "Dados, cálculos e hipóteses separados na resposta." },
 ];
 
 function Differentials() {
@@ -428,8 +422,8 @@ function Audience() {
     {
       icon: Wind,
       title: "Fazendas de energia",
-      desc: "Acompanhe receita, sazonalidade e o melhor momento para negociar excedentes.",
-      items: ["Receita projetada", "Histórico e tendências", "Análises diárias por IA"],
+      desc: "Acompanhe contratos de venda e estimativas gerenciais, com leitura do mercado adequada ao seu perfil.",
+      items: ["Receita estimada e contratos de venda", "PLD, hidrologia e térmica", "Cenários com premissas explícitas"],
     },
   ];
   return (
@@ -467,7 +461,7 @@ function Pricing() {
   return (
     <Section id="plano" eyebrow="Planos" title="Os mesmos dados, dois níveis de análise">
       <p className="mx-auto mt-4 max-w-2xl text-center text-sm leading-relaxed text-muted-foreground">
-        Core e Pro têm a mesma cobertura completa de dados CCEE, ONS e ANA. A diferença está na profundidade das análises e nos limites de uso.
+        Core e Pro acessam as mesmas áreas da plataforma. A diferença está na profundidade das análises e nos limites de uso. Séries oficiais dependem dos dados carregados; exemplos demonstrativos são identificados.
       </p>
       <div className="mx-auto mt-12 grid max-w-4xl gap-6 md:grid-cols-2">
         {PLAN_LIST.map((p) => {
@@ -494,9 +488,9 @@ function Pricing() {
                   <span className="text-4xl font-semibold tracking-tight">{p.priceLabel}</span>
                   <span className="pb-1 text-sm text-muted-foreground">/{p.interval}</span>
                 </div>
-                <p className="relative mt-4 text-sm leading-relaxed text-muted-foreground">{p.description}</p>
+                <p className="relative mt-4 text-sm leading-relaxed text-muted-foreground">{pro ? "Análises aprofundadas e limites ampliados para sua operação." : "Contratos, alertas e relatórios informativos para o dia a dia."}</p>
                 <ul className="relative mt-8 space-y-3">
-                  {p.features.map((i) => (
+                  {p.features.map((i) => i === "Dados CCEE, ONS e ANA" ? "PLD, hidrologia e térmica" : i).map((i) => (
                     <li key={i} className="flex items-center gap-2.5 text-sm">
                       <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary/15 text-primary">
                         <Check className="h-3 w-3" />
@@ -539,7 +533,7 @@ const institutional = [
   {
     icon: Target,
     title: "Nossa missão",
-    desc: "Transformar dados energéticos públicos em decisões financeiras seguras e rentáveis.",
+    desc: "Transformar dados energéticos em leituras claras para apoiar decisões conscientes.",
   },
   {
     icon: Eye,
@@ -587,7 +581,15 @@ function Institutional() {
 const faq = [
   {
     q: "De onde vêm os dados do PLD?",
-    a: "De fontes públicas oficiais do setor, como CCEE e ONS, processadas e organizadas pela Ethere em leitura acionável.",
+    a: "O PLD oficial vem da CCEE e é apresentado em médias diárias quando carregado. Hidrologia e térmica usam dados do setor quando disponíveis. Sem séries oficiais carregadas, a plataforma identifica os exemplos demonstrativos; eles não são dados oficiais nem leituras em tempo real.",
+  },
+  {
+    q: "Os gráficos aparecem nos arquivos exportados?",
+    a: "O gráfico do PLD pode ser visto dentro da plataforma. Atualmente, ele não é incluído no PDF nem na planilha; os arquivos trazem os dados e as tabelas selecionados.",
+  },
+  {
+    q: "Como funcionam os cenários?",
+    a: "Compare queda, referência e alta do PLD. Os resultados são impactos estimados no cenário, com premissas e limitações visíveis, e não liquidação oficial ou previsão garantida.",
   },
   {
     q: "Preciso instalar algo?",
@@ -595,7 +597,7 @@ const faq = [
   },
   {
     q: "O que é o Ethere Intelligence?",
-    a: "É o assistente de IA da plataforma. Você pergunta em linguagem natural e ele consulta seus contratos, alertas e os dados do mercado antes de responder, sempre indicando as fontes. Disponível nos dois planos — com limite mensal no Core e ilimitado no Pro.",
+    a: "É o assistente de IA da plataforma. Você pergunta em linguagem natural e ele consulta seus contratos, alertas e os dados do mercado antes de responder, sempre indicando as fontes. Disponível nos dois planos — até 50 perguntas/mês no Core, contadas neste navegador, e ilimitado no Pro. Não pesquisa na internet nem toma decisões pelo cliente.",
   },
   {
     q: "Existe limite de contratos?",
@@ -607,7 +609,7 @@ const faq = [
   },
   {
     q: "O que a análise por IA entrega?",
-    a: "Uma leitura diária do comportamento do mercado, com contexto sobre variações do PLD e possíveis impactos na sua carteira.",
+    a: "Leituras por período sobre variações do PLD, hidrologia, térmica e contratos, separando dado, cálculo e hipótese. Cenários mostram impacto estimado, com premissas, sem representar liquidação oficial.",
   },
 ];
 

@@ -19,7 +19,9 @@ export const Route = createFileRoute("/app/perfil")({
       { name: "description", content: "Gerencie seus dados pessoais, empresa, senha e plano na Ethere." },
       { property: "og:title", content: "Meu perfil · Ethere" },
       { property: "og:description", content: "Dados pessoais, segurança e plano contratado." },
-    ],
+          { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+],
   }),
   component: ProfilePage,
 });

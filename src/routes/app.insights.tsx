@@ -22,7 +22,11 @@ export const Route = createFileRoute("/app/insights")({
     meta: [
       { title: "Central de Inteligência · Ethere" },
       { name: "description", content: "Insights inteligentes, prioridades e recomendações estratégicas para sua operação de energia." },
-    ],
+      { property: "og:title", content: "Central de Inteligência · Ethere" },
+      { property: "og:description", content: "Insights da carteira e cenários com premissas e limitações." },
+          { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+],
   }),
   component: InsightsPage,
 });

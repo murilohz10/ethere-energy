@@ -35,7 +35,9 @@ export const Route = createFileRoute("/app/")({
         property: "og:description",
         content: "Indicadores, gráficos e análises contextualizados ao perfil da sua operação de energia.",
       },
-    ],
+          { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+],
   }),
   component: Overview,
 });

@@ -114,8 +114,6 @@ export type Contract = {
   endDate: string;
   status: ContractStatus;
   notes: string;
-  counterpartyId?: string | null;
-  unitId?: string | null;
 };
 
 const contractsStore = createPersistentStore<{ items: Contract[] }>("ethere.contracts.v2", { items: [] });
