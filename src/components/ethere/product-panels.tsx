@@ -83,9 +83,9 @@ export function ScenarioPanel() {
     { key: "base", label: "Referência", shift: 0 },
     { key: "up", label: `PLD +${pldShift}%`, shift: pldShift },
   ].map((s) => {
-    if (isFarm) { const r = farmRevenue(s.shift); return { ...s, pld: r.pld, value: r.total, farm: r }; }
+    if (isFarm) { const r = farmRevenue(s.shift); return { ...s, pld: r.pld, value: r.total, farm: r as ReturnType<typeof farmRevenue> | undefined, rows: undefined as ReturnType<typeof scenarioVsMarket>["rows"] | undefined }; }
     const r = scenarioVsMarket(contracts, pldBase, s.shift);
-    return { ...s, pld: r.pld, value: r.total, rows: r.rows };
+    return { ...s, pld: r.pld, value: r.total, rows: r.rows as ReturnType<typeof scenarioVsMarket>["rows"] | undefined, farm: undefined as ReturnType<typeof farmRevenue> | undefined };
   });
   const base = scenarios[1];
   const up = scenarios[2];
