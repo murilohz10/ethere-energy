@@ -336,6 +336,7 @@ export type Database = {
           company_id: string
           consumer: string
           counterparty: string
+          counterparty_id: string | null
           created_at: string
           created_by: string | null
           end_date: string | null
@@ -348,6 +349,7 @@ export type Database = {
           submarket: string
           supplier: string
           type: string
+          unit_id: string | null
           updated_at: string
           volume: number
         }
@@ -356,6 +358,7 @@ export type Database = {
           company_id: string
           consumer?: string
           counterparty?: string
+          counterparty_id?: string | null
           created_at?: string
           created_by?: string | null
           end_date?: string | null
@@ -368,6 +371,7 @@ export type Database = {
           submarket?: string
           supplier?: string
           type?: string
+          unit_id?: string | null
           updated_at?: string
           volume?: number
         }
@@ -376,6 +380,7 @@ export type Database = {
           company_id?: string
           consumer?: string
           counterparty?: string
+          counterparty_id?: string | null
           created_at?: string
           created_by?: string | null
           end_date?: string | null
@@ -388,12 +393,74 @@ export type Database = {
           submarket?: string
           supplier?: string
           type?: string
+          unit_id?: string | null
           updated_at?: string
           volume?: number
         }
         Relationships: [
           {
             foreignKeyName: "contracts_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_counterparty_id_fkey"
+            columns: ["counterparty_id"]
+            isOneToOne: false
+            referencedRelation: "counterparties"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contracts_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      counterparties: {
+        Row: {
+          company_id: string
+          created_at: string
+          document: string
+          email: string
+          id: string
+          kind: string
+          name: string
+          notes: string
+          phone: string
+          updated_at: string
+        }
+        Insert: {
+          company_id: string
+          created_at?: string
+          document?: string
+          email?: string
+          id?: string
+          kind?: string
+          name: string
+          notes?: string
+          phone?: string
+          updated_at?: string
+        }
+        Update: {
+          company_id?: string
+          created_at?: string
+          document?: string
+          email?: string
+          id?: string
+          kind?: string
+          name?: string
+          notes?: string
+          phone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "counterparties_company_id_fkey"
             columns: ["company_id"]
             isOneToOne: false
             referencedRelation: "companies"
@@ -493,6 +560,79 @@ export type Database = {
           value?: number
         }
         Relationships: []
+      }
+      operational_tasks: {
+        Row: {
+          assignee_id: string | null
+          category: string
+          company_id: string
+          contract_id: string | null
+          created_at: string
+          created_by: string | null
+          description: string
+          due_date: string | null
+          id: string
+          priority: string
+          status: string
+          title: string
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          assignee_id?: string | null
+          category?: string
+          company_id: string
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          due_date?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assignee_id?: string | null
+          category?: string
+          company_id?: string
+          contract_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          due_date?: string | null
+          id?: string
+          priority?: string
+          status?: string
+          title?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "operational_tasks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operational_tasks_contract_id_fkey"
+            columns: ["contract_id"]
+            isOneToOne: false
+            referencedRelation: "contracts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "operational_tasks_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -635,6 +775,69 @@ export type Database = {
           },
         ]
       }
+      units: {
+        Row: {
+          active: boolean
+          capacity_mw: number | null
+          city: string
+          company_id: string
+          counterparty_id: string | null
+          created_at: string
+          id: string
+          kind: string
+          name: string
+          source: string
+          state: string
+          submarket: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          capacity_mw?: number | null
+          city?: string
+          company_id: string
+          counterparty_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          name: string
+          source?: string
+          state?: string
+          submarket?: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          capacity_mw?: number | null
+          city?: string
+          company_id?: string
+          counterparty_id?: string | null
+          created_at?: string
+          id?: string
+          kind?: string
+          name?: string
+          source?: string
+          state?: string
+          submarket?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "units_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "units_counterparty_id_fkey"
+            columns: ["counterparty_id"]
+            isOneToOne: false
+            referencedRelation: "counterparties"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           company_id: string
@@ -672,6 +875,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_operate: { Args: never; Returns: boolean }
       can_write: { Args: never; Returns: boolean }
       company_plan: { Args: { _company: string }; Returns: string }
       current_company_id: { Args: never; Returns: string }
@@ -685,7 +889,12 @@ export type Database = {
       is_company_admin: { Args: never; Returns: boolean }
     }
     Enums: {
-      app_role: "Administrador" | "Gestor" | "Analista"
+      app_role:
+        | "Administrador"
+        | "Gestor"
+        | "Analista"
+        | "Operacional"
+        | "Leitura"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -813,7 +1022,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["Administrador", "Gestor", "Analista"],
+      app_role: [
+        "Administrador",
+        "Gestor",
+        "Analista",
+        "Operacional",
+        "Leitura",
+      ],
     },
   },
 } as const
