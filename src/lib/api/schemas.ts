@@ -42,6 +42,8 @@ export const contractSchema = z
     endDate: isoDate,
     status: z.enum(contractStatuses as [string, ...string[]]),
     notes: text(2000).optional().default(""),
+    counterpartyId: z.string().uuid().nullable().optional(),
+    unitId: z.string().uuid().nullable().optional(),
   })
   .refine((v) => v.endDate >= v.startDate, {
     message: "O vencimento deve ser posterior ao início.",
