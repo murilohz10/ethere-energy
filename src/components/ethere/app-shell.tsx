@@ -48,6 +48,8 @@ const nav: NavItem[] = [
   { to: "/app/intelligence", label: "Ethere Intelligence", icon: MessageSquareText },
   { to: "/app/monitoramento", label: "Monitoramento", icon: Activity },
   { to: "/app/contratos", label: "Contratos", icon: FileText },
+  { to: "/app/clientes", label: "Clientes e Unidades", icon: Building2 },
+  { to: "/app/operacional", label: "Gestão Operacional", icon: ListChecks },
   { to: "/app/alertas", label: "Alertas", icon: Bell },
   { to: "/app/relatorios", label: "Relatórios", icon: BarChart3 },
   { to: "/app/configuracoes", label: "Configurações", icon: Settings },
