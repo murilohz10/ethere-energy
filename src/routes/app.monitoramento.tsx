@@ -3,10 +3,12 @@ import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/ethere/app-shell";
 import { PldInterpretationPanel } from "@/components/ethere/interpretation-panels";
+import { HydroSection, ThermalSection } from "@/components/ethere/operational-panels";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { demoPldRows } from "@/lib/interpretation";
 import {
   LineChart, Line, ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Brush,
-  AreaChart, Area, BarChart, Bar,
+  BarChart, Bar,
 } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -53,13 +55,6 @@ const chartTooltip = {
 
 const buildData = (days: number, seed: number): Row[] => demoPldRows(days, seed);
 
-/** Indicador hidrológico disponível (nível dos reservatórios, % da capacidade). */
-const buildHydro = (days: number, seed: number) =>
-  Array.from({ length: days }).map((_, i) => ({
-    d: `D${i + 1}`,
-    nivel: +(58 + Math.sin((i + seed) / 7) * 9 - i * 0.05).toFixed(1),
-  }));
-
 const periods = [
   { v: "7", l: "Últimos 7 dias" },
   { v: "30", l: "Últimos 30 dias" },
@@ -94,7 +89,6 @@ function Monitor() {
   const lastDate = real?.[real.length - 1]?.date;
   // Série completa para comparar com o período anterior (independe do zoom).
   const fullRows = useMemo<Row[]>(() => real ?? buildData(180, seed), [real, seed]);
-  const hydro = useMemo(() => buildHydro(days, seed), [days, seed]);
   const generation = useMemo(
     () => generationSeries(farm.capacityMwm, days, seed),
     [farm.capacityMwm, days, seed],
@@ -189,40 +183,36 @@ function Monitor() {
         }
       />
 
-      <div className="grid gap-4 md:grid-cols-4">
-        {loading
-          ? Array.from({ length: kpis.length || 4 }).map((_, i) => (
-              <div key={i} className="h-[116px] animate-pulse rounded-2xl border border-border bg-card shadow-soft" />
-            ))
-          : kpis.map((k) => (
-              <div key={k.key} className={cn(
-                "relative overflow-hidden rounded-2xl border bg-card p-5 shadow-soft transition hover:shadow-elegant",
-                k.label === "SE/CO" ? "border-brand-soft" : "border-border",
-              )}>
-                {k.label === "SE/CO" && <div className="pointer-events-none absolute inset-x-0 top-0 h-0.5" style={{ background: "var(--gradient-brand)" }} />}
-                <div className="flex items-center justify-between">
-                  <div className="text-xs font-medium text-muted-foreground">Submercado {k.label}</div>
-                  {k.label === "SE/CO" && <span className="rounded-full bg-brand-softer px-2 py-0.5 text-[10px] font-semibold text-brand-dark">Principal</span>}
+      <Tabs defaultValue="precos">
+      <TabsList className="mb-5 h-auto flex-wrap">
+        <TabsTrigger value="precos">Preços (PLD)</TabsTrigger>
+        <TabsTrigger value="hidrico">Hídrico</TabsTrigger>
+        <TabsTrigger value="termico">Térmico</TabsTrigger>
+      </TabsList>
+      <TabsContent value="precos" className="mt-0">
+      <div className="rounded-2xl border border-border bg-card shadow-soft">
+        <div className="grid grid-cols-2 divide-border md:grid-cols-4 md:divide-x">
+          {loading
+            ? Array.from({ length: 4 }).map((_, i) => <div key={i} className="m-4 h-14 animate-pulse rounded-lg bg-muted/40" />)
+            : kpis.map((k) => (
+                <div key={k.key} className="p-4">
+                  <div className="text-[11px] font-medium text-muted-foreground">PLD {k.label}</div>
+                  <div className="mt-1 text-xl font-semibold tracking-tight tabular-nums">{brl(k.value)}</div>
+                  <div className={cn("mt-0.5 inline-flex items-center gap-0.5 text-[11px] font-medium", k.up ? "text-brand" : "text-destructive")}>
+                    {k.up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
+                    {k.delta.toFixed(1).replace(".", ",")}% vs. dia anterior
+                  </div>
                 </div>
-                <div className="mt-2 text-2xl font-semibold tracking-tight tabular-nums">{brl(k.value)}</div>
-                <div className={cn("mt-1 inline-flex items-center gap-0.5 text-xs font-semibold", k.up ? "text-brand" : "text-red-500")}>
-                  {k.up ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
-                  {k.delta.toFixed(1).replace(".", ",")}%
-                </div>
-              </div>
-            ))}
-      </div>
-
-      <div className="mt-4 grid gap-4 md:grid-cols-4">
-        {profileKpis.map((k) => (
-          <div key={k.l} className="rounded-2xl border border-border bg-card p-5 shadow-soft">
-            <div className="text-xs font-medium text-muted-foreground">{k.l}</div>
-            <div className={cn(
-              "mt-2 text-xl font-semibold tracking-tight tabular-nums",
-              k.negative && "text-red-500",
-            )}>{k.v}</div>
-          </div>
-        ))}
+              ))}
+        </div>
+        <div className="grid grid-cols-2 border-t border-border md:grid-cols-4 md:divide-x md:divide-border">
+          {profileKpis.map((k) => (
+            <div key={k.l} className="p-4">
+              <div className="text-[11px] font-medium text-muted-foreground">{k.l}</div>
+              <div className={cn("mt-1 text-base font-semibold tabular-nums", k.negative && "text-destructive")}>{k.v}</div>
+            </div>
+          ))}
+        </div>
       </div>
       <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">{ESTIMATE_NOTE}</p>
 
@@ -279,7 +269,7 @@ function Monitor() {
           ) : (
             <ResponsiveContainer>
               <LineChart data={viewData}>
-                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                <CartesianGrid stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip formatter={(v: number, name: string) => [brl(v), name]} contentStyle={chartTooltip} />
@@ -295,8 +285,8 @@ function Monitor() {
       </div>
 
       {isFarm ? (
-        <div className="mt-6 grid gap-6 lg:grid-cols-2">
-          <div className="rounded-2xl border border-brand-soft bg-card p-6 shadow-soft">
+        <div className="mt-6">
+          <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
             <div className="flex items-center justify-between">
               <div className="text-sm font-semibold">Geração prevista × realizada</div>
               <span className="text-xs text-muted-foreground">MWh/dia</span>
@@ -307,7 +297,7 @@ function Monitor() {
               ) : (
                 <ResponsiveContainer>
                   <LineChart data={generation}>
-                    <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                    <CartesianGrid stroke="var(--border)" vertical={false} />
                     <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
                     <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
                     <Tooltip formatter={(v: number, n: string) => [`${num(v)} MWh`, n]} contentStyle={chartTooltip} />
@@ -320,35 +310,9 @@ function Monitor() {
             </div>
           </div>
 
-          <div className="rounded-2xl border border-border bg-card p-6 shadow-soft">
-            <div className="flex items-center justify-between">
-              <div className="text-sm font-semibold">Nível dos reservatórios</div>
-              <span className="text-xs text-muted-foreground">% da capacidade</span>
-            </div>
-            <div className="mt-4 h-72">
-              <ResponsiveContainer>
-                <AreaChart data={hydro}>
-                  <defs>
-                    <linearGradient id="hydroG" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#2563EB" stopOpacity={0.28} />
-                      <stop offset="100%" stopColor="#2563EB" stopOpacity={0} />
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
-                  <XAxis dataKey="d" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
-                  <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
-                  <Tooltip formatter={(v: number) => [`${num(v)}%`, "Nível"]} contentStyle={chartTooltip} />
-                  <Area type="monotone" dataKey="nivel" stroke="#2563EB" strokeWidth={2.5} fill="url(#hydroG)" name="Nível" />
-                </AreaChart>
-              </ResponsiveContainer>
-            </div>
-            <p className="mt-3 text-[11px] leading-relaxed text-muted-foreground">
-              Indicador hidrológico disponível — usado como contexto para a leitura do PLD e da geração.
-            </p>
-          </div>
         </div>
       ) : (
-        <div className="mt-6 rounded-2xl border border-brand-soft bg-card p-6 shadow-soft">
+        <div className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-soft">
           <div className="flex items-center justify-between">
             <div className="text-sm font-semibold">Posição contratada por submercado</div>
             <span className="text-xs text-muted-foreground">MWm</span>
@@ -356,7 +320,7 @@ function Monitor() {
           <div className="mt-4 h-72">
             <ResponsiveContainer>
               <BarChart data={position}>
-                <CartesianGrid stroke="var(--border)" strokeDasharray="3 3" vertical={false} />
+                <CartesianGrid stroke="var(--border)" vertical={false} />
                 <XAxis dataKey="m" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
                 <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
                 <Tooltip formatter={(v: number, n: string) => [`${num(v)} MWm`, n]} contentStyle={chartTooltip} />
@@ -371,6 +335,14 @@ function Monitor() {
           </p>
         </div>
       )}
+      </TabsContent>
+      <TabsContent value="hidrico" className="mt-0 rounded-2xl border border-border bg-card p-6 shadow-soft">
+        <HydroSection pldRows={fullRows} pldSimulated={!real} />
+      </TabsContent>
+      <TabsContent value="termico" className="mt-0 rounded-2xl border border-border bg-card p-6 shadow-soft">
+        <ThermalSection pldRows={fullRows} pldSimulated={!real} />
+      </TabsContent>
+      </Tabs>
     </>
   );
 }

@@ -38,7 +38,9 @@ const toolLabels: Record<string, string> = {
 const suggestions = [
   "O que mudou no PLD nesta semana?",
   "Como o período atual se compara ao anterior?",
-  "Quais contratos mais pesam na carteira?",
+  "Como os reservatórios evoluíram nesta semana?",
+  "Como a geração térmica evoluiu nos últimos dias?",
+  "Que relações existem entre hídrico, térmico e PLD?",
   "Quais dados estão faltando para aprofundar a análise?",
 ];
 

@@ -137,3 +137,36 @@ export function pldSummary(rows: PldRow[]) {
     return { submarket, value, delta, up: delta >= 0 };
   });
 }
+
+/* ------------------------- indicadores operativos ------------------------- */
+
+/**
+ * Séries operativas lidas de `market_series` quando forem carregadas
+ * (ONS/ANA). Hoje não há importação: a lista volta vazia e a tela mostra o
+ * estado "sem dados" — nada é simulado aqui.
+ */
+export const OPERATIONAL_SERIES = {
+  reservoir: "reservoir_ear",
+  thermalRealized: "thermal_realized",
+  thermalScheduled: "thermal_scheduled",
+} as const;
+
+export type OperationalPoint = { date: string; group: string; value: number; source: string };
+
+export function useOperationalSeries(series: string, days = 180) {
+  return useQuery({
+    queryKey: ["market", "operational", series, days],
+    staleTime: 15 * 60 * 1000,
+    queryFn: async (): Promise<OperationalPoint[]> => {
+      const { data, error } = await supabase
+        .from("market_series")
+        .select("submarket, reference_date, value, source")
+        .eq("series", series)
+        .gte("reference_date", isoDaysAgo(days))
+        .order("reference_date", { ascending: true })
+        .limit(5000);
+      if (error) throw toAppError(error);
+      return (data ?? []).map((r) => ({ date: r.reference_date, group: r.submarket, value: Number(r.value), source: r.source }));
+    },
+  });
+}
