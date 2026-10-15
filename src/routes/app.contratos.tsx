@@ -31,6 +31,7 @@ import {
   useContracts, brl, fmtDate, downloadFile, toCsv,
   type Contract, type ContractStatus, type ContractType, type Submarket,
 } from "@/lib/store";
+import { useSession as useSessionLink } from "@/lib/store";
 import { useAccessRole, usePlan } from "@/lib/store";
 import { can } from "@/lib/rbac";
 import { useCompanyProfile } from "@/lib/profile";
@@ -81,7 +82,7 @@ const daysTo = (iso: string) => Math.ceil((new Date(`${iso}T00:00:00`).getTime()
 
 function Contracts() {
   const { contracts, add, update, remove } = useContracts();
-  const { user: linkUser } = useSession();
+  const { user: linkUser } = useSessionLink();
   const cps = useCounterparties(linkUser?.companyId);
   const unitsQ = useUnits(linkUser?.companyId);
   const isFarmLink = linkUser?.profile === "Fazenda de Energia";
