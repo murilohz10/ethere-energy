@@ -48,6 +48,8 @@ export type PldInterpretation =
       volatility: { current: number; previous: number } | null;
       /** Dia com a maior variação diária dentro da janela. */
       biggestMove: { day: string; deltaAbs: number } | null;
+      biggestRise: { day: string; deltaAbs: number } | null;
+      biggestFall: { day: string; deltaAbs: number } | null;
       submarkets: { key: PldKey; label: string; avg: number; deltaPct: number }[];
       spread: { high: PldKey; low: PldKey; diff: number };
       reference30: { avg: number; diffPct: number } | null;
@@ -94,12 +96,20 @@ export function interpretPld(rows: PldPoint[], window: number, key: PldKey = "se
   const volatility = window >= 7 ? { current: std(diffs(cv)), previous: std(diffs(pv)) } : null;
 
   let biggestMove: { day: string; deltaAbs: number } | null = null;
+  let biggestRise: { day: string; deltaAbs: number } | null = null;
+  let biggestFall: { day: string; deltaAbs: number } | null = null;
   if (window >= 7) {
     const withPrev = [pv[pv.length - 1], ...cv];
     const d = diffs(withPrev);
-    let idx = 0;
-    d.forEach((x, i) => { if (Math.abs(x) > Math.abs(d[idx])) idx = i; });
+    let idx = 0, up = 0, dn = 0;
+    d.forEach((x, i) => {
+      if (Math.abs(x) > Math.abs(d[idx])) idx = i;
+      if (x > d[up]) up = i;
+      if (x < d[dn]) dn = i;
+    });
     biggestMove = { day: cur[idx].d, deltaAbs: d[idx] };
+    if (d[up] > 0) biggestRise = { day: cur[up].d, deltaAbs: d[up] };
+    if (d[dn] < 0) biggestFall = { day: cur[dn].d, deltaAbs: d[dn] };
   }
 
   const submarkets = KEYS.map((k) => {
@@ -127,6 +137,9 @@ export function interpretPld(rows: PldPoint[], window: number, key: PldKey = "se
   );
   if (pattern === "tendencia") parts.push(`O movimento foi persistente: a maior parte dos dias ficou ${deltaPct > 0 ? "acima" : "abaixo"} da média anterior.`);
   if (pattern === "pontual") parts.push("O movimento não se manteve na maior parte dos dias, o que indica variação pontual, não tendência.");
+  if (biggestMove && Math.abs(biggestMove.deltaAbs) >= 0.5 && window >= 7) {
+    parts.push(`O dia de maior variação foi ${biggestMove.day}, com ${biggestMove.deltaAbs > 0 ? "alta" : "queda"} de ${brlMwh(Math.abs(biggestMove.deltaAbs))}.`);
+  }
   if (spread.diff >= 1) parts.push(`${PLD_LABEL[spread.high]} teve a maior média e ${PLD_LABEL[spread.low]} a menor, diferença de ${brlMwh(spread.diff)}.`);
   if (reference30 && Math.abs(reference30.diffPct) >= STABLE_PCT) {
     parts.push(`Frente à média dos últimos 30 dias, o preço está ${fmt(Math.abs(reference30.diffPct), 1)}% ${reference30.diffPct > 0 ? "acima" : "abaixo"}.`);
@@ -140,11 +153,14 @@ export function interpretPld(rows: PldPoint[], window: number, key: PldKey = "se
       metric: `${brlMwh(minV)} – ${brlMwh(maxV)}`,
     });
   }
-  if (biggestMove && Math.abs(biggestMove.deltaAbs) >= 0.5) {
+  if (biggestRise || biggestFall) {
     observations.push({
-      title: "Maior variação diária",
-      text: `Em ${biggestMove.day} o preço ${biggestMove.deltaAbs > 0 ? "subiu" : "caiu"} ${brlMwh(Math.abs(biggestMove.deltaAbs))} em um dia.`,
-      metric: `${biggestMove.deltaAbs > 0 ? "+" : "−"}${brlMwh(Math.abs(biggestMove.deltaAbs))}`,
+      title: "Maior alta e maior queda diárias",
+      text: [
+        biggestRise ? `Maior alta em ${biggestRise.day} (+${brlMwh(biggestRise.deltaAbs)}).` : "Nenhum dia de alta.",
+        biggestFall ? `Maior queda em ${biggestFall.day} (−${brlMwh(Math.abs(biggestFall.deltaAbs))}).` : "Nenhum dia de queda.",
+      ].join(" "),
+      metric: `${biggestRise ? "+" + fmt(biggestRise.deltaAbs) : "0"} / ${biggestFall ? "−" + fmt(Math.abs(biggestFall.deltaAbs)) : "0"} R$/MWh`,
     });
   }
   if (volatility && volatility.previous > 0) {
@@ -180,11 +196,13 @@ export function interpretPld(rows: PldPoint[], window: number, key: PldKey = "se
     pattern,
     volatility,
     biggestMove,
+    biggestRise,
+    biggestFall,
     submarkets,
     spread,
     reference30,
     summary: parts.join(" "),
-    observations: observations.slice(0, 3),
+    observations: observations.slice(0, 4),
   };
 }
 
@@ -268,4 +286,56 @@ export function scenarioVsMarket(contracts: Contract[], pldBase: number, shiftPc
     });
   const total = rows.reduce((s, r) => s + r.value, 0);
   return { pld, total, rows: [...rows].sort((a, b) => Math.abs(b.value) - Math.abs(a.value)) };
+}
+
+/* ------------------------- contrato individual -------------------------- */
+
+const SIMILAR_PCT = 5;
+
+/** Grupos comparáveis da carteira: mesmo tipo e mesmo submercado, contratos ativos com preço. */
+export function comparableGroups(contracts: Contract[]) {
+  const map = new Map<string, Contract[]>();
+  for (const c of contracts) {
+    if (c.status !== "Ativo" || c.price <= 0 || c.volume <= 0) continue;
+    const k = `${c.type} · ${c.submarket}`;
+    map.set(k, [...(map.get(k) ?? []), c]);
+  }
+  return [...map.entries()].map(([key, cs]) => {
+    const vol = cs.reduce((s, c) => s + c.volume, 0);
+    const avgP = cs.reduce((s, c) => s + c.price * c.volume, 0) / vol;
+    const prices = cs.map((c) => c.price);
+    return {
+      key, count: cs.length, mwm: vol, avgPrice: avgP,
+      min: Math.min(...prices), max: Math.max(...prices),
+      similar: cs.filter((c) => Math.abs((c.price - avgP) / avgP) * 100 <= SIMILAR_PCT).length,
+    };
+  }).sort((a, b) => b.mwm - a.mwm);
+}
+
+export function contractAnalysis(c: Contract, contracts: Contract[], today = new Date()) {
+  const start = new Date(`${c.startDate}T00:00:00`);
+  const end = new Date(`${c.endDate}T00:00:00`);
+  const termMonths = Math.max(0, Math.round((end.getTime() - start.getTime()) / (dayMs * 30.44)));
+  const remainingDays = daysTo(c.endDate, today);
+  const active = contracts.filter((x) => x.status === "Ativo");
+  const totalVol = active.reduce((s, x) => s + x.volume, 0);
+  const peers = active.filter((x) => x.id !== c.id && x.type === c.type && x.submarket === c.submarket && x.price > 0 && x.volume > 0);
+  const peerVol = peers.reduce((s, x) => s + x.volume, 0);
+  const peerAvg = peerVol > 0 ? peers.reduce((s, x) => s + x.price * x.volume, 0) / peerVol : null;
+  const missing = missingFields(c);
+  const lines: string[] = [];
+  lines.push(`${c.type} de ${fmt(c.volume, 2)} MWm a ${brlMwh(c.price)} no submercado ${c.submarket}, equivalente a cerca de ${Math.round(c.volume * HOURS_PER_MONTH).toLocaleString("pt-BR")} MWh/mês.`);
+  lines.push(remainingDays < 0
+    ? `Prazo de ${termMonths} meses, encerrado há ${Math.abs(remainingDays)} dias.`
+    : `Prazo de ${termMonths} meses; faltam ${remainingDays} dias para o término.`);
+  if (c.status === "Ativo" && totalVol > 0) lines.push(`Representa ${fmt((c.volume / totalVol) * 100, 1)}% do volume ativo da carteira.`);
+  if (peerAvg != null) {
+    const d = ((c.price - peerAvg) / peerAvg) * 100;
+    lines.push(Math.abs(d) <= SIMILAR_PCT
+      ? `Preço semelhante aos ${peers.length} outro(s) contrato(s) de ${c.type.toLowerCase()} em ${c.submarket} (média ${brlMwh(peerAvg)}, diferença ${pct(d)}).`
+      : `Preço ${fmt(Math.abs(d), 1)}% ${d > 0 ? "acima" : "abaixo"} da média dos ${peers.length} outro(s) contrato(s) de ${c.type.toLowerCase()} em ${c.submarket} (${brlMwh(peerAvg)}). Diferenças de prazo e condições podem explicar parte disso.`);
+  } else {
+    lines.push(`Não há outro contrato ativo de ${c.type.toLowerCase()} em ${c.submarket} para comparar o preço.`);
+  }
+  return { termMonths, remainingDays, peers: peers.length, peerAvg, missing, lines, conditions: c.notes?.trim() || null };
 }
