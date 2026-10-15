@@ -24,7 +24,7 @@ export function PldInterpretationPanel({ rows, simulated, submarket }: { rows: P
   const [open, setOpen] = useState(false);
 
   return (
-    <section className="mt-6 rounded-2xl border border-brand-soft bg-card p-6 shadow-soft">
+    <section className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-soft">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           <Lightbulb className="h-4 w-4 text-brand" />
@@ -70,7 +70,7 @@ export function PldInterpretationPanel({ rows, simulated, submarket }: { rows: P
           {r.observations.length > 0 && (
             <ul className="mt-4 grid gap-3 md:grid-cols-3">
               {r.observations.map((o) => (
-                <li key={o.title} className="rounded-xl border border-border p-3">
+                <li key={o.title} className="border-l border-border pl-3">
                   <div className="text-[10px] font-semibold uppercase tracking-wide text-brand">{o.title}</div>
                   <div className="mt-1 text-sm font-semibold tabular-nums">{o.metric}</div>
                   <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{o.text}</p>
