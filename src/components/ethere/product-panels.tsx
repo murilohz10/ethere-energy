@@ -10,6 +10,7 @@ import { cn } from "@/lib/utils";
 import { useAlerts, useContracts, useSession } from "@/lib/store";
 import { ESTIMATE_NOTE, farmMetrics, traderMetrics, useCompanyProfile } from "@/lib/profile";
 import { isOverdue, useTasks } from "@/lib/api/operations";
+import { scenarioVsMarket } from "@/lib/interpretation";
 
 const brl = (v: number) => v.toLocaleString("pt-BR", { style: "currency", currency: "BRL", maximumFractionDigits: 0 });
 
@@ -62,62 +63,115 @@ export function AttentionPanel() {
 export function ScenarioPanel() {
   const { contracts } = useContracts();
   const { isFarm } = useCompanyProfile();
-  const [pldShift, setPldShift] = useState(0);
+  const [pldShift, setPldShift] = useState(15);
   const [genShift, setGenShift] = useState(0);
 
-  const result = useMemo(() => {
-    if (isFarm) {
-      const f = farmMetrics(contracts);
-      const realized = f.realizedMwh * (1 + genShift / 100);
-      const pld = f.pld.value * (1 + pldShift / 100);
-      const contracted = Math.min(realized, f.contractedMwh) * f.avgContractPrice;
-      const surplus = Math.max(0, realized - f.contractedMwh) * pld;
-      return { base: f.projectedRevenue, scenario: contracted + surplus, label: "Receita estimada do mês" };
-    }
-    const t = traderMetrics(contracts);
-    const spread = (pld: number) => (t.avgSalePrice > 0 ? t.avgSalePrice - pld : 0);
-    return { base: spread(t.pld.value), scenario: spread(t.pld.value * (1 + pldShift / 100)), label: "Preço médio de venda − PLD (R$/MWh)" };
-  }, [contracts, isFarm, pldShift, genShift]);
+  const t = useMemo(() => traderMetrics(contracts), [contracts]);
+  const f = useMemo(() => farmMetrics(contracts), [contracts]);
+  const pldBase = isFarm ? f.pld.value : t.pld.value;
 
-  const diff = result.scenario - result.base;
+  const farmRevenue = (shift: number) => {
+    const realized = f.realizedMwh * (1 + genShift / 100);
+    const pld = f.pld.value * (1 + shift / 100);
+    const contracted = Math.min(realized, f.contractedMwh) * f.avgContractPrice;
+    const surplusMwh = Math.max(0, realized - f.contractedMwh);
+    return { total: contracted + surplusMwh * pld, contracted, surplus: surplusMwh * pld, surplusMwh, pld };
+  };
+
+  const scenarios = [
+    { key: "down", label: `PLD −${pldShift}%`, shift: -pldShift },
+    { key: "base", label: "Referência", shift: 0 },
+    { key: "up", label: `PLD +${pldShift}%`, shift: pldShift },
+  ].map((s) => {
+    if (isFarm) { const r = farmRevenue(s.shift); return { ...s, pld: r.pld, value: r.total, farm: r as ReturnType<typeof farmRevenue> | undefined, rows: undefined as ReturnType<typeof scenarioVsMarket>["rows"] | undefined }; }
+    const r = scenarioVsMarket(contracts, pldBase, s.shift);
+    return { ...s, pld: r.pld, value: r.total, rows: r.rows as ReturnType<typeof scenarioVsMarket>["rows"] | undefined, farm: undefined as ReturnType<typeof farmRevenue> | undefined };
+  });
+  const base = scenarios[1];
+  const up = scenarios[2];
+  const top = !isFarm ? (up.rows ?? []).slice(0, 3) : [];
+  const hasData = isFarm ? f.contractedMwm > 0 : (base.rows?.length ?? 0) > 0;
 
   return (
     <section className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-soft">
       <div className="mb-1 flex items-center gap-2">
         <SlidersHorizontal className="h-4 w-4 text-brand" />
-        <h2 className="text-base font-semibold">Cenários</h2>
-        <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">Estimativa</span>
+        <h2 className="text-base font-semibold">Cenários de PLD × carteira</h2>
+        <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] text-muted-foreground">Simulação</span>
       </div>
       <p className="mb-5 text-sm text-muted-foreground">
         {isFarm
-          ? "Ajuste o PLD e a geração para ver como a receita estimada reage. O excedente de geração é valorado ao PLD do cenário."
-          : "Compare o preço médio dos seus contratos de venda com o PLD do cenário. A margem dos contratos com preço fixo não muda; a diferença indica a referência de mercado para novas negociações."}
+          ? "Variável alterada: PLD (e, opcionalmente, a geração). A parte contratada é valorada ao preço do contrato; o excedente de geração, ao PLD do cenário."
+          : "Variável alterada: PLD. Para cada contrato ativo calculamos a diferença mensal entre o preço contratado e o PLD do cenário: venda (preço − PLD), compra (PLD − preço), × volume × 730 h."}
       </p>
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="grid gap-5">
-          <Control label="Variação do PLD" value={pldShift} onChange={setPldShift} />
-          {isFarm && <Control label="Variação da geração" value={genShift} onChange={setGenShift} />}
-        </div>
-        <div className="grid grid-cols-2 gap-3">
-          <Box label={`${result.label} · base`} value={brl(result.base)} />
-          <Box label="Cenário" value={brl(result.scenario)} hint={`${diff >= 0 ? "+" : ""}${brl(diff)}`} negative={diff < 0} />
-        </div>
+
+      <div className="grid gap-5 md:grid-cols-2">
+        <Control label="Amplitude da variação do PLD" value={pldShift} onChange={setPldShift} min={5} max={40} signed={false} />
+        {isFarm && <Control label="Variação da geração" value={genShift} onChange={setGenShift} />}
       </div>
-      <p className="mt-4 text-[11px] text-muted-foreground">{ESTIMATE_NOTE} Cenários não são previsões.</p>
+
+      {!hasData ? (
+        <p className="mt-5 text-sm text-muted-foreground">Cadastre contratos ativos com preço e volume para simular o impacto na carteira.</p>
+      ) : (
+        <>
+          <div className="mt-5 grid gap-3 sm:grid-cols-3">
+            {scenarios.map((s) => {
+              const diff = s.value - base.value;
+              return (
+                <div key={s.key} className={cn("rounded-xl border p-4", s.key === "base" ? "border-brand-soft bg-brand-softer/40" : "border-border")}>
+                  <p className="text-xs font-semibold">{s.label}</p>
+                  <p className="text-[11px] tabular-nums text-muted-foreground">PLD R$ {s.pld.toFixed(2).replace(".", ",")}/MWh</p>
+                  <p className="mt-2 text-lg font-semibold tabular-nums">{brl(s.value)}</p>
+                  <p className="text-[11px] text-muted-foreground">{isFarm ? "receita estimada no mês" : "diferença contrato × mercado no mês"}</p>
+                  {s.key !== "base" && (
+                    <p className={cn("mt-1 text-xs tabular-nums", diff < 0 ? "text-destructive" : "text-success")}>
+                      {diff >= 0 ? "+" : ""}{brl(diff)} vs. referência
+                    </p>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+
+          <div className="mt-4 rounded-xl border border-border p-4">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-brand">O que mais influencia o resultado</p>
+            {isFarm ? (
+              <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
+                No cenário de alta, {brl(up.farm!.contracted)} vêm da energia contratada (não muda com o PLD) e {brl(up.farm!.surplus)} do excedente de {Math.round(up.farm!.surplusMwh).toLocaleString("pt-BR")} MWh valorado ao PLD.
+                {up.farm!.surplusMwh === 0 ? " Sem excedente, o PLD não altera a receita estimada." : " Só o excedente é sensível ao PLD."}
+              </p>
+            ) : (
+              <ul className="mt-2 space-y-1 text-xs">
+                {top.map((r) => (
+                  <li key={r.id} className="flex justify-between gap-2">
+                    <span><span className="font-medium">{r.code}</span> <span className="text-muted-foreground">· {r.type}</span></span>
+                    <span className="tabular-nums">{brl(r.value)}</span>
+                  </li>
+                ))}
+                <li className="pt-1 text-muted-foreground">Contratos de maior volume pesam mais. Com PLD em alta, vendas a preço fixo ficam menos vantajosas frente ao mercado e compras, mais.</li>
+              </ul>
+            )}
+          </div>
+        </>
+      )}
+      <p className="mt-4 text-[11px] leading-relaxed text-muted-foreground">
+        Premissas: PLD de referência SE/CO da plataforma ({brl(pldBase)}/MWh), 730 h/mês, preços fixos dos contratos.
+        Impacto estimado no cenário — não é lucro ou prejuízo realizado nem previsão. {ESTIMATE_NOTE}
+      </p>
     </section>
   );
 }
 
-function Control({ label, value, onChange }: { label: string; value: number; onChange: (v: number) => void }) {
+function Control({ label, value, onChange, min = -30, max = 30, signed = true }: { label: string; value: number; onChange: (v: number) => void; min?: number; max?: number; signed?: boolean }) {
   return (
     <div>
-      <div className="mb-2 flex justify-between text-sm"><span>{label}</span><span className="tabular-nums text-muted-foreground">{value > 0 ? "+" : ""}{value}%</span></div>
-      <Slider min={-30} max={30} step={5} value={[value]} onValueChange={([v]) => onChange(v)} aria-label={label} />
+      <div className="mb-2 flex justify-between text-sm"><span>{label}</span><span className="tabular-nums text-muted-foreground">{signed ? (value > 0 ? "+" : "") : "±"}{value}%</span></div>
+      <Slider min={min} max={max} step={5} value={[value]} onValueChange={([v]) => onChange(v)} aria-label={label} />
     </div>
   );
 }
 
-function Box({ label, value, hint, negative }: { label: string; value: string; hint?: string; negative?: boolean }) {
+export function Box({ label, value, hint, negative }: { label: string; value: string; hint?: string; negative?: boolean }) {
   return (
     <div className="rounded-xl border border-border p-4">
       <p className="text-xs text-muted-foreground">{label}</p>
@@ -147,10 +201,11 @@ const statusMeta = {
 
 export function DataSourcesPanel() {
   return (
-    <section className="mt-6 rounded-2xl border border-border bg-card p-6 shadow-soft">
-      <h2 className="text-base font-semibold">Fontes de dados</h2>
-      <p className="mb-4 text-sm text-muted-foreground">Origem e situação de cada dado usado nos painéis e análises.</p>
-      <ul className="divide-y divide-border">
+    <details className="group mt-6 rounded-2xl border border-border bg-card px-6 py-4 shadow-soft">
+      <summary className="cursor-pointer list-none text-sm font-medium text-muted-foreground hover:text-foreground">
+        Transparência · origem e situação dos dados <span className="text-xs group-open:hidden">(mostrar)</span>
+      </summary>
+      <ul className="mt-3 divide-y divide-border">
         {sources.map((s) => {
           const meta = statusMeta[s.status];
           return (
@@ -161,6 +216,6 @@ export function DataSourcesPanel() {
           );
         })}
       </ul>
-    </section>
+    </details>
   );
 }

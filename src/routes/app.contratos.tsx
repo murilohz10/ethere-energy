@@ -2,6 +2,8 @@ import { useCounterparties, useUnits } from "@/lib/api/operations";
 import { Pick } from "@/components/ethere/form-bits";
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { PortfolioAnalysisPanel } from "@/components/ethere/interpretation-panels";
+import { usePldRows } from "@/lib/api/market";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/ethere/app-shell";
 import { Button } from "@/components/ui/button";
@@ -225,6 +227,15 @@ function Contracts() {
   const toggleSort = (key: SortKey) =>
     setSort((s) => (s.key === key ? { key, dir: s.dir === "asc" ? "desc" : "asc" } : { key, dir: "asc" }));
 
+  const pldRows = usePldRows(30);
+  const pldAvg = useMemo(() => {
+    const rows = pldRows.data ?? [];
+    if (!rows.length) return {};
+    const m = (k: "seco" | "s" | "ne" | "n") => rows.reduce((a, r) => a + r[k], 0) / rows.length;
+    return { "SE/CO": m("seco"), S: m("s"), NE: m("ne"), N: m("n") } as Record<string, number>;
+  }, [pldRows.data]);
+  const pldPeriod = pldRows.data?.length ? `${pldRows.data[0].d} a ${pldRows.data[pldRows.data.length - 1].d}` : "—";
+
   const allPageSelected = pageRows.length > 0 && pageRows.every((r) => selected.includes(r.id));
 
   return (
@@ -261,6 +272,8 @@ function Contracts() {
           </>
         )}
       </div>
+
+      <PortfolioAnalysisPanel contracts={contracts} pldAvg={pldAvg} pldPeriod={pldPeriod} simulated={false} />
 
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <div className="group flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-sm text-muted-foreground transition focus-within:border-brand">
