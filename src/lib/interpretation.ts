@@ -350,3 +350,141 @@ export function demoPldRows(days: number, seed = 0): PldPoint[] {
     n: +(120 + Math.cos((i + seed) / 6) * 20 + i * 0.7).toFixed(2),
   }));
 }
+
+/* ------------------- indicadores operativos (hídrico/térmico) ------------------- */
+
+/** Ponto de uma série operativa: data ISO, grupo (subsistema/reservatório) e valor. */
+export type IndicatorPoint = { date: string; group: string; value: number };
+
+export type IndicatorSpec = {
+  label: string;
+  unit: string;
+  /** Unidade percentual: variação é expressa em pontos percentuais, não em %. */
+  isPercent?: boolean;
+  decimals?: number;
+};
+
+const ddmm = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
+
+export type IndicatorInterpretation =
+  | { ok: false; reason: string }
+  | {
+      ok: true;
+      group: string;
+      period: { from: string; to: string; prevFrom: string; prevTo: string };
+      current: { avg: number; last: number; min: number; max: number; minDay: string; maxDay: string };
+      previous: { avg: number };
+      deltaAbs: number;
+      /** null quando a unidade é percentual (variação em p.p.). */
+      deltaPct: number | null;
+      movement: Movement;
+      pattern: Pattern;
+      ranking: { group: string; deltaAbs: number; last: number }[];
+      summary: string;
+      missing: string[];
+    };
+
+/** Agrega os pontos por data para o grupo escolhido ("Todos" soma ou faz média conforme a unidade). */
+export function seriesForGroup(points: IndicatorPoint[], group: string, spec: IndicatorSpec) {
+  const map = new Map<string, number[]>();
+  for (const p of points) {
+    if (group !== "Todos" && p.group !== group) continue;
+    map.set(p.date, [...(map.get(p.date) ?? []), p.value]);
+  }
+  return [...map.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([date, vs]) => ({ date, value: spec.isPercent ? avg(vs) : vs.reduce((a, b) => a + b, 0) }));
+}
+
+export function interpretIndicator(
+  points: IndicatorPoint[],
+  window: number,
+  group: string,
+  spec: IndicatorSpec,
+): IndicatorInterpretation {
+  const d = spec.decimals ?? 1;
+  if (!points.length) return { ok: false, reason: "Nenhum dado carregado na plataforma para este indicador." };
+  const s = seriesForGroup(points, group, spec);
+  if (s.length < window * 2) {
+    return { ok: false, reason: `São necessários ${window * 2} dias com dados para comparar com o período anterior; há ${s.length}.` };
+  }
+  const cur = s.slice(-window);
+  const prev = s.slice(-window * 2, -window);
+  const cv = cur.map((p) => p.value);
+  const cAvg = avg(cv);
+  const pAvg = avg(prev.map((p) => p.value));
+  const deltaAbs = cAvg - pAvg;
+  const deltaPct = spec.isPercent || !pAvg ? null : (deltaAbs / pAvg) * 100;
+  const rel = spec.isPercent ? deltaAbs : deltaPct ?? 0;
+  const threshold = spec.isPercent ? 0.5 : STABLE_PCT;
+  const movement: Movement = Math.abs(rel) < threshold ? "estavel" : rel > 0 ? "alta" : "queda";
+  let pattern: Pattern = "indefinido";
+  if (movement === "estavel") pattern = "estavel";
+  else if (window >= 7) {
+    const share = cv.filter((v) => (deltaAbs > 0 ? v > pAvg : v < pAvg)).length / cv.length;
+    pattern = share >= TREND_SHARE ? "tendencia" : "pontual";
+  }
+  const minV = Math.min(...cv);
+  const maxV = Math.max(...cv);
+
+  const groups = [...new Set(points.map((p) => p.group))];
+  const ranking = groups
+    .map((g) => {
+      const gs = seriesForGroup(points, g, spec);
+      if (gs.length < window * 2) return null;
+      const a = avg(gs.slice(-window).map((p) => p.value));
+      const b = avg(gs.slice(-window * 2, -window).map((p) => p.value));
+      return { group: g, deltaAbs: a - b, last: gs[gs.length - 1].value };
+    })
+    .filter((x): x is { group: string; deltaAbs: number; last: number } => x !== null)
+    .sort((a, b) => Math.abs(b.deltaAbs) - Math.abs(a.deltaAbs));
+
+  const u = (v: number) => `${fmt(v, d)} ${spec.unit}`;
+  const change = spec.isPercent ? `${deltaAbs >= 0 ? "+" : ""}${fmt(deltaAbs, d)} p.p.` : pct(deltaPct ?? 0);
+  const parts = [
+    movement === "estavel"
+      ? `${spec.label} ficou estável frente aos ${window} dias anteriores (${change}), média de ${u(cAvg)}.`
+      : `${spec.label} ${movement === "alta" ? "subiu" : "caiu"} ${change} frente aos ${window} dias anteriores, de ${u(pAvg)} para ${u(cAvg)} em média.`,
+  ];
+  if (pattern === "tendencia") parts.push("A mudança se manteve na maior parte dos dias.");
+  if (pattern === "pontual") parts.push("A mudança não se manteve na maior parte dos dias; parece pontual.");
+  if (group === "Todos" && ranking.length > 1) {
+    parts.push(`Maior variação em ${ranking[0].group} (${ranking[0].deltaAbs >= 0 ? "+" : ""}${fmt(ranking[0].deltaAbs, d)} ${spec.isPercent ? "p.p." : spec.unit}).`);
+  }
+  const missing: string[] = [];
+  if (window < 30 && s.length < 60) missing.push("histórico mais longo para avaliar sazonalidade");
+
+  return {
+    ok: true,
+    group,
+    period: { from: ddmm(cur[0].date), to: ddmm(cur[cur.length - 1].date), prevFrom: ddmm(prev[0].date), prevTo: ddmm(prev[prev.length - 1].date) },
+    current: { avg: cAvg, last: cv[cv.length - 1], min: minV, max: maxV, minDay: ddmm(cur[cv.indexOf(minV)].date), maxDay: ddmm(cur[cv.indexOf(maxV)].date) },
+    previous: { avg: pAvg },
+    deltaAbs,
+    deltaPct,
+    movement,
+    pattern,
+    ranking,
+    summary: parts.join(" "),
+    missing,
+  };
+}
+
+/** Frase de co-movimento observado — nunca atribui causa. */
+export function coMovement(aLabel: string, a: Movement, bLabel: string, b: Movement): string {
+  const w = (m: Movement) => (m === "alta" ? "subiu" : m === "queda" ? "caiu" : "ficou estável");
+  const same = a === b;
+  return `No mesmo período, ${aLabel} ${w(a)} e ${bLabel} ${w(b)}. ${
+    same ? "Movimentos no mesmo sentido" : "Movimentos em sentidos diferentes"
+  } são uma observação; os dados não demonstram relação de causa.`;
+}
+
+/** Realizado × programado só nas datas presentes nas duas séries. */
+export function realizedVsScheduled(realized: { date: string; value: number }[], scheduled: { date: string; value: number }[]) {
+  const sMap = new Map(scheduled.map((p) => [p.date, p.value]));
+  const pairs = realized.filter((p) => sMap.has(p.date)).map((p) => ({ date: p.date, realized: p.value, scheduled: sMap.get(p.date)! }));
+  if (!pairs.length) return null;
+  const r = pairs.reduce((s, p) => s + p.realized, 0);
+  const sc = pairs.reduce((s, p) => s + p.scheduled, 0);
+  return { days: pairs.length, realized: r, scheduled: sc, diff: r - sc, diffPct: sc ? ((r - sc) / sc) * 100 : null, pairs };
+}
